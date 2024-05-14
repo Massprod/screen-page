@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Viewport</title>
+    <link rel="stylesheet" href="css/main_styling.css">
+</head>
+<body>
+    <div id="viewport" class="viewport">
+        <div id="grid" class="grid-container">
+        </div>
+    </div>
+    <div id="setHeight">
+        <input type="text" id="heightBox" placeholder="Enter desired height">
+        <button id = 'heightButton' type="button" class="button">Height</button>
+    </div>
+    <div id="setWidth">
+        <input type="text" id="widthBox" placeholder="Enter desired width">
+        <button id = 'widthButton' type="button" class="button">width</button>
+    </div>
+    <button id = 'testBut' type="button" class="button"> Create grid </button>
+    <button id = 'testArea' type="button" class="button"> Start new area </button>
+    <button id = 'testSaveArea' type="button" class="button"> Save current zone </button>
+    <select id="savedZonesDropdown"></select>
+    <button id = 'testRestoreZone' type="button" class="button"> Restore chosen zone </button>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/zoomDrag.js"></script>
+</body>
+</html>

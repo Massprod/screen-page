@@ -1,0 +1,43 @@
+.viewport {
+    width: 100VW;    /* Fixed width */
+    height: 60VH;
+    background-color: whitesmoke;   /* Fixed height */
+    overflow: hidden; /* Hide the parts of the image outside the viewport */
+    position: relative; /* Necessary for absolute positioning of content */
+}
+
+.grid-container {
+    /* display: flex;
+    flex-direction: row;
+    flex-wrap: wrap; */
+    position: absolute;
+    transform-origin: 0 0;
+    background-color: white;
+}
+
+.tile {
+    width: 10px;
+    height: 10px;
+    background-color: #00ffdd;
+    border: 0.1px solid  #1c0080;
+}
+
+
+.button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.row {
+    height: max-content;
+    width: max-content; 
+    display: flex;
+}
