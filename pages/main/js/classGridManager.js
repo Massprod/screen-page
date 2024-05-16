@@ -88,11 +88,13 @@ export default class GridManager {
     }
   }
 
-  clickResetTileColor(tile, color) {
+  clickResetTileColor(tile) {
     tile.setColor(this.defaultTileColor);
     tile.zoneId = -1;
     delete this.currentZone[tile.id];
-    this.firstTileOfZone = true;
+    if (Object.values(this.currentZone).length === 0) {
+      this.firstTileOfZone = true;
+    }
     this.allTiles[tile.id]['bgColor'] = this.defaultTileColor;
   }
 
@@ -105,7 +107,7 @@ export default class GridManager {
       this.clickSetTileColor(this.firstTileOfZone, tile, this.currentColor, this.currentZoneId);
       this.firstTileOfZone = false;
     } else if (event.button === 2 && this.creatingZone) {
-        
+      this.clickResetTileColor(tile);
     }
   }
 
@@ -168,6 +170,7 @@ export default class GridManager {
       message.show(
         { message: flashText}
       );
+      this.firstTileOfZone = true;
       return true;
     } else {
       flashText = 'The current area is not a square.\r\nPlease select a square area.';
