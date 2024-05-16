@@ -23,8 +23,10 @@ export default class Tile {
     bgColor = '#00ffdd',
     border = '0.1px solid  #1c0080',
     clickHandler,
+    zoneId = -1,
   ) {
     // Basic stats
+    this.zoneId = zoneId;
     this.stylesData = stylesData;
     this.width = width;
     this.height = height;
@@ -50,13 +52,13 @@ export default class Tile {
    * Apply styles to the tile element.
    */
   applyStyles() {
+    for (const [key, value] of Object.entries(this.stylesData)) {
+      this.element.style[key] = value;
+    }
     this.element.style.width = `${this.width}px`;
     this.element.style.height = `${this.height}px`;
     this.element.style.backgroundColor = this.bgColor;
     this.element.style.border = this.border;
-    for (const [key, value] of Object.entries(this.stylesData)) {
-      this.element.style[key] = value;
-    }
   }
 
   /**
@@ -64,7 +66,6 @@ export default class Tile {
    * @param {string} color - The new background color.
    */
   setColor(color) {
-    console.log(color);
     this.element.style.backgroundColor = `${color}`;
   }
 

@@ -1,5 +1,6 @@
 // Import
 import Tile from './classTile.js';
+import FlashMessage from '../../classMessages.js';
 // ---
 /**
  * Class to manage the grid and tile functionalities.
@@ -28,47 +29,25 @@ export default class GridManager {
     this.availableRows = basicRows;
     this.availableCols = basicCols;
     this.defaultBorder = '0.1px solid  #1c0080';
+    this.defaultTileClass = 'tile';
     // ---
     // Zone and stored zones from whom we can restore states.
-    this.zoneMatrix = [];
-    this.zoneStorage = {};
+    this.screenMatrix = [];
+    this.screensStorage = {};
     // ---
     // Areas marked with the Tiles of the same colour.
     this.allTiles = {};
-    this.currentAreaId = 0;
-    this.currentArea = {};
-    this.allAreas = {};
+    this.currentZoneId = 0;
+    this.currentZone = {};
+    this.allZones = {};
     // ---
     // Triggers for Area creation and coloring.
-    this.creatingArea = false;
+    this.creatingZone = false;
     this.defaultTileColor = defaultColor;
     this.usedColors = { defaultTileColor: true };
     this.currentColor = '';
-    this.firstTileOfArea = true;
+    this.firstTileOfZone = true;
     // ---
-  }
-
-  /**
-   * Check if an object is empty.
-   * @param {Object} obj - The object to check.
-   * @returns {boolean} True if the object is empty, false otherwise.
-   */
-  isEmptyObject(obj) {
-    return Object.keys(obj).length === 0;
-  }
-
-  /**
-   * Convert an RGB color string to a hex color string.
-   * @param {string} rgb - The RGB color string.
-   * @returns {string} The hex color string.
-   */
-  getHex(rgb) {
-    let rgbValues = rgb.match(/\d+/g);
-    let hex = rgbValues.map((num) => {
-      let hex = parseInt(num).toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    }).join('');
-    return `#${hex}`;
   }
 
   /**
@@ -77,19 +56,20 @@ export default class GridManager {
    * @returns {boolean} True if there are neighboring tiles with the same color, false otherwise.
    */
   correctNeighbours(tileId) {
-    let [tileY, tileX] = this.allTiles[tileId];
+    let tileY = this.allTiles[tileId]['row'];
+    let tileX = this.allTiles[tileId]['column'];
     let options = [
       [-1, 0], [-1, 1], [0, 1], [1, 1],
       [1, 0], [1, -1], [0, -1], [-1, -1]
     ];
-    let maxY = this.zoneMatrix.length;
-    let maxX = this.zoneMatrix[tileY].length;
+    let maxY = this.screenMatrix.length;
+    let maxX = this.screenMatrix[tileY].length;
     for (let [dy, dx] of options) {
       let [newY, newX] = [tileY + dy, tileX + dx];
       if (newY >= 0 && newY < maxY && newX >= 0 && newX < maxX) {
-        let neighbour = this.zoneMatrix[newY][newX];
-        let neighbourColor = window.getComputedStyle(neighbour).backgroundColor;
-        if (this.getHex(neighbourColor) === this.currentColor) {
+        let neighbourId = this.screenMatrix[newY][newX];
+        let neighbourColor = this.allTiles[neighbourId]['bgColor'];
+        if (neighbourColor === this.currentColor) {
           return true;
         }
       }
@@ -97,23 +77,35 @@ export default class GridManager {
     return false;
   }
 
+  clickSetTileColor(firstTile, tile, color, zoneId) {
+    if (firstTile || this.correctNeighbours(tile.id)) {
+      tile.setColor(color);
+      tile.zoneId = zoneId;
+      this.allTiles[tile.id]['bgColor'] = color;
+      let tileY = this.allTiles[tile.id]['row'];
+      let tileX = this.allTiles[tile.id]['column'];
+      this.currentZone[tile.id] = { 'row': tileY, 'column': tileX };
+    }
+  }
+
+  clickResetTileColor(tile, color) {
+    tile.setColor(this.defaultTileColor);
+    tile.zoneId = -1;
+    delete this.currentZone[tile.id];
+    this.firstTileOfZone = true;
+    this.allTiles[tile.id]['bgColor'] = this.defaultTileColor;
+  }
+
   /**
    * Handle click event on a tile.
    * @param {MouseEvent} event - The click event.
    */
   clickOfTheTile(tile, event) {
-    if (event.button === 0 && this.creatingArea) {
-      if (this.firstTileOfArea || this.correctNeighbours(tile.id)) {
-        tile.setColor(this.currentColor);
-        let tileY = this.allTiles[tile.id]['row'];
-        let tileX = this.allTiles[tile.id]['column'];
-        this.currentArea[tile.id] = [tileY, tileX];
-        this.firstTileOfArea = false;
-      }
-    } else if (event.button === 2 && this.creatingArea) {
-        tile.setColor(this.defaultTileColor);
-        delete this.currentArea[tile.id];
-        this.firstTileOfArea = true;
+    if (event.button === 0 && this.creatingZone) {
+      this.clickSetTileColor(this.firstTileOfZone, tile, this.currentColor, this.currentZoneId);
+      this.firstTileOfZone = false;
+    } else if (event.button === 2 && this.creatingZone) {
+        
     }
   }
 
@@ -121,74 +113,67 @@ export default class GridManager {
    * Check if the current marked area forms a square.
    * @returns {boolean} True if the marked area is a square, false otherwise.
    */
-  isCurrentAreaSquare() {
-    if (Object.keys(this.currentArea).length === 0) {
+  iscurrentZoneSquare() {
+    if (Object.keys(this.currentZone).length === 0) {
       return false;
     }
-
-    // Get all the x and y coordinates
-    const xCoordinates = Object.values(this.currentArea).map(([y, x]) => x);
-    const yCoordinates = Object.values(this.currentArea).map(([y, x]) => y);
-
-    // Determine the bounds
-    const minX = Math.min(...xCoordinates);
-    const maxX = Math.max(...xCoordinates);
-    const minY = Math.min(...yCoordinates);
-    const maxY = Math.max(...yCoordinates);
-
-    // Calculate width and height
-    const width = maxX - minX + 1;
-    const height = maxY - minY + 1;
-
-    // Check if width and height are equal
-    if (width !== height) {
+    // [row == y, col == x]
+    let topLeft = [10 ** 9, 10 ** 9];
+    let topRight = [10 ** 9, 0];
+    let botLeft = [0, 10 ** 9];
+    let curZoneColor = '';
+    for (const tile in this.currentZone) {
+      let tileY = this.currentZone[tile]['row'];
+      let tileX = this.currentZone[tile]['column'];
+      topLeft[0] = Math.min(topLeft[0], tileY);
+      topLeft[1] = Math.min(topLeft[1], tileX);
+      topRight[0] = Math.min(topRight[0],tileY);
+      topRight[1] = Math.max(topRight[1], tileX);
+      botLeft[0] = Math.max(botLeft[0], tileY);
+      botLeft[1] = Math.min(botLeft[1], tileX);
+      if ('' === curZoneColor) {
+        curZoneColor = this.allTiles[this.screenMatrix[tileY][tileX]]['bgColor'];
+      }
+    }
+    let height = Math.abs(topLeft[0] - botLeft[0]);
+    let width = Math.abs(topLeft[1] - topRight[1]); 
+    if (height !== width) {
       return false;
     }
-
-    // Verify all coordinates within the bounds are marked
-    for (let y = minY; y <= maxY; y++) {
-      for (let x = minX; x <= maxX; x++) {
-        if (!Object.values(this.currentArea).some(([coordY, coordX]) => coordY === y && coordX === x)) {
+    // Verify filling.
+    for (let row = topLeft[0]; row <= botLeft[0]; row += 1) {
+      for (let col = topLeft[1]; col <= topRight[1]; col += 1) {
+        let curTileId = this.screenMatrix[row][col];
+        let curTileColor = this.allTiles[curTileId]['bgColor'];
+        if (curTileColor !== curZoneColor) {
           return false;
         }
       }
     }
-
     return true;
   }
 
   /**
-   * Show a flash message.
-   * @param {string} message - The message to display.
-   * @param {string} [color='red'] - The color of the message.
-   */
-    showFlashMessage(message, color = 'red') {
-      const flashMessage = document.getElementById('flashMessage');
-      flashMessage.textContent = message;
-      flashMessage.style.backgroundColor = color;
-      flashMessage.classList.remove('hidden');
-      flashMessage.classList.add('show');
-  
-      // Hide the message after 2 seconds
-      setTimeout(() => {
-        flashMessage.classList.remove('show');
-        flashMessage.classList.add('hidden');
-      }, 2000);
-    }
-  
-  /**
    * Create a new area with the current tiles.
    */
-  createArea() {
-    if (this.isCurrentAreaSquare()) {
-      this.allAreas[this.currentAreaId] = {... this.currentArea};
-      this.currentAreaId++;
-      this.currentArea = {};
+  createZone() {
+    const message = new FlashMessage();
+    let flashText = '';
+    if (this.iscurrentZoneSquare()) {
+      this.allZones[this.currentZoneId] = {... this.currentZone};
+      this.currentZoneId++;
+      this.currentZone = {};
       this.usedColors[this.currentColor] = true;
-      this.showFlashMessage('Area created successfully!', 'green');
+      flashText = 'Correct square area created.';
+      message.show(
+        { message: flashText}
+      );
       return true;
     } else {
-      this.showFlashMessage('The current area is not a square. Please select a square area.');
+      flashText = 'The current area is not a square.\r\nPlease select a square area.';
+      message.show(
+        { message: flashText}
+      );
       return false;
     }
   }
@@ -198,30 +183,55 @@ export default class GridManager {
    * @returns {Object} The saved zone data.
    */
   saveZone() {
-    let zoneIdentifier = new Date().toISOString();
-    return {
-      zoneId: zoneIdentifier,
-      zoneMatrix: this.zoneMatrix,
-      zoneAreas: this.allAreas
-    };
+    let screenIdentifier = new Date().toISOString();
+    let screenData = {
+      'screenId': screenIdentifier,
+      'screenRows': this.screenMatrix.length,
+      'screenColumns': this.screenMatrix[0].length,
+      'screenTiles': JSON.parse(JSON.stringify(this.allTiles)),
+      'screenZones': JSON.parse(JSON.stringify(this.allZones)),
+    }
+    this.screensStorage[screenIdentifier] = JSON.parse(JSON.stringify(screenData));
+    return this.screensStorage[screenIdentifier];
   }
 
   /**
    * Restore a zone from the saved state.
    * @param {string} zoneId - The ID of the zone to restore.
    */
-  restoreZone(zoneId) {
+  restoreZone(screenId) {
     this.gridContainer.replaceChildren([]);
-    let zoneMatrix = this.zoneStorage[zoneId].zoneMatrix;
-    console.log(zoneMatrix);
-    for (let row of zoneMatrix) {
-      console.log(row);
+    let screenData = _.cloneDeep(this.screensStorage[screenId]);
+    this.allTiles = screenData['screenTiles'];
+    this.allZones = screenData['screenZones'];
+    this.screenMatrix = [];
+    let curTileId = 0;
+    for (let row = 0; row < screenData['screenRows']; row += 1) {
+      let newRow = [];
       let rowDiv = document.createElement('div');
       rowDiv.className = 'row';
       this.gridContainer.appendChild(rowDiv);
-      for (let cell of row) {
-        rowDiv.appendChild(cell);
+      for (let col = 0; col < screenData['screenColumns']; col += 1) {
+        newRow.push(curTileId);
+        let tileData = screenData['screenTiles'][curTileId];
+        if (tileData['bgColor'] !== this.defaultTileColor) {
+        }
+        let newTile = new Tile(
+          curTileId,
+          tileData['row'],
+          tileData['column'],
+          { 'className': tileData['className'] },
+          tileData['width'],
+          tileData['height'],
+          tileData['bgColor'],
+          tileData['border'],
+          (tile, event) => this.clickOfTheTile(tile, event),
+          tileData['zoneId'],
+        );
+        curTileId += 1;
+        rowDiv.appendChild(newTile.element);
       }
+      this.screenMatrix.push(newRow);
     }
   }
 
@@ -230,7 +240,7 @@ export default class GridManager {
    */
   fillTheGrid() {
     this.gridContainer.replaceChildren([]);
-    this.zoneMatrix = [];
+    this.screenMatrix = [];
     let curId = 0;
     for (let row = 0; row < this.availableRows; row++) {
       let rowDiv = document.createElement('div');
@@ -240,33 +250,33 @@ export default class GridManager {
       for (let column = 0; column < this.availableCols; column++) {
         // TileData
         let tileData = {
-          curId: {
-            'height': this.baseTileHeight,
-            'width': this.baseTileWidth,
-            'bgColor': this.defaultTileColor,
-            'border': this.defaultBorder,
-            'row': row,
-            'column': column,
-          }
+          'height': this.baseTileHeight,
+          'width': this.baseTileWidth,
+          'bgColor': this.defaultTileColor,
+          'border': this.defaultBorder,
+          'row': row,
+          'column': column,
+          'zoneId': -1,
+          'className': this.defaultTileClass,
         };
         // ---
         let newTile = new Tile(
           curId,
           row,
           column,
-          {'className': 'tile'},
-          tileData[curId][width],
-          tileData[curId][height],
-          tileData[curId][bgColor],
-          tileData[curId][border],
+          { 'className': tileData['className'] },
+          tileData['width'],
+          tileData['height'],
+          tileData['bgColor'],
+          tileData['border'],
           (tile, event) => this.clickOfTheTile(tile, event)
         );
         rowDiv.appendChild(newTile.element);
-        curRow.push(tileData.curId);
-        this.allTiles[tileData.curId] = tileData;
+        curRow.push(curId);
+        this.allTiles[curId] = tileData;
         curId++;
       }
-      this.zoneMatrix.push(curRow);
+      this.screenMatrix.push(curRow);
     }
   }
 
@@ -290,21 +300,21 @@ export default class GridManager {
    * Toggle the area creation mode.
    * @returns {string} The new button text.
    */
-  toggleCreatingArea() {
-    if (this.creatingArea) {
-      if (this.currentArea.length !== 0 && this.createArea()) {
-        this.creatingArea = false;
-        return 'Start new area';
+  togglecreatingZone() {
+    if (this.creatingZone) {
+      if (this.currentZone.length !== 0 && this.createZone()) {
+        this.creatingZone = false;
+        return 'Start new zone';
       }
     } else {
       this.currentColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
       while (this.currentColor in this.usedColors) {
         this.currentColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
       }
-      this.creatingArea = true;
-      this.firstTileOfArea = true;
-      return 'Create area';
+      this.creatingZone = true;
+      this.firstTileOfZone = true;
+      return 'Create zone';
     }
-    return 'Create area';
+    return 'Create zone';
   }
 }

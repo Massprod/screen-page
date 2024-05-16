@@ -5,7 +5,17 @@ import GridManager from './classGridManager.js';
 // Viewport + Body of the main area
 let zoomableZone = document.getElementById('viewport');
 let gridContainer = document.getElementById('grid');
-const zoomAndDrag = new ZoomAndDrag(zoomableZone, gridContainer);
+
+const zoomAndDrag = new ZoomAndDrag(
+  zoomableZone,
+  gridContainer,
+  1,
+  4,
+  0.1,
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+  0.1,
+);
 // Initialize GridManager
 const gridManager = new GridManager(gridContainer, 10, 10, 30, 30, '#00ffdd');
 // DOM elements
@@ -22,41 +32,35 @@ let testRestoreZoneButton = document.getElementById('testRestoreZone');
 createButton.addEventListener('click', () => gridManager.fillTheGrid());
 
 heightButton.addEventListener('click', () => {
-    let height = Math.floor(heightInput.value) * 2;
+    let height = Math.floor(heightInput.value);
     gridManager.setHeight(height);
 });
 
 widthButton.addEventListener('click', () => {
-    let width = Math.floor(widthInput.value) * 2;
+    let width = Math.floor(widthInput.value);
     gridManager.setWidth(width);
 });
 
 testAreaButton.addEventListener('click', () => {
-  testAreaButton.textContent = gridManager.toggleCreatingArea();
+  testAreaButton.textContent = gridManager.togglecreatingZone();
 });
 
 testSaveAreaButton.addEventListener('click', () => {
-  let data = gridManager.saveZone();
-  if (!gridManager.isEmptyObject(data.zoneAreas)) {
-      gridManager.zoneStorage[data.zoneId] = {
-          'zoneMatrix': data.zoneMatrix,
-          'zoneAreas': data.zoneAreas
-      };
-  }
+  gridManager.saveZone();
 });
 
 savedZonesDropdown.addEventListener('focus', () => {
     savedZonesDropdown.innerHTML = '';
-    for (let zone in gridManager.zoneStorage) {
+    for (let zoneId in gridManager.screensStorage) {
         let newOption = document.createElement('option');
-        newOption.text = zone;
+        newOption.text = zoneId;
         savedZonesDropdown.add(newOption);
     }
 });
 
 testRestoreZoneButton.addEventListener('click', () => {
-    let chosenZoneId = savedZonesDropdown.value;
-    if (chosenZoneId) {
-        gridManager.restoreZone(chosenZoneId);
+    let chosenScreenId = savedZonesDropdown.value;
+    if (chosenScreenId) {
+        gridManager.restoreZone(chosenScreenId);
     }
 });

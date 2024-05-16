@@ -9,15 +9,15 @@
 .grid-container {
     position: absolute;
     transform-origin: top left;
-    background-color: white;
+    background-color: whitesmoke;
     will-change: transform;
 }
 
 .tile {
     width: 10px;
     height: 10px;
-    background-color: #00ffdd;
     border: 0.1px solid  #1c0080;
+    overflow: hidden;
 }
 
 .button {

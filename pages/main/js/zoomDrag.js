@@ -43,10 +43,11 @@ export default class ZoomAndDrag {
    * Initialize event listeners for zoom and drag.
    */
   #init() {
-    this.gridContainer.addEventListener('mousedown', this.onMouseDown.bind(this));
     this.zoomableZone.addEventListener('mousemove', this.onMouseMove.bind(this));
+    this.gridContainer.addEventListener('mousedown', this.onMouseDown.bind(this));
     document.addEventListener('mouseup', this.onMouseUp.bind(this));
     this.gridContainer.addEventListener('wheel', this.onWheel.bind(this));
+    this.gridContainer.style.transform = `translate(${this.posEnd.x}px, ${this.posEnd.y}px) scale(${this.basicScale})`;
   }
 
   /**
