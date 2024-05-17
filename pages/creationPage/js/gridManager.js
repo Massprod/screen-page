@@ -1,6 +1,6 @@
-import Tile from './classTile.js';
-import ColorManager from '../../utility/classColoring.js';
-import FlashMessage from '../../utility/classMessages.js';
+import Tile from './tile.js';
+import ColorManager from '../../utility/colorManager.js';
+import FlashMessage from '../../utility/flashMessage.js';
 
 export default class GridManager {
   /**
@@ -28,6 +28,8 @@ export default class GridManager {
     this.availableRows = this.validateNumber(basicRows);
     this.availableCols = this.validateNumber(basicCols);
     this.zoomAndDragInstance = false;
+    this.baseHightLimit = 100;
+    this.baseWidthLimit = 100;
     // Base styling
     this.defaultBorder = defaultBorder;
     this.defaultTileClass = defaultTileClass;
@@ -43,8 +45,7 @@ export default class GridManager {
     this.firstTileOfZone = true;
     this.emptyZoneId = -1;
     // Grid coloring
-    this.colorManager = new ColorManager(this.defaultTileColor);
-    this.usedColors = { [this.defaultTileColor]: true };
+    this.colorManager = new ColorManager(this.defaultTileColor, 75);
     this.currentColor = '';
     // Initialisation
     this.#addStyles();
@@ -290,7 +291,6 @@ export default class GridManager {
       this.allZones[this.currentZoneId] = { ...this.currentZone };
       this.currentZoneId++;
       this.currentZone = {};
-      this.usedColors[this.currentColor] = true;
       flashText = 'Correct square area created.';
       message.show({ 'message': flashText });
       this.firstTileOfZone = true;
@@ -390,7 +390,7 @@ export default class GridManager {
    * @returns {boolean} True if the height is valid, false otherwise.
    */
   setHeight(height) {
-    if (typeof height === 'number' && height > 0) {
+    if (typeof height === 'number' && height > 0 && height <= this.baseHightLimit ) {
       this.availableRows = Math.floor(height) * 2;
       return true;
     } else {
@@ -404,7 +404,7 @@ export default class GridManager {
    * @returns {boolean} True if the width is valid, false otherwise.
   */
   setWidth(width) {
-    if (typeof width === 'number' && width > 0) {
+    if (typeof width === 'number' && width > 0 && width <= this.baseWidthLimit) {
       this.availableCols = Math.floor(width) * 2;
       return true;
     } else {

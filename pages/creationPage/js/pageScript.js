@@ -1,6 +1,6 @@
 import ZoomAndDrag from './zoomDrag.js';
 import GridManager from './gridManager.js';
-import FlashMessage from '../../utility/classMessages.js';
+import FlashMessage from '../../utility/flashMessage.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,12 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const widthBox = document.getElementById('widthBox');
   const savedZonesDropdown = document.getElementById('savedZonesDropdown');
   const gridManager = new GridManager();
-  
+  const message = new FlashMessage();
+
   const assignZoom = (gridElement) => {
     const zoomer = new ZoomAndDrag(
       { 
         'zoomableZone': viewport,
         'gridContainer': gridElement,
+        'maxScale': 6,
       });
     gridManager.setZoomAndDragInstance(zoomer);
   };
@@ -33,19 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let width = parseInt(widthBox.value);
     if (isNaN(height)) {
       height = gridManager.availableRows;
-    };
+    }
     if (isNaN(width)) {
       width = gridManager.availableCols;
     };
-    if (height > 0 && height < 300 && width > 0 && width < 300) {
-     gridManager.setHeight(height);
-     gridManager.setWidth(width);
-     const gridElement = gridManager.createBasicGrid(); 
-     reassignGrid(gridElement);
-     assignZoom(gridElement);
-    } else {
-      alert('Height and width limited to 0 - 300.')
-    };
+    if (!gridManager.setHeight(height) || !gridManager.setWidth(width)) {
+      const flashText = 'Height and width limited to 0 - 300.';
+      message.show({ 'message': flashText })
+      return;
+    }
+    const gridElement = gridManager.createBasicGrid(); 
+    reassignGrid(gridElement);
+    assignZoom(gridElement);
   });
 
   startAreaButton.addEventListener('click', () => {
