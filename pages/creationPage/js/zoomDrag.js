@@ -18,24 +18,28 @@ export default class ZoomAndDrag {
    * @param {number} [zoomStep=0.05] - The step value for zooming.
    */
   constructor(
-    zoomableZone,
+    {zoomableZone,
     gridContainer,
     basicScale = 1,
     maxScale = 2,
     minScale = 0.1,
     posStart = { x: 0, y: 0 },
     posEnd = { x: 0, y: 0 },
-    zoomStep = 0.05
-  ) {
+    zoomStep = 0.05,
+    dragDelay = 100,
+  } = {}) {
     this.zoomableZone = zoomableZone;
     this.gridContainer = gridContainer;
     this.activeDrag = false;
+    this.recentlyDragged = false;
     this.basicScale = basicScale;
     this.maxScale = maxScale;
     this.minScale = minScale;
     this.posStart = posStart;
     this.posEnd = posEnd;
     this.zoomStep = zoomStep;
+    this.dragDelay = dragDelay;
+    this.dragTimeout = null;
     this.#init();
   }
 
@@ -62,7 +66,13 @@ export default class ZoomAndDrag {
    * @param {MouseEvent} event - The mouse up event.
    */
   onMouseUp(event) {
-    this.activeDrag = false;
+    if (this.activeDrag) {
+      clearTimeout(this.dragTimeout);
+      this.dragTimeout = setTimeout(() => {
+        this.recentlyDragged = false;
+      }, this.dragDelay);
+      this.activeDrag = false;
+    }
   }
 
   /**
@@ -72,6 +82,7 @@ export default class ZoomAndDrag {
   onMouseDown(event) {
     if (event.button === 0) {
       this.activeDrag = true;
+      clearTimeout(this.dragTimeout);
       event.preventDefault();
       this.posStart.x = event.clientX;
       this.posStart.y = event.clientY;
@@ -84,6 +95,7 @@ export default class ZoomAndDrag {
    */
   onMouseMove(event) {
     if (this.activeDrag) {
+      this.recentlyDragged = true;
       let shiftX = event.clientX - this.posStart.x;
       let shiftY = event.clientY - this.posStart.y;
       this.posEnd.x += shiftX;

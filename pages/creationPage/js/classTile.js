@@ -40,7 +40,7 @@ export default class Tile {
     // Create element
     this.element = document.createElement('div');
     this.applyStyles();
-    this.element.id = `${id}`;
+    this.element.id = `${this.id}`;
     this.element.addEventListener('click', (event) => clickHandler(this, event));
     this.element.addEventListener('contextmenu', (event) => {
       event.preventDefault();
@@ -67,6 +67,10 @@ export default class Tile {
    */
   setColor(color) {
     this.element.style.backgroundColor = `${color}`;
+  }
+
+  setZoneId(zoneId) {
+    this.zoneId = zoneId;
   }
 
   /**
