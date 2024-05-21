@@ -13,7 +13,7 @@
   will-change: transform;
 }
 
-.tile {
+.wheelStack {
   width: 10px;
   height: 10px;
   border: 0.1px solid  #1c0080;
@@ -33,12 +33,11 @@
   background-color: #0056b3;
 }
 
-.row {
+.rowCoordinate {
   height: max-content;
   width: max-content; 
   display: flex;
 }
-
 
 #flashMessage {
   position: fixed;
@@ -60,4 +59,67 @@
 
 .hidden {
   display: none;
+}
+
+.context-menu {
+  position: absolute;
+  display: none;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 10px;
+}
+
+.context-menu-row {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+  width: 100%;
+}
+
+.context-menu-option {
+  flex: 1; /* Make all buttons the same size */
+  min-width: 100px; /* Ensure minimum width */
+  height: 40px; /* Fixed height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap; /* Prevent text wrapping */
+  text-overflow: ellipsis; /* Show ellipsis if text overflows */
+}
+
+.context-menu-option:hover {
+  background-color: #f1f1f1;
+}
+
+.context-menu-add-button {
+  width: 100%;
+  margin-bottom: 10px; /* Add some space between the add button and other buttons */
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.context-menu-add-button:hover {
+  background-color: #0056b3;
+}
+
+.wheel-details-menu {
+  position: absolute;
+  display: none;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 10px;
+  min-width: 200px;
 }
