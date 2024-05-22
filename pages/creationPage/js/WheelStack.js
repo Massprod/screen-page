@@ -96,6 +96,9 @@ export default class WheelStack {
     this.element.style.borderRadius = '50%';
     this.element.style.position = 'relative';
     this.element.style.margin = '5px';
+    this.element.style.display = 'flex';
+    this.element.style.alignItems = 'center';
+    this.element.style.justifyContent = 'center';
     // Override default if provided.
     for (const [key, value] of Object.entries(styles)) {
       this.element.style[key] = value;

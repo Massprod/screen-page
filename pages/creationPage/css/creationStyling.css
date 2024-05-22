@@ -25,11 +25,38 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-height: 40VH;
+  overflow-y: auto;
 }
 
 .column:last-child {
   border-right: none; /* Remove the border for the last column */
 }
+
+/* TestColumn1*/
+.column1 {
+  flex: 1;
+  border-right: 1px solid #ccc; /* Add borders between columns */
+  display: flex;
+  flex-direction: row; /* Align children horizontally */
+  align-items: center;
+  max-height: 40vh;
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.wheel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  flex: 1;
+  width: 50%;
+  height: 100%;
+  box-sizing: border-box;
+}
+/* ---- */
+
 
 .bottom-half {
   flex: 1;
@@ -103,34 +130,33 @@ html, body {
 
 .context-menu {
   position: absolute;
-  display: none;
   background-color: white;
   border: 1px solid #ccc;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
   padding: 10px;
+  min-width: 200px;  /* Set a minimum width to prevent squishing */
+  white-space: nowrap;  /* Prevent text from wrapping */
+  overflow: hidden;  /* Hide overflow */
+  text-overflow: ellipsis;  /* Add ellipsis for overflowing text */
+  z-index: 1000;
 }
 
-.context-menu-row {
-  display: flex;
-  gap: 10px; /* Space between buttons */
-  width: 100%;
+.context-menu div {
+  margin-bottom: 5px;  /* Space out items for readability */
 }
 
-.context-menu-option {
-  flex: 1; /* Make all buttons the same size */
-  min-width: 100px; /* Ensure minimum width */
-  height: 40px; /* Fixed height */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.context-menu .context-menu-option {
+  display: block;
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #f4f4f4;
   border: none;
-  background: none;
-  text-align: center;
   cursor: pointer;
-  overflow: hidden;
-  white-space: nowrap; /* Prevent text wrapping */
-  text-overflow: ellipsis; /* Show ellipsis if text overflows */
+  text-align: center;
+}
+
+.context-menu .context-menu-option:hover {
+  background-color: #ddd;
 }
 
 .context-menu-option:hover {
@@ -164,21 +190,43 @@ html, body {
   min-width: 200px;
 }
 
-#orderTable {
+
+/* Set table layout to fixed */
+.order-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
+}
+
+/* Style for table headers */
+.order-table th {
+  background-color: #f4f4f4;
+  padding: 10px;
+  text-align: left;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
   position: sticky;
   top: 0;
-  background-color: #fff;
-  z-index: 100;
+  z-index: 1;
 }
 
-#orderTable th, #orderTable td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
+/* Set specific widths for headers */
+.order-table th:nth-child(1) { /* ID column */
+  width: 60%;
 }
 
-#orderTable th {
-  background-color: #f4f4f4;
+.order-table th:nth-child(2) { /* Status column */
+  width: 40%;
 }
+
+/* Style for table rows */
+.order-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+

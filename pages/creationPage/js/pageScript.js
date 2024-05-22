@@ -2,14 +2,14 @@ import ZoomAndDrag from './zoomDrag.js';
 import GridManager from './gridManager.js';
 import FlashMessage from '../../utility/flashMessage.js';
 import OrderManager from './OrderManager.js';
+import WheelStack from './WheelStack.js';
+import ContextMenuManager from './contextMenuManager.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const viewport = document.getElementById('viewport');
-  const createGridButton = document.getElementById('testBut');
-  const heightBox = document.getElementById('heightBox');
-  const widthBox = document.getElementById('widthBox');
   const contextMenu = document.getElementById('contextMenu');
   const wheelDetailsMenu = document.getElementById('wheelDetailsMenu'); // Assuming this is also defined in your HTML
+  const message = new FlashMessage();
 
   const rowsData = {
     'first': 58,
@@ -33,129 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
     'basicGridColumns': 31,
     'gridRowsData': rowsData,
     'wheelStackElementCLickHandler': (wheelStack, event) => {
-      showContextMenu(event, wheelStack);
+      contextMenuManager.showContextMenu(event, wheelStack)
     }
   });
-
-  // Test context-menu
-  const showContextMenu = (event, wheelStack) => {
-    event.preventDefault();
-    populateContextMenu(wheelStack);
-    const { clientX: mouseX, clientY: mouseY } = event;
-    contextMenu.style.top = `${mouseY}px`;
-    contextMenu.style.left = `${mouseX}px`;
-    contextMenu.style.display = `block`;
-    adjustMenuPosition(contextMenu, mouseX, mouseY);
-  };
-
-  const adjustMenuPosition = (menu, mouseX, mouseY) => {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const menuWidth = menu.offsetWidth;
-    const menuHeight = menu.offsetHeight;
-
-    let positionX = mouseX;
-    let positionY = mouseY;
-
-    if (mouseX + menuWidth > viewportWidth) {
-      positionX = viewportWidth - menuWidth;
-    }
-    if (mouseY + menuHeight > viewportHeight) {
-      positionY = viewportHeight - menuHeight;
-    }
-
-    menu.style.top = `${positionY}px`;
-    menu.style.left = `${positionX}px`;
-  };
-
-  const populateContextMenu = (wheelStack) => {
-    contextMenu.innerHTML = ''; // Clear existing menu items
-
-    // Add a button to add a new wheel if the stack is not full
-    if (wheelStack.takenPositions < wheelStack.stackSize) {
-      const addButton = document.createElement('button');
-      addButton.textContent = 'Add Wheel';
-      addButton.className = 'context-menu-add-button';
-      addButton.onclick = () => {
-        addWheelToStack(wheelStack);
-      };
-      contextMenu.appendChild(addButton);
-    }
-
-    // Add buttons for existing wheels
-    Object.keys(wheelStack.stackData).forEach((position) => {
-      const wheel = wheelStack.stackData[position];
-      const wheelButton = document.createElement('button');
-      wheelButton.textContent = `ID: ${wheel.wheelId || 'Empty'}`;
-      wheelButton.className = 'context-menu-option';
-      wheelButton.addEventListener('click', (event) => {
-        showWheelDetails(event, wheel);
-      });
-      contextMenu.appendChild(wheelButton);
-    });
-  };
-
-  const addWheelToStack = (wheelStack) => {
-    // Implement the logic to add a new wheel to the stack
-    console.log('Adding new wheel to', wheelStack);
-    // Hide the context menu
-    contextMenu.style.display = 'none';
-  };
-
-  const showWheelDetails = (event, wheel) => {
-    event.preventDefault();
-    wheelDetailsMenu.innerHTML = ''; // Clear existing menu items
-
-    const details = document.createElement('div');
-    details.innerHTML = `
-      <div>ID: ${wheel.wheelId}</div>
-      <div>Size: ${wheel.wheelSize}</div>
-      <div>Batch: ${wheel.wheelBatch}</div>
-      <button class="context-menu-option" id="extraActionButton">Extra Action</button>
-    `;
-    wheelDetailsMenu.appendChild(details);
-
-    adjustMenuPosition(wheelDetailsMenu, event.clientX, event.clientY);
-    wheelDetailsMenu.style.display = 'block';
-
-    // Add event listener for the extra action button
-    document.getElementById('extraActionButton').addEventListener('click', () => {
-      extraAction(wheel);
-    });
-
-    // Add event listeners to close the details menu when clicking outside
-    document.addEventListener('click', (event) => {
-      if (!wheelDetailsMenu.contains(event.target) && !contextMenu.contains(event.target)) {
-        hideWheelDetails();
-      }
-    }, { once: true });
-  };
-
-  const extraAction = (wheel) => {
-    console.log('Extra action for', wheel);
-    // Implement the extra action logic here
-  };
-
-  const hideWheelDetails = () => {
-    wheelDetailsMenu.style.display = 'none';
-  };
-
-  const hideContextMenu = () => {
-    contextMenu.style.display = 'none';
-    hideWheelDetails();
-  };
-
-  document.addEventListener('click', (event) => {
-    const wheelDetailsMenu = document.getElementById('wheelDetailsMenu');
-    const orderDetailsMenu = document.getElementById('orderDetailsMenu');
-  
-    if (wheelDetailsMenu && wheelDetailsMenu.style.display === 'block' && !wheelDetailsMenu.contains(event.target)) {
-      wheelDetailsMenu.style.display = 'none';
-    }
-  
-  });
-
-  const message = new FlashMessage();
 
   const createGrid = () => {
     const gridElement = gridManager.createBasicGrid();
@@ -169,26 +49,86 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   createGrid();
 
+  // ---------------------^^SomewhatStable^^--------
   // TestingGround
+  // Test context-menu
+  // ++++++++++++
+  const contextMenuManager = new ContextMenuManager({
+    'contextMenuClass': `context-menu`,
+    'wheelDetailsMenuClass': `context-menu`
+  });
+  // -----------
+  // +++++++
+  // TestingOrders
+  const mockOrders = [
+    {
+      order_id: '1',
+      action: 'move_wheelstack',
+      posFrom: { row: 'A', column: 1 },
+      posTo: { row: 'B', column: 2 },
+      completed: false
+    },
+    {
+      order_id: '2',
+      action: 'move_wheelstack',
+      posFrom: { row: 'C', column: 3 },
+      posTo: { row: 'D', column: 4 },
+      completed: false
+    }
+  ];
+  let orderCounter = 3;
+
+  const fetchNewOrders = () => {
+    // Simulate adding a new order every second
+    const newOrder = {
+      order_id: orderCounter.toString(),
+      action: 'move_wheelstack',
+      posFrom: { row: 'E', column: 5 },
+      posTo: { row: 'F', column: 6 },
+      completed: false
+    };
+    orderCounter++;
+    mockOrders.push(newOrder);
+    return mockOrders;
+  };
   const orderManager = new OrderManager('column3');
   window.completeOrder = (orderId) => orderManager.completeOrder(orderId);
-  // Example of creating and adding a new order
-  const newOrderData = {
-    order_id: 'order1',
-    action: 'move_wheelstack',
-    posFrom: { row: 'A', column: 1 },
-    posTo: { row: 'B', column: 2 },
-    completed: false
-  };
-  orderManager.addOrder(newOrderData)
-  const nextOrder = {
-    order_id: 'order2',
-    action: 'move_wheelstack',
-    posFrom: { row: 'A', column: 1 },
-    posTo: { row: 'B', column: 2 },
-    completed: false
-  };
-  orderManager.addOrder(nextOrder);
+
+  // Initial orders
+  mockOrders.forEach(order => {
+    orderManager.addOrder(order);
+  });
+
+  // Periodically fetch new orders and update the front-end
+  setInterval(() => {
+    const newOrders = fetchNewOrders();
+    orderManager.ordersStack = [];
+    orderManager.allOrders = {};
+    newOrders.forEach(order => {
+      orderManager.addOrder(order);
+    });
+  }, 2500); // Update every second
+  // ------------
+  // +++++++++
+  // TestingColumn1
+  const wheelContainer1 = document.getElementById('wheel-container1');
+  const wheelContainer2 = document.getElementById('wheel-container2');
+
+  for (let i = 0; i < 8; i += 1) {
+    const newWheelStack = new WheelStack({
+      'placementRow': `${i < 4 ? String(i + 1) : String(i - 3)}`,
+      'placementColumn': `${i < 4 ? '0' : '1'}`,
+      'wheelStackClickHandler': (wheelStack, event) => {
+        contextMenuManager.showContextMenu(event, wheelStack);
+      }
+    })
+    if (i < 4) {
+      wheelContainer1.appendChild(newWheelStack.element);
+    } else {
+      wheelContainer2.appendChild(newWheelStack.element);
+    }
+    
+  }
   // -----------------
 
 });

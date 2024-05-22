@@ -21,6 +21,7 @@ export default class OrderManager {
   #createOrderTable() {
     const table = document.createElement('table');
     table.id = 'orderTable';
+    table.className = 'order-table';
     table.innerHTML = `
       <thead>
         <tr>
@@ -63,8 +64,6 @@ export default class OrderManager {
     const orderTableBody = this.orderTable.querySelector('tbody');
     orderTableBody.innerHTML = ''; // Clear existing rows
     for (let index = (this.ordersStack.length - 1); index > -1; index -= 1) {
-      console.log(index);
-      console.log(this.ordersStack[index]);
       const row = this.createOrderElement(this.ordersStack[index]);
       orderTableBody.appendChild(row);
     }
@@ -124,9 +123,7 @@ export default class OrderManager {
    */
   completeOrder(orderId) {
     const order = this.allOrders[orderId];
-    console.log('completeBut_dont');
     if (order) {
-      console.log('completeBut_works');
       order.complete();
       this.displayOrders();
       this.hideOrderDetails();
@@ -138,6 +135,9 @@ export default class OrderManager {
    * @param {Event} event - The event that triggered hiding the order details.
    */
   hideOrderDetails(event) {
+    if (!event) {
+      return;
+    }
     if (!this.orderTable.contains(event.target) && !this.orderDetailsMenu.contains(event.target)) {
       this.orderDetailsMenu.style.display = 'none';
     }
