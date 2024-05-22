@@ -111,6 +111,7 @@ export default class ZoomAndDrag {
    * @param {WheelEvent} event - The wheel event.
    */
   onWheel(event) {
+    event.preventDefault();
     if (event.deltaY < 0) {
       this.basicScale += this.zoomStep;
     } else {

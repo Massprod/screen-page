@@ -3,14 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Viewport</title>
+    <title>ScreenMain</title>
     <link rel="stylesheet" href="../css/creationStyling.css">
 </head>
 <body>
+    <div class="main-container">
+        <div class="top-half">
+            <div class="column" id="column1">
+                <p>Test1Column1</p>
+            </div>
+            <div class="column" id="column2">
+                <p>Test2Column2</p>
+            </div>
+            <div class="column" id="column3">
+            </div>
+        </div>
+        <div class="bottom-half">
+            <div class="viewport" id="viewport">
+
+            </div>
+        </div>
+    </div>
+    <!-- Extra menus -->
     <div id="contextMenu" class="context-menu"></div>
     <div id="wheelDetailsMenu" class="context-menu"></div>
-    <div id="viewport" class="viewport"></div>
-    <button id = 'testBut' type="button" class="button"> Create grid </button>
+    <div id="orderDetailsMenu" class="context-menu"></div>
+    <!-- JS scripts-->
     <script type="module" src="../js/pageScript.js"></script>
 </body>
 </html>

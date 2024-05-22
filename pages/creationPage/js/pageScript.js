@@ -1,6 +1,7 @@
 import ZoomAndDrag from './zoomDrag.js';
 import GridManager from './gridManager.js';
 import FlashMessage from '../../utility/flashMessage.js';
+import OrderManager from './OrderManager.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const viewport = document.getElementById('viewport');
@@ -145,14 +146,20 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   document.addEventListener('click', (event) => {
-    if (!contextMenu.contains(event.target) && !wheelDetailsMenu.contains(event.target)) {
-      hideContextMenu();
+    const wheelDetailsMenu = document.getElementById('wheelDetailsMenu');
+    const orderDetailsMenu = document.getElementById('orderDetailsMenu');
+  
+    if (wheelDetailsMenu && wheelDetailsMenu.style.display === 'block' && !wheelDetailsMenu.contains(event.target)) {
+      wheelDetailsMenu.style.display = 'none';
     }
+  
   });
 
   const message = new FlashMessage();
 
-  const assignZoom = (gridElement) => {
+  const createGrid = () => {
+    const gridElement = gridManager.createBasicGrid();
+    viewport.appendChild(gridElement);
     const zoomer = new ZoomAndDrag({
       'zoomableZone': viewport,
       'gridContainer': gridElement,
@@ -160,11 +167,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     gridManager.setZoomAndDragInstance(zoomer);
   };
+  createGrid();
 
-  createGridButton.addEventListener('click', () => {
-    const gridElement = gridManager.createBasicGrid();
-    viewport.appendChild(gridElement);
-    assignZoom(gridElement);
-  });
+  // TestingGround
+  const orderManager = new OrderManager('column3');
+  window.completeOrder = (orderId) => orderManager.completeOrder(orderId);
+  // Example of creating and adding a new order
+  const newOrderData = {
+    order_id: 'order1',
+    action: 'move_wheelstack',
+    posFrom: { row: 'A', column: 1 },
+    posTo: { row: 'B', column: 2 },
+    completed: false
+  };
+  orderManager.addOrder(newOrderData)
+  const nextOrder = {
+    order_id: 'order2',
+    action: 'move_wheelstack',
+    posFrom: { row: 'A', column: 1 },
+    posTo: { row: 'B', column: 2 },
+    completed: false
+  };
+  orderManager.addOrder(nextOrder);
+  // -----------------
 
 });
