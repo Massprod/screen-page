@@ -1,4 +1,5 @@
 import ColorManager from '../../utility/colorManager.js';
+import FlashMessage from '../../utility/flashMessage.js';
 import Row from './Row.js';
 
 export default class GridManager {
@@ -9,11 +10,18 @@ export default class GridManager {
     wheelStackBgColor = '#00ffdd',
     wheelStackBorder = '0.5px solid #1c0080',
     wheelStackClassStyle = 'wheelStack',
-    wheelStackElementCLickHandler,
+    wheelStackContextMenuHandler,
+    wheelStackLeftClickHandler,
+    orderManager,
   } = {}) {
+    this.choosingStackPlacement = false;
+    this.stackToMove = null;
+    this.orderManager = orderManager;
+    this.wheelStackLeftClickHandler = wheelStackLeftClickHandler;
+
     this.gridRowsData = gridRowsData;
     this.zoomAndDragInstance = false;
-    this.wheelStackElementCLickHandler = wheelStackElementCLickHandler;
+    this.wheelStackContextMenuHandler = wheelStackContextMenuHandler;
     // Size limits
     this.baseStackHeightLimit = 500;
     this.baseStackWidthLimit = 500;
@@ -127,15 +135,18 @@ export default class GridManager {
         'rowIdentifier': rowIdent,
         'rowElementHeight': this.baseStackHeight,
         'rowElementWidth': this.baseStackWidth,
-        'elementClickHandler': this.wheelStackElementCLickHandler,
+        'wheelStackContextMenuHandler': this.wheelStackContextMenuHandler,
+        'wheelStackLeftClickHandler': this.wheelStackLeftClickHandler,
       });
       this.gridContainer.appendChild(newRow.rowElement);
       const createdWheelStacks = newRow.createRow();
       for (let index in createdWheelStacks) {
         const wheelStack = createdWheelStacks[index];
-        const wheelStackRow = wheelStack.row;
-        const wheelStackCol = wheelStack.column;
-        this.gridPlacements[wheelStackRow] = [wheelStackCol];
+        const wheelStackRow = wheelStack.wheelStackRow;
+        const wheelStackCol = wheelStack.wheelStackColumn;
+        if (!(wheelStackRow in this.gridPlacements)) {
+          this.gridPlacements[wheelStackRow] = {};
+        }
         this.gridPlacements[wheelStackRow][wheelStackCol] = wheelStack;
       }
       }
@@ -144,5 +155,27 @@ export default class GridManager {
   
   setZoomAndDragInstance(zoomAndDragInstance) {
     this.zoomAndDragInstance = zoomAndDragInstance;
+  }
+
+  createMoveWheelStackOrder(wheelStack) {
+    console.log(wheelStack);
+    console.log(this.stackToMove);
+    console.log(this.choosingStackPlacement);
+    if (this.orderManager.createMoveWheelStackOrder(this.stackToMove, wheelStack)) {
+      this.stackToMove = null;
+      this.choosingStackPlacement = false;
+      this.cursorInitialMode();
+      return;
+    }
+    FlashMessage('No space');
+  }
+
+
+  cursorPlacementMode(cursor = 'cell') {
+    document.querySelector('.bottom-half').style.cursor = cursor;
+  }
+
+  cursorInitialMode(cursor = 'initial') {
+    document.querySelector('.bottom-half').style.cursor = cursor;
   }
 }

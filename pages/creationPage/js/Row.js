@@ -9,7 +9,8 @@ export default class Row {
     rowElementWidth = 75,
     rowPresetStyle = '',
     rowBgColor = 'whitesmoke',
-    elementClickHandler,
+    wheelStackContextMenuHandler,
+    wheelStackLeftClickHandler,
   } = {}) {
     this.rowColumns = rowColumns;
     this.rowIdentifier = rowIdentifier;
@@ -18,7 +19,8 @@ export default class Row {
     this.rowElementWidth = rowElementWidth;
     this.rowBgColor = rowBgColor;
     this.wheelStacks = [];
-    this.elementClickHandler = elementClickHandler;
+    this.wheelStackContextMenuHandler = wheelStackContextMenuHandler;
+    this.wheelStackLeftClickHandler = wheelStackLeftClickHandler;
     this.#init();
     this.#setDefRowStyle();
   }
@@ -79,7 +81,8 @@ export default class Row {
         'placementRow': this.rowIdentifier,
         'placementColumn': col,
         'wheelStackBgColor': this.rowBgColor,
-        'wheelStackClickHandler': this.elementClickHandler,
+        'wheelStackContextMenuHandler': this.wheelStackContextMenuHandler,
+        'wheelStackLeftClickHandler': this.wheelStackLeftClickHandler,
       })
       this.rowElement.appendChild(newWheelStack.element);
       this.wheelStacks.push(newWheelStack);

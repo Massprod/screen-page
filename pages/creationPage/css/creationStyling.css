@@ -38,22 +38,25 @@ html, body {
   flex: 1;
   border-right: 1px solid #ccc; /* Add borders between columns */
   display: flex;
-  flex-direction: row; /* Align children horizontally */
+  flex-direction: column; /* Align children horizontally */
   align-items: center;
   max-height: 40vh;
+  max-width: 18vw;
+  min-width: 250px;
+  min-height: 250px;
   overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .wheel-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
   width: 100%;
   flex: 1;
-  width: 50%;
-  height: 100%;
+  height: 50%;
   box-sizing: border-box;
+  /* padding: 10px; */
 }
 /* ---- */
 
@@ -147,6 +150,7 @@ html, body {
 
 .context-menu .context-menu-option {
   display: block;
+  width: 100%;
   margin-top: 10px;
   padding: 5px 10px;
   background-color: #f4f4f4;
@@ -163,7 +167,7 @@ html, body {
   background-color: #f1f1f1;
 }
 
-.context-menu-add-button {
+.context-menu-move-stack-button {
   width: 100%;
   margin-bottom: 10px; /* Add some space between the add button and other buttons */
   padding: 10px;
@@ -175,7 +179,7 @@ html, body {
   border-radius: 4px;
 }
 
-.context-menu-add-button:hover {
+.context-menu-move-stack-button:hover {
   background-color: #0056b3;
 }
 
@@ -187,7 +191,8 @@ html, body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   padding: 10px;
-  min-width: 200px;
+  min-width: 128px;
+  max-width: 384px;
 }
 
 

@@ -19,7 +19,7 @@ export default class Order {
     completed = false,
     date = new Date().toISOString,
     comment = '',
-    canceled= false,
+    canceled = false,
   } = {}) {
     this.order_id = order_id;
     this.action = action;
@@ -36,9 +36,12 @@ export default class Order {
    * @param {string} [comment=null] - The comment to add when completing the order.
    * @returns {boolean} Whether the order was successfully completed.
    */
-  complete(comment = null) {
+  complete(comment = null, gridManager) {
     if (this.canceled || this.completed) {
       return false;
+    }
+    if (this.action === 'move_stack') {
+      this.executeMoveWheelStack(gridManager);
     }
     this.completed = true;
     if (comment) {
@@ -62,4 +65,30 @@ export default class Order {
     }
     return true;
   }
+
+  executeMoveWheelStack(gridManager) {
+    if (!gridManager) {
+      throw(error(`Incorrect input 'gridManager' is empty`));
+    }
+    console.log(gridManager.gridPlacements);
+    var { row, column } = this.posFrom;
+    let wheelStackToMove = gridManager.gridPlacements[row][column];
+    var { row, column } = this.posTo;
+    let wheelStackToPlace = gridManager.gridPlacements[row][column];
+    const currentTop = Object.keys(wheelStackToPlace.stackData).length;
+    const appendStackData = {};
+    for (const wheelKey in wheelStackToMove.stackData) {
+      console.log(wheelKey);
+      const currentWheel = wheelStackToMove.stackData[wheelKey];
+      console.log(currentWheel);
+      appendStackData[currentTop] = {
+        'wheelId': currentWheel.wheelId,
+        'wheelSize': currentWheel.wheelSize,
+        'wheelBatch': currentWheel.wheelBatch,
+      }
+    }
+    wheelStackToPlace.fillTheStack(appendStackData);
+    wheelStackToMove.createEmptyStack();
+  }
+
 }

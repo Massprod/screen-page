@@ -1,7 +1,10 @@
 import Order from './Order.js';
 
 export default class OrderManager {
-  constructor(containerId) {
+  constructor({
+    containerId,
+  } = {}) {
+    this.gridManager = null;
     this.ordersStack = [];
     this.allOrders = {};
     this.container = document.getElementById(containerId);
@@ -108,7 +111,9 @@ export default class OrderManager {
     } else {
       htmlString += `<div>Status: ${order.completed ? 'Completed' : 'Pending'}</div>`;
     }
-    htmlString += `<button class="context-menu-option" onclick="completeOrder('${order.order_id}')">Complete</button>`;
+    if (!order.canceled && !order.completed) {
+      htmlString += `<button class="context-menu-option" onclick="completeOrder('${order.order_id}')">Complete</button>`;
+    }
     this.orderDetailsMenu.innerHTML = htmlString;
     this.orderDetailsMenu.style.display = 'block';
     const { clientX: mouseX, clientY: mouseY } = event;
@@ -124,7 +129,8 @@ export default class OrderManager {
   completeOrder(orderId) {
     const order = this.allOrders[orderId];
     if (order) {
-      order.complete();
+      let comment = '';
+      order.complete(comment, this.gridManager);
       this.displayOrders();
       this.hideOrderDetails();
     }
@@ -168,4 +174,55 @@ export default class OrderManager {
     menu.style.top = `${positionY}px`;
     menu.style.left = `${positionX}px`;
   }
+
+  createMoveTopWheelOrder(wheelStack, targetStack) {
+    if (targetStack.takenPositions === targetStack.maxStackSize) {
+      return false;
+    }
+    const orderData = {
+      order_id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      action: `move_top_wheel`,
+      posFrom: {
+        row: wheelStack.wheelStackRow,
+        column: wheelStackColumn,
+      },
+      posTo: {
+        row:  targetStack.wheelStackRow,
+        column: targetStack.wheelStackColumn,
+      },
+      completed: false,
+    }
+    this.addOrder(orderData);
+    return true;
+  }
+
+  createMoveWheelStackOrder(wheelStack, targetStack) {
+    const emptyPositions = targetStack.maxStackSize - targetStack.takenPositions;
+    if (emptyPositions < wheelStack.takenPositions) {
+      return false;
+    }
+    const orderData = {
+      order_id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      action: `move_stack`,
+      posFrom: {
+        row: wheelStack.wheelStackRow,
+        column: wheelStack.wheelStackColumn,
+      },
+      posTo: {
+        row: targetStack.wheelStackRow,
+        column: targetStack.wheelStackColumn,
+      },
+      completed: false,
+    }
+    this.addOrder(orderData);
+    return true;
+  }
+  
+  async updateOrderStatus(orderId, statusUpdate) {
+    this.allOrders[orderId].completed = statusUpdate['completed'];
+    this.allOrders[orderId].canceled = statusUpdate['canceled'];
+    this.allOrders[orderId].comment = statusUpdate['comment'];
+    this.displayOrders();
+  }
+
 }

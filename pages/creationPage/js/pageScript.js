@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ['I', 27]
     ]
   };
+  const orderManager = new OrderManager({'containerId': 'column3'});
 
   const gridManager = new GridManager({
     'baseTileHeight': 75,
@@ -32,10 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
     'basicGridRows': 6,
     'basicGridColumns': 31,
     'gridRowsData': rowsData,
-    'wheelStackElementCLickHandler': (wheelStack, event) => {
+    'wheelStackContextMenuHandler': (wheelStack, event) => {
       contextMenuManager.showContextMenu(event, wheelStack)
+    },
+    'orderManager': orderManager,
+    'wheelStackLeftClickHandler': (wheelStack, event) => {
+      if (gridManager.choosingStackPlacement) {
+        gridManager.createMoveWheelStackOrder(wheelStack);
+      }
     }
   });
+
+  orderManager.gridManager = gridManager;
 
   const createGrid = () => {
     const gridElement = gridManager.createBasicGrid();
@@ -51,13 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------------------^^SomewhatStable^^--------
   // TestingGround
-  // Test context-menu
-  // ++++++++++++
-  const contextMenuManager = new ContextMenuManager({
-    'contextMenuClass': `context-menu`,
-    'wheelDetailsMenuClass': `context-menu`
-  });
-  // -----------
   // +++++++
   // TestingOrders
   const mockOrders = [
@@ -91,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mockOrders.push(newOrder);
     return mockOrders;
   };
-  const orderManager = new OrderManager('column3');
+  
   window.completeOrder = (orderId) => orderManager.completeOrder(orderId);
 
   // Initial orders
@@ -100,28 +102,61 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Periodically fetch new orders and update the front-end
-  setInterval(() => {
-    const newOrders = fetchNewOrders();
-    orderManager.ordersStack = [];
-    orderManager.allOrders = {};
-    newOrders.forEach(order => {
-      orderManager.addOrder(order);
-    });
-  }, 2500); // Update every second
+
+
+  // setInterval(() => {
+  //   const newOrders = fetchNewOrders();
+  //   orderManager.ordersStack = [];
+  //   orderManager.allOrders = {};
+  //   newOrders.forEach(order => {
+  //     orderManager.addOrder(order);
+  //   });
+  // }, 2500); // Update every second
   // ------------
+  // Test context-menu
+  // ++++++++++++
+  const contextMenuManager = new ContextMenuManager({
+    'contextMenuClass': `context-menu`,
+    'wheelDetailsMenuClass': `wheel-details-menu`,
+    'gridManager': gridManager,
+  });
+
+  // -----------
+
   // +++++++++
   // TestingColumn1
   const wheelContainer1 = document.getElementById('wheel-container1');
   const wheelContainer2 = document.getElementById('wheel-container2');
 
+  
   for (let i = 0; i < 8; i += 1) {
+    const placementRow = i < 4 ? String(i + 1) : String(i - 3)
+    const placementColumn = i < 4 ? '0' : '1';
     const newWheelStack = new WheelStack({
-      'placementRow': `${i < 4 ? String(i + 1) : String(i - 3)}`,
-      'placementColumn': `${i < 4 ? '0' : '1'}`,
-      'wheelStackClickHandler': (wheelStack, event) => {
+      'placementRow': placementRow,
+      'placementColumn': placementColumn,
+      'wheelStackContextMenuHandler': (wheelStack, event) => {
         contextMenuManager.showContextMenu(event, wheelStack);
       }
     })
+    if (!(placementRow in gridManager.gridPlacements)) {
+      gridManager.gridPlacements[placementRow] = {};
+    }
+    gridManager.gridPlacements[placementRow][placementColumn] = newWheelStack;
+    // TestPopulation
+    const min = 0;
+    const max = 5;
+    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    const stackData = {};
+    for (let k = randomNum; k >= 0; k -= 1) {
+      stackData[k] = {
+        'wheelId': `testId${k}`,
+        'wheelSize': `testSize${k}`,
+        'wheelBatch': `testiBatch${k}`,
+      }
+    }
+    newWheelStack.fillTheStack(stackData)
+    // ------
     if (i < 4) {
       wheelContainer1.appendChild(newWheelStack.element);
     } else {

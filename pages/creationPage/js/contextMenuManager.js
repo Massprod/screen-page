@@ -1,5 +1,10 @@
 export default class ContextMenuManager {
-  constructor({ contextMenuClass = 'context-menu', wheelDetailsMenuClass = 'context-menu' } = {}) {
+  constructor({
+    contextMenuClass = 'context-menu',
+    wheelDetailsMenuClass = 'wheel-details-menu',
+    gridManager,
+    } = {}) {
+    this.gridManager = gridManager;
     this.contextMenu = document.createElement('div');
     this.contextMenu.className = contextMenuClass;
     this.contextMenu.style.display = 'none';
@@ -24,6 +29,9 @@ export default class ContextMenuManager {
   }
 
   showContextMenu(event, wheelStack) {
+    if (0 === wheelStack.takenPositions) {
+      return;
+    }
     event.preventDefault();
     this.populateContextMenu(wheelStack);
     const { clientX: mouseX, clientY: mouseY } = event;
@@ -55,21 +63,20 @@ export default class ContextMenuManager {
 
   populateContextMenu(wheelStack) {
     this.contextMenu.innerHTML = ''; // Clear existing menu items
-
+    
     // Add a button to add a new wheel if the stack is not full
-    if (wheelStack.takenPositions < wheelStack.stackSize) {
-      const addButton = document.createElement('button');
-      addButton.textContent = 'Add Wheel';
-      addButton.className = 'context-menu-add-button';
-      addButton.onclick = () => {
-        this.addWheelToStack(wheelStack);
-      };
-      this.contextMenu.appendChild(addButton);
-    }
+    const addButton = document.createElement('button');
+    addButton.textContent = 'Move stack';
+    addButton.className = 'context-menu-move-stack-button';
+    addButton.onclick = () => {
+      this.moveWheelStack(wheelStack);
+    };
+    this.contextMenu.appendChild(addButton);
 
     // Add buttons for existing wheels
-    Object.keys(wheelStack.stackData).forEach((position) => {
-      const wheel = wheelStack.stackData[position];
+    const wheelsNumber = Object.keys(wheelStack.stackData).length - 1;
+    for (let index = wheelsNumber; index >= 0; index -= 1) {
+      const wheel = wheelStack.stackData[index];
       const wheelButton = document.createElement('button');
       wheelButton.textContent = `ID: ${wheel.wheelId || 'Empty'}`;
       wheelButton.className = 'context-menu-option';
@@ -77,14 +84,16 @@ export default class ContextMenuManager {
         this.showWheelDetails(event, wheel);
       });
       this.contextMenu.appendChild(wheelButton);
-    });
+    };
   }
 
-  addWheelToStack(wheelStack) {
-    // Implement the logic to add a new wheel to the stack
-    console.log('Adding new wheel to', wheelStack);
-    // Hide the context menu
+  moveWheelStack(wheelStack) {
+    console.log('Moving wheelstack to', wheelStack);
+    console.log(this.gridManager);
+    this.gridManager.choosingStackPlacement = true;
+    this.gridManager.stackToMove = wheelStack;
     this.contextMenu.style.display = 'none';
+    this.gridManager.cursorPlacementMode();
   }
 
   showWheelDetails(event, wheel) {

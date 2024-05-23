@@ -8,23 +8,25 @@ export default class WheelStack {
     placementColumn = '',
     wheelStackStyle = {},
     wheelStackBgColor = '#f5f5f5',
-    stackSize = 5,
+    maxStackSize = 6,
     stackData = {},
-    wheelStackClickHandler,
+    wheelStackContextMenuHandler,
+    wheelStackLeftClickHandler,
   } = {}) {
     // Placement data
     this.wheelStackRow = placementRow;
     this.wheelStackColumn = placementColumn;
-    this.wheelStackClickHandler = wheelStackClickHandler;
+    this.wheelStackContextMenuHandler = wheelStackContextMenuHandler;
+    this.wheelStackLeftClickHandler = wheelStackLeftClickHandler;
     // Basic stats
     this.stylesData = wheelStackStyle;
     this.width = stackWidth;
     this.height = stackHeight;
     this.bgColor = wheelStackBgColor;
     this.stackData = {};
-    this.stackSize = stackSize;
+    this.maxStackSize = maxStackSize;
     this.#init();
-    this.#createEmptyStack();
+    this.createEmptyStack();
     this.takenPositions = 0;
     this.fillTheStack(stackData);
   }
@@ -32,7 +34,8 @@ export default class WheelStack {
   #init() {
     this.element = document.createElement('div');
     this.applyStyles(this.stylesData);
-    this.element.addEventListener('contextmenu', (event) => this.wheelStackClickHandler(this, event));
+    this.element.addEventListener('contextmenu', (event) => {this.wheelStackContextMenuHandler(this, event)});
+    this.element.addEventListener('click', (event) => {this.wheelStackLeftClickHandler(this, event)});
     this.element.appendChild(this.#numberIndicator());
     this.updateIndicator();
   }
@@ -49,8 +52,8 @@ export default class WheelStack {
     return this.numberSpan;
   }
 
-  #createEmptyStack() {
-    for (let index = 0; index < this.stackSize; index += 1) {
+  createEmptyStack() {
+    for (let index = 0; index < this.maxStackSize; index += 1) {
       this.stackData[index] = new Wheel({
         'wheelStackColumn': this.wheelStackColumn,
         'wheelStackRow': this.wheelStackRow,
@@ -62,8 +65,8 @@ export default class WheelStack {
   fillTheStack(stackData) {
     const stackKeys = Object.keys(stackData);
     for (const key in stackData) {
-      if (key >= this.stackSize) {
-        throw(new Error(`Incorrect input. Provided 'stackData' can't have position higher than 'stackSize' == ${this.stackSize}`));
+      if (key >= this.maxStackSize) {
+        throw(new Error(`Incorrect input. Provided 'stackData' can't have position higher than 'stackSize' == ${this.maxStackSize}`));
       }
       this.stackData[key].wheelId = stackData[key]['wheelId'];
       this.stackData[key].wheelSize = stackData[key]['wheelSize'];
@@ -123,7 +126,9 @@ export default class WheelStack {
 
   updateIndicator() {
     this.takenPositions = this.checkPositions();
-    this.numberSpan.textContent = this.takenPositions;
+    if (0 !== this.takenPositions) {
+      this.numberSpan.textContent = this.takenPositions;
+    }
   }
 
   setIndicatorColor(color) {
