@@ -1,0 +1,27 @@
+@import url(../../designSettings.css);
+
+:root {
+  /* wheel-stack */
+  --wheel-stack-height: 100px;
+  --wheel-stack-width: 100px;
+  --wheel-stack-border-radius: 50%;
+  --wheel-stack-bg-color: var(--background-color);
+  --wheel-stack-border-width: 4px;
+  --wheel-stack-border-style: var(--basic-border-elements);
+  --wheel-stack-border-color: var(--primary-color);
+  --wheel-stack-text-color: var(--text-color);
+  --wheel-stack-font-size: 50px;
+  --wheel-stack-margin: 25px;
+  --wheel-stack-display: flex;
+  --wheel-stack-align-items: center;
+  --wheel-stack-justify-content: center;
+  /* wheel-stack-context-menu */
+  --wheel-stack-context-menu-position: absolute;
+  --wheel-stack-context-menu-border-width: 4px;
+  --wheel-stack-context-menu-border-style: var(--basic-border-elements);
+  --wheel-stack-context-menu-border-color: var(--border-color);
+  --wheel-stack-context-menu-padding: var(--basic-context-menu-paddig);
+  --wheel-stack-context-menu-z-index: 1000;
+  --wheel-stack-context-menu-display: flex;
+  --wheel-stack-context-menu-display-hidden: none;
+}

@@ -1,0 +1,12 @@
+:root {
+  /* Main color palette */
+  --primary-color: #000000; /* Black */
+  --secondary-color: #FFFFFF; /* White */
+  --background-color: #F5F5F5; /* Light Gray */
+  --border-color: #CCCCCC; /* Medium Gray */
+  --text-color: #333333; /* Dark Gray */
+  --accent-color: #007BFF; /* Blue */
+  --basic-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  --basic-border-elements: solid;
+  --basic-context-menu-paddig: 10px;
+}

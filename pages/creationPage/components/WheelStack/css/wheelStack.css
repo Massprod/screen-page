@@ -1,0 +1,40 @@
+@import url(wheelStackSettings.css);
+@import url(../../designSettings.css);
+
+.wheel-stack {
+  width: var(--wheel-stack-height);
+  height: var(--wheel-stack-width);
+  border: var(--wheel-stack-border-width) var(--wheel-stack-border-style) var(--wheel-stack-border-color);
+  border-radius: var(--wheel-stack-border-radius);
+  background-color: var(--wheel-stack-bg-color);
+  display: var(--wheel-stack-display);
+  align-items: var(--wheel-stack-align-items);
+  justify-content: var(--wheel-stack-justify-content);
+  color: var(--wheel-stack-text-color);
+  font-size: var(--wheel-stack-font-size);
+  margin: var(--wheel-stack-margin);
+}
+
+.wheel-stack:hover {
+  background-color: var(--border-color);
+}
+
+.wheel-stack-context-menu {
+  position: var(--wheel-stack-context-menu-position);
+  background-color: var(--secondary-color);
+  border: var(--wheel-stack-context-menu-border-width) var(--wheel-stack-context-menu-border-style) var(--wheel-stack-context-menu-border-color);
+  box-shadow: var(--basic-box-shadow);
+  padding: var(--wheel-stack-context-menu-padding);
+  z-index: var(--wheel-stack-context-menu-z-index);
+  display: var(--wheel-stack-context-menu-display);
+}
+
+.wheel-stack-context-menu-hidden {
+  position: var(--wheel-stack-context-menu-position);
+  background-color: var(--secondary-color);
+  border: var(--wheel-stack-context-menu-border-width) var(--wheel-stack-context-menu-border-style) var(--wheel-stack-context-menu-border-color);
+  box-shadow: var(--basic-box-shadow);
+  padding: var(--wheel-stack-context-menu-padding);
+  z-index: var(--wheel-stack-context-menu-z-index);
+  display: var(--wheel-stack-context-menu-display-hidden);
+}
