@@ -19,21 +19,37 @@ export default class WheelStackElement {
     maxSize = 6,
     placementRow = null,
     placementColumn = null,
+    wheels = [],
     container = null,
+    identifier = null
   } = {}) {
-    this.wheelStackData = new WheelStackData({ stackId, maxSize, placementRow, placementColumn });
     this.container = container;
     this.element = document.createElement('div');
     this.element.className = CLASS_NAMES.WHEEL_STACK;
-    this.updateVisual();
     this.container.appendChild(this.element);
+    if (identifier === null) {
+      this.wheelStackData = new WheelStackData({ stackId, maxSize, placementRow, placementColumn, wheels});
+      this.updateVisual();
+    } else {
+      this.wheelStackData = null;
+      this.identifier = identifier;
+      this.setIdentifier();
+    }
   }
 
   /**
    * Update the visual representation of the wheel stack element.
    */
   updateVisual() {
+    if (this.wheelStackData.wheels.length === 0) {
+      return;
+    }
     this.element.textContent = this.wheelStackData.wheels.length;
+  }
+
+  setIdentifier() {
+    this.element.textContent = this.identifier;
+    this.element.style.border = 'none';
   }
 
   /**
@@ -46,10 +62,14 @@ export default class WheelStackElement {
   }
 
   hideElement() {
-    this.element.style.display = 'none';
+    this.element.style.visibility = 'hidden';
   }
   
+  showElement() {
+    this.element.style.visibility = 'visible';
+  }
+
   isHidden() {
-    return 'none' === this.element.style.display;
+    return 'hidden' === this.element.style.visibility;
   }
 }

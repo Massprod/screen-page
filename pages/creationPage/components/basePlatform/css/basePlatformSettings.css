@@ -1,0 +1,11 @@
+@import url(../../designSettings.css);
+
+:root {
+    --base-platform-border-right: var(--basic-border-size) var(--basic-border-elements) var(--border-color);
+    --base-platform-display: flex;
+    --base-platform-flex-direction: column;
+    --base-platform-min-height: var(--basic-column-min-height);
+    --base-platform-max-height: var(--basic-column-max-height);
+    --base-platform-min-width: var(--basic-column-min-width);
+    --base-platform-max-width: var(--basic-column-max-width);
+}

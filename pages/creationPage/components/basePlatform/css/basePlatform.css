@@ -1,0 +1,16 @@
+@import url(../../designSettings.css);
+@import url(../css/basePlatformSettings.css);
+
+
+.base-platform {
+    border-right: var(--base-platform-border-right);
+    display: var(--base-platform-display);
+    flex-direction: var(--base-platform-flex-direction);
+    min-height: var(--base-platform-min-height);
+    max-height: var(--base-platform-max-height);
+    min-width: var(--base-platform-min-width);
+    max-width: var(--base-platform-max-width);
+    justify-content: center;
+    align-items: auto;
+    /* margin-top: 75px; /* Temporarily, we will align everything later*/
+}

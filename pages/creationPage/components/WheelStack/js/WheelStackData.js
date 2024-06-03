@@ -1,4 +1,3 @@
-import Wheel from './Wheel.js';
 
 /**
  * Class representing a wheel stack.
@@ -18,9 +17,10 @@ export default class WheelStackData {
     maxSize = 6,
     placementRow = null,
     placementColumn = null,
+    wheels = []
   } = {}) {
     this.stackId = stackId;
-    this.wheels = [];
+    this.wheels = wheels;
     this.wheelMap = {}; // Object to map wheel IDs to Wheel objects
     this.maxSize = maxSize;
     this.placementRow = placementRow;

@@ -9,4 +9,10 @@
   --basic-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   --basic-border-elements: solid;
   --basic-context-menu-paddig: 10px;
+  --basic-border-size: 1px;
+  /* Top columns */
+  --basic-column-min-height: 300px;
+  --basic-column-max-height: 40vh;
+  --basic-column-min-width: 300px;
+  --basic-column-max-width: 25wv;
 }
