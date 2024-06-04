@@ -12,5 +12,4 @@
     max-width: var(--base-platform-max-width);
     justify-content: center;
     align-items: auto;
-    /* margin-top: 75px; /* Temporarily, we will align everything later*/
 }

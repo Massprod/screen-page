@@ -22,7 +22,7 @@ html, body {
 .top-half {
   display: flex;
   flex: 0 0 40vh;
-  border-bottom: 2px solid #ccc; /* Optional: Add a border between halves */
+  border-bottom: 2px solid #ccc;
 }
 
 

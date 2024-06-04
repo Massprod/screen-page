@@ -1,75 +1,79 @@
 import WheelStackData from './WheelStackData.js';
 import { CLASS_NAMES } from '../../constants.js';
 
-/**
- * Class representing the visual representation of a wheel stack.
- */
+
 export default class WheelStackElement {
-  /**
-   * Create a wheel stack element.
-   * @param {Object} params - The parameters for the wheel stack element.
-   * @param {string} params.stackId - The unique identifier for the wheel stack.
-   * @param {number} params.maxSize - The maximum number of wheels the stack can hold.
-   * @param {string} params.placementRow - The row placement of the wheel stack.
-   * @param {number} params.placementColumn - The column placement of the wheel stack.
-   * @param {HTMLElement} params.container - The container element to render the wheel stack element.
-   */
-  constructor({
-    stackId = null,
-    maxSize = 6,
-    placementRow = null,
-    placementColumn = null,
-    wheels = [],
-    container = null,
-    identifier = null
-  } = {}) {
+  constructor(container)
+  {
+    // Only represenets element on page, all data in different class.
+    // It can be one of 3 options for now:
+    //   - used to show rowIdentifier as visual part of the row, to identify it.
+    //   - used to show wheelStackElement and use it as gate for all data attached to this element.
+    //   - empty placeholder, we can have empty cells on the row, they should be the same size and style, only `hidden`.
+    this.whiteSpace = false;  // to check if it's empty cell
+    this.rowIdentifier = '';  // to show as rowIdentifier for row disting.
     this.container = container;
     this.element = document.createElement('div');
-    this.element.className = CLASS_NAMES.WHEEL_STACK;
+    this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
     this.container.appendChild(this.element);
-    if (identifier === null) {
-      this.wheelStackData = new WheelStackData({ stackId, maxSize, placementRow, placementColumn, wheels});
-      this.updateVisual();
-    } else {
-      this.wheelStackData = null;
-      this.identifier = identifier;
-      this.setIdentifier();
-    }
+    this.wheelStackData = null;
+    this.element.addEventListener('click', () => {
+      console.log('123');
+      console.log(this.wheelStackData);
+    })
+  }
+  
+  resetElement() {
+    this.whiteSpace = false,
+    this.rowIdentifier = '';
+    this.element.textContent = this.rowIdentifier;
+    this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
+    this.wheelStackData = null;
   }
 
-  /**
-   * Update the visual representation of the wheel stack element.
-   */
   updateVisual() {
-    if (this.wheelStackData.wheels.length === 0) {
-      return;
+    if (null === this.wheelStackData) {
+      return false;
     }
     this.element.textContent = this.wheelStackData.wheels.length;
+    return true;
   }
 
-  setIdentifier() {
-    this.element.textContent = this.identifier;
-    this.element.style.border = 'none';
+  setAsIdentifier(identifier) {
+    this.resetElement();
+    this.rowIdentifier = identifier;
+    this.element.textContent =  this.rowIdentifier;
+    this.element.style = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK + CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_IDENTIFIER;
   }
 
-  /**
-   * Attach an event to the wheel stack element.
-   * @param {string} eventType - The type of the event (e.g., 'click', 'contextmenu').
-   * @param {Function} handler - The function to handle the event.
-   */
+  setAsWhiteSpace() {
+    this.resetElement();
+    this.whiteSpace = true;
+    this.element.style = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK + CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_WHITESPACE;
+  }
+
+  setAsWheelStack(wheelStackData) {
+    this.wheelStackData = new WheelStackData(
+      wheelStackData['_id'],
+      wheelStackData['originalPisId'],
+      wheelStackData['batchNumber'],
+      wheelStackData['maxSize'],
+      wheelStackData['blocked'],
+      wheelStackData['placement'],
+      wheelStackData['colPlacement'],
+      wheelStackData['rowPlacement'],
+      wheelStackData['wheels']
+    )
+    this.updateVisual();
+  }
+  
+  // Because we rebuilded everything with Async.
+  // We can't get hold of the element before it's created.
+  // And I have no idea how we can get it from allRows and columns like planned.
+  // But I can assign it with simple eventListener and add context-menus like that.
+  // We will get all the data we need, and all operations are done on Back anyway0999
   attachEvent(eventType, handler) {
     this.element.addEventListener(eventType, handler);
   }
 
-  hideElement() {
-    this.element.style.visibility = 'hidden';
-  }
-  
-  showElement() {
-    this.element.style.visibility = 'visible';
-  }
-
-  isHidden() {
-    return 'hidden' === this.element.style.visibility;
-  }
 }

@@ -1,16 +1,21 @@
 import WheelStackRowElement from "../../WheelStackRow/js/wheelStackRowElement.js";
-import { CLASS_NAMES } from "../../constants.js";
+import { CLASS_NAMES, SETTINGS } from "../../constants.js";
+import { BACK_URLS } from "../../constants.js";
 
 
 export default class BasePlatformManager {
     constructor(container) {
+        // Container assignment + creation of the element.
         this.container = container;
         this.element = document.createElement('div');
         this.element.className = CLASS_NAMES.BASE_PLATFORM;
+        // Rows data { rowIdentifier: WheelStackRowElement }
+        this.allRows = {};
+        // Requests URLS.
+        this.getPlatformUrl = BACK_URLS.GET_BASE_PLATFORM_URL;
+        this.#createPlatform();
+        this.startUpdating();
         this.container.appendChild(this.element);
-        this.req_url = 'http://127.0.0.1:8000/platform/';
-        // this.startUpdating();
-        this.#update_platform();
     }
 
     async #fetchPlatform(url) {
@@ -27,7 +32,6 @@ export default class BasePlatformManager {
         }
     }
 
-
     async #createRow(rowIdentifier, rowData) {
         const newRow = new WheelStackRowElement(
             rowIdentifier,
@@ -35,22 +39,36 @@ export default class BasePlatformManager {
             rowData['columns'],
             this.element,
         )
-        this.element.appendChild(newRow.element);
+        return newRow;
     }
 
-    async #update_platform() {
-        // Better to update, than recreate. Temporary.
+    async #createPlatform() {
         this.element.innerHTML = '';
-        const data = await this.#fetchPlatform(this.req_url);
+        const data = await this.#fetchPlatform(this.getPlatformUrl);
+        for (const row in data['rows']){
+            const rowData = data['rows'][row];
+            const newRow = await this.#createRow(row, rowData);
+            this.element.appendChild(newRow.element);
+            this.allRows[row] = newRow;
+        }
+    }
+
+    async #updateRow(rowIdentifier, newRowData) {
+        const wheelStackRowElement = this.allRows[rowIdentifier]
+        wheelStackRowElement.updateRowData(newRowData);
+    }
+
+    async #updatePlatform() {
+        const data = await this.#fetchPlatform(this.getPlatformUrl);
         for (const row in data['rows']) {
-            const rowData = data['rows'][row] 
-            await this.#createRow(row, rowData);
+            const newRowData = data['rows'][row] 
+            await this.#updateRow(row, newRowData);
         }
     }
 
     startUpdating() {
         setInterval(() => {
-            this.#update_platform();
-        }, 500)  // 0.5s
+            this.#updatePlatform();
+        }, SETTINGS.BASE_PLATFORM_UPDATE_TIME)
     }
 }

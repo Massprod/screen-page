@@ -13,10 +13,19 @@
   color: var(--wheel-stack-text-color);
   font-size: var(--wheel-stack-font-size);
   margin: var(--wheel-stack-margin);
+  transition: var(--wheel-stack-transition);
 }
 
 .wheel-stack:hover {
   background-color: var(--border-color);
+}
+
+.wheel-stack-whitespace {
+  border: var(--wheel-stack-whitespace-border);
+}
+
+.wheel-stack-identifier {
+  border: var(--wheel-stack-identifier-border);
 }
 
 .wheel-stack-context-menu {

@@ -4,10 +4,10 @@ export default class WheelStackRowData{
     constructor(
        rowIdentifier,
        columnsOrder,
-       allColumns,
+       columns,
     ) {
         this.rowIdentifier = rowIdentifier;
         this.columnsOrder = columnsOrder;
-        this.allColumns = allColumns;
+        this.columns = columns;
     }
 }

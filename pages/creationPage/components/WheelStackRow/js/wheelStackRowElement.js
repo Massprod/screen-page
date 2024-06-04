@@ -1,5 +1,6 @@
 import WheelStackElement from "../../WheelStack/js/WheelStackElement.js";
 import { CLASS_NAMES } from "../../constants.js";
+import { BACK_URLS } from "../../constants.js";
 import WheelStackRowData from "./wheelStackRowData.js";
 
 
@@ -7,22 +8,24 @@ export default class WheelStackRowElement {
     constructor(
         rowIdentifier,
         columnsOrder,
-        allColumns,
+        columns,
         container,
     ) {
-        this.wheelStacksUrl = 'http://127.0.0.1:8000/wheelstacks/';
+        this.wheelStacksUrl = BACK_URLS.GET_WHEELSTACK_DATA_URl;
         // Element creation
         this.container = container;
         this.element = document.createElement('div');
-        this.element.className = CLASS_NAMES.WHEEL_STACK_ROW;
+        this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ROW;
         this.container.appendChild(this.element);
-        // Populating
+        // All related rowData.
         this.wheelStackRowData = new WheelStackRowData(
             rowIdentifier,
             columnsOrder,
-            allColumns,
+            columns,
         );
-        this.#populate();
+        // { column: WheelStackElement }
+        this.allWheelstacks = {};
+        this.#createRow();
     }
 
     async #fetchWheelStackData(wheelStackId, url) {
@@ -40,34 +43,53 @@ export default class WheelStackRowElement {
         }
     }
 
-    async #populate() {
-        for (const column of this.wheelStackRowData.columnsOrder) {
-            const wheelStack = this.wheelStackRowData.allColumns[column];
-            if (wheelStack['whiteSpace'] === true) {
+
+    async #createRow() {
+        const columnsOrdering = this.wheelStackRowData.columnsOrder;
+        const columns = this.wheelStackRowData.columns;
+        for (const column of columnsOrdering) {
+            const wheelStackInfo = columns[column];
+            const wheelStackElement = new WheelStackElement(this.element);
+            this.allWheelstacks[column] = wheelStackElement;
+            // Empty element !== whiteSpace
+            if (true == wheelStackInfo['whiteSpace']) {
+                wheelStackElement.setAsWhiteSpace();
                 continue;
             }
-            if (wheelStack['wheelStack'] === null) {
-                const emptyWheelStack = new WheelStackElement(
-                    {'container': this.element});
-                this.element.appendChild(emptyWheelStack.element);
+            // We always create it as empty element.
+            if (null == wheelStackInfo['wheelStack']) {
                 continue;
             }
-            const wheelStackId = wheelStack['wheelStack'];
+            const wheelStackId = wheelStackInfo['wheelStack'];
             const wheelStackReq = await this.#fetchWheelStackData(
                 wheelStackId,
-                this.wheelStacksUrl
+                this.wheelStacksUrl,
             );
             const wheelStackData = wheelStackReq['data'];
-            console.log(wheelStackData);
-            const wheelStackElement = new WheelStackElement({
-                'stackId': wheelStackData['_id'],
-                'maxSize': wheelStackData['maxSize'],
-                'placementRow': wheelStackData['rowPlacement'],
-                'placementColumn': wheelStackData['colPlacement'],
-                'wheels': wheelStackData['wheels'],
-                'container': this.element,
-            });
-            this.element.appendChild(wheelStackElement.element);
+            wheelStackElement.setAsWheelStack(wheelStackData);
+        }
+    }
+
+    async updateRowData(newRowData) {
+        const columnsOrdering = newRowData.columnsOrder;
+        const columns = newRowData.columns;
+        for (const column of columnsOrdering) {
+            const wheelStackInfo = columns[column];
+            if (true == wheelStackInfo['whiteSpace']) {
+                continue;
+            }
+            const storedWheelStack = this.allWheelstacks[column];
+            const newWheelStackId = wheelStackInfo['wheelStack'];
+            if (null == newWheelStackId) {
+                storedWheelStack.resetElement();
+                continue;
+            }
+            const newWheelStackReq = await this.#fetchWheelStackData(
+                newWheelStackId,
+                this.wheelStacksUrl,
+            )
+            const newWheelStackData = newWheelStackReq['data'];
+            storedWheelStack.setAsWheelStack(newWheelStackData);
         }
     }
 }

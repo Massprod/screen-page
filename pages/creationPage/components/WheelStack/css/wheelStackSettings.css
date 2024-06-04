@@ -15,6 +15,11 @@
   --wheel-stack-display: flex;
   --wheel-stack-align-items: center;
   --wheel-stack-justify-content: center;
+  --wheel-stack-transition: ease 0.1s;
+  /* Identifier */
+  --wheel-stack-identifier-border: 'none';
+  /* whiteSpace */
+  --wheel-stack-whitespace-border: 'none';
   /* wheel-stack-context-menu */
   --wheel-stack-context-menu-position: absolute;
   --wheel-stack-context-menu-border-width: 4px;

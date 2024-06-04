@@ -13,6 +13,6 @@
   /* Top columns */
   --basic-column-min-height: 300px;
   --basic-column-max-height: 40vh;
-  --basic-column-min-width: 300px;
-  --basic-column-max-width: 25wv;
+  --basic-column-min-width: 250px;
+  --basic-column-max-width: 35wv;
 }
