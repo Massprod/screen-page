@@ -1,123 +1,101 @@
-/**
- * Class representing a zoom and drag functionality for a container.
- */
-export default class ZoomAndDrag {
+class ZoomAndDrag {
   /**
    * Create a ZoomAndDrag instance.
-   * @param {HTMLElement} zoomableZone - The element that contains the zoomable area.
-   * @param {HTMLElement} gridContainer - The element that will be zoomed and dragged.
-   * @param {number} [basicScale=1] - The initial scale value.
-   * @param {number} [maxScale=2] - The maximum scale value.
-   * @param {number} [minScale=0.1] - The minimum scale value.
-   * @param {Object} [posStart={ x: 0, y: 0 }] - The initial start position.
-   * @param {number} [posStart.x=0] - The initial x-coordinate.
-   * @param {number} [posStart.y=0] - The initial y-coordinate.
-   * @param {Object} [posEnd={ x: 0, y: 0 }] - The initial end position.
-   * @param {number} [posEnd.x=0] - The initial x-coordinate.
-   * @param {number} [posEnd.y=0] - The initial y-coordinate.
+   * @param {HTMLElement} viewport - The element that contains the zoomable area.
+   * @param {HTMLElement} grid - The element that will be zoomed and dragged.
+   * @param {number} [initialScale=0.3] - The initial scale value.
+   * @param {number} [maxScale=1.5] - The maximum scale value.
+   * @param {number} [minScale=0.2] - The minimum scale value.
    * @param {number} [zoomStep=0.05] - The step value for zooming.
    */
-  constructor(
-    {zoomableZone,
-    gridContainer,
-    basicScale = 1,
-    maxScale = 2,
-    minScale = 0.1,
-    posStart = { x: 0, y: 0 },
-    posEnd = { x: 0, y: 0 },
-    zoomStep = 0.05,
-    dragDelay = 100,
-  } = {}) {
-    this.zoomableZone = zoomableZone;
-    this.gridContainer = gridContainer;
-    this.activeDrag = false;
-    this.recentlyDragged = false;
-    this.basicScale = basicScale;
+  constructor({ viewport, grid, initialScale = 0.5, maxScale = 1.5, minScale = 0.4, zoomStep = 0.05 }) {
+    this.viewport = viewport;
+    this.grid = grid;
+    this.scale = initialScale;
     this.maxScale = maxScale;
     this.minScale = minScale;
-    this.posStart = posStart;
-    this.posEnd = posEnd;
     this.zoomStep = zoomStep;
-    this.dragDelay = dragDelay;
-    this.dragTimeout = null;
-    this.#init();
+    this.dragging = false;
+    this.lastMousePos = { x: 0, y: 0 };
+    this.translation = { x: 0, y: 0 };
+
+    this.init();
   }
 
-  /**
-   * Initialize event listeners for zoom and drag.
-   */
-  #init() {
-    this.zoomableZone.addEventListener('mousemove', this.onMouseMove.bind(this));
-    this.gridContainer.addEventListener('mousedown', this.onMouseDown.bind(this));
+  init() {
+    this.updateTransform();
+
+    this.viewport.addEventListener('wheel', this.onWheel.bind(this), { passive: false });
+    this.viewport.addEventListener('mousedown', this.onMouseDown.bind(this));
+    this.viewport.addEventListener('mousemove', this.onMouseMove.bind(this));
     document.addEventListener('mouseup', this.onMouseUp.bind(this));
-    this.gridContainer.addEventListener('wheel', this.onWheel.bind(this));
-    this.gridContainer.style.transform = `translate(${this.posEnd.x}px, ${this.posEnd.y}px) scale(${this.basicScale})`;
   }
 
-  /**
-   * Update the position of the grid container based on the current scale and position.
-   */
-  updatePosition() {
-    this.gridContainer.style.transform = `translate(${this.posEnd.x}px, ${this.posEnd.y}px) scale(${this.basicScale})`;
-  }
-
-  /**
-   * Handle the mouse up event to stop dragging.
-   * @param {MouseEvent} event - The mouse up event.
-   */
-  onMouseUp(event) {
-    if (this.activeDrag) {
-      clearTimeout(this.dragTimeout);
-      this.dragTimeout = setTimeout(() => {
-        this.recentlyDragged = false;
-      }, this.dragDelay);
-      this.activeDrag = false;
-    }
-  }
-
-  /**
-   * Handle the mouse down event to start dragging.
-   * @param {MouseEvent} event - The mouse down event.
-   */
-  onMouseDown(event) {
-    if (event.button === 0) {
-      this.activeDrag = true;
-      clearTimeout(this.dragTimeout);
-      event.preventDefault();
-      this.posStart.x = event.clientX;
-      this.posStart.y = event.clientY;
-    }
-  }
-
-  /**
-   * Handle the mouse move event to drag the grid container.
-   * @param {MouseEvent} event - The mouse move event.
-   */
-  onMouseMove(event) {
-    if (this.activeDrag) {
-      this.recentlyDragged = true;
-      let shiftX = event.clientX - this.posStart.x;
-      let shiftY = event.clientY - this.posStart.y;
-      this.posEnd.x += shiftX;
-      this.posEnd.y += shiftY;
-      this.updatePosition();
-      this.posStart.x = event.clientX;
-      this.posStart.y = event.clientY;
-    }
-  }
-
-  /**
-   * Handle the wheel event to zoom in and out of the grid container.
-   * @param {WheelEvent} event - The wheel event.
-   */
   onWheel(event) {
     event.preventDefault();
+
+    const rect = this.grid.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+
+    const prevScale = this.scale;
     if (event.deltaY < 0) {
-      this.basicScale += this.zoomStep;
+      this.scale = Math.min(this.maxScale, this.scale + this.zoomStep);
     } else {
-      this.basicScale -= this.zoomStep;
+      this.scale = Math.max(this.minScale, this.scale - this.zoomStep);
     }
-    this.basicScale = Math.min(this.maxScale, Math.max(this.minScale, this.basicScale));
-    this.updatePosition();
+
+    const scaleRatio = this.scale / prevScale;
+
+    // Adjust the translation to keep the zoom centered on the mouse pointer
+    this.translation.x = offsetX - scaleRatio * (offsetX - this.translation.x);
+    this.translation.y = offsetY - scaleRatio * (offsetY - this.translation.y);
+
+    this.updateTransform();
+  }
+
+  onMouseDown(event) {
+    event.preventDefault();
+    this.dragging = true;
+    this.lastMousePos = { x: event.clientX, y: event.clientY };
+    clearTimeout(this.dragTimeout);
+
+  }
+
+  onMouseMove(event) {
+    if (!this.dragging) return;
+
+    const deltaX = event.clientX - this.lastMousePos.x;
+    const deltaY = event.clientY - this.lastMousePos.y;
+
+    this.translation.x += deltaX;
+    this.translation.y += deltaY;
+
+    this.lastMousePos = { x: event.clientX, y: event.clientY };
+
+    this.updateTransform();
+  }
+
+  onMouseUp() {
+    if (this.dragging) {
+      this.dragging = false;
+    }
+  }
+
+  updateTransform() {
+    const viewportRect = this.viewport.getBoundingClientRect();
+    const scaledWidth = this.grid.offsetWidth * this.scale;
+    const scaledHeight = this.grid.offsetHeight * this.scale;
+
+    // Ensure the grid stays within the bounds of the viewport
+    const minTranslateX = Math.min(0, viewportRect.width - scaledWidth);
+    const minTranslateY = Math.min(0, viewportRect.height - scaledHeight);
+
+    this.translation.x = Math.max(minTranslateX, Math.min(0, this.translation.x));
+    this.translation.y = Math.max(minTranslateY, Math.min(0, this.translation.y));
+
+    this.grid.style.transform = `translate(${this.translation.x}px, ${this.translation.y}px) scale(${this.scale})`;
   }
 }
+
+export default ZoomAndDrag;

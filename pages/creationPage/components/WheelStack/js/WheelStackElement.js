@@ -5,7 +5,7 @@ import { CLASS_NAMES } from '../../constants.js';
 export default class WheelStackElement {
   constructor(container)
   {
-    // Only represenets element on page, all data in different class.
+    // Only represents element on page, all data in different class.
     // It can be one of 3 options for now:
     //   - used to show rowIdentifier as visual part of the row, to identify it.
     //   - used to show wheelStackElement and use it as gate for all data attached to this element.
@@ -20,6 +20,8 @@ export default class WheelStackElement {
     this.element.addEventListener('click', () => {
       console.log('123');
       console.log(this.wheelStackData);
+      console.log(this.whiteSpace);
+      console.log(this.rowIdentifier);
     })
   }
   
@@ -49,7 +51,7 @@ export default class WheelStackElement {
   setAsWhiteSpace() {
     this.resetElement();
     this.whiteSpace = true;
-    this.element.style = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK + CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_WHITESPACE;
+    this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_WHITESPACE}`;
   }
 
   setAsWheelStack(wheelStackData) {

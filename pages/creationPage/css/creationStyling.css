@@ -1,6 +1,7 @@
 @import url(../components/WheelStack/css/wheelStack.css);
 @import url(../components/WheelStackRow/css/wheelStackRow.css);
 @import url(../components/basePlatform/css/basePlatform.css);
+@import url(../components/grid/css/grid.css);
 
 
 /* Base page settings, can be left alone */
@@ -39,6 +40,8 @@ html, body {
   background-color: whitesmoke;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: row;
 }
 
 /*-----*/

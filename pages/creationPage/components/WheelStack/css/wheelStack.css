@@ -14,6 +14,8 @@
   font-size: var(--wheel-stack-font-size);
   margin: var(--wheel-stack-margin);
   transition: var(--wheel-stack-transition);
+  min-width: var(--wheel-stack-height);
+  min-height: var(--wheel-stack-width);
 }
 
 .wheel-stack:hover {

@@ -1,24 +1,21 @@
 import WheelStackRowElement from "../../WheelStackRow/js/wheelStackRowElement.js";
-import { CLASS_NAMES, SETTINGS } from "../../constants.js";
-import { BACK_URLS } from "../../constants.js";
+import { BACK_URLS, CLASS_NAMES } from "../../constants.js";
 
 
-export default class BasePlatformManager {
+
+export default class GridManager {
     constructor(container) {
-        // Container assignment + creation of the element.
         this.container = container;
         this.element = document.createElement('div');
-        this.element.className = CLASS_NAMES.BASE_PLATFORM;
-        // Rows data { rowIdentifier: WheelStackRowElement }
+        this.element.className = CLASS_NAMES.GRID;
         this.allRows = {};
-        // Requests URLS.
-        this.getPlatformUrl = BACK_URLS.GET_BASE_PLATFORM_URL;
-        this.#createPlatform();
-        this.startUpdating();
+        this.getGridUrl = BACK_URLS.GET_GRID_URL;
+        this.#createGrid();
         this.container.appendChild(this.element);
     }
 
-    async #fetchPlatform(url) {
+
+    async #fetchGrid(url) {
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -42,9 +39,9 @@ export default class BasePlatformManager {
         return newRow;
     }
 
-    async #createPlatform() {
+    async #createGrid() {
         this.element.innerHTML = '';
-        const data = await this.#fetchPlatform(this.getPlatformUrl);
+        const data = await this.#fetchGrid(this.getGridUrl);
         for (const row of data['rowsOrder']) {
             const rowData = data['rows'][row];
             const newRow = await this.#createRow(row, rowData);
@@ -53,22 +50,4 @@ export default class BasePlatformManager {
         }
     }
 
-    async #updateRow(rowIdentifier, newRowData) {
-        const wheelStackRowElement = this.allRows[rowIdentifier]
-        wheelStackRowElement.updateRowData(newRowData);
-    }
-
-    async #updatePlatform() {
-        const data = await this.#fetchPlatform(this.getPlatformUrl);
-        for (const row in data['rows']) {
-            const newRowData = data['rows'][row] 
-            await this.#updateRow(row, newRowData);
-        }
-    }
-
-    startUpdating() {
-        setInterval(() => {
-            this.#updatePlatform();
-        }, SETTINGS.BASE_PLATFORM_UPDATE_TIME)
-    }
 }
