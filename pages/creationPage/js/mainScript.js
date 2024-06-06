@@ -1,6 +1,8 @@
 import ZoomAndDrag from "../../utility/zoomDrag.js";
 import BasePlatformManager from "../components/basePlatform/js/basePlatformManager.js";
 import GridManager from "../components/grid/js/gridManager.js";
+import { TEMPO_CONSTS } from '../components/constants.js';
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -12,10 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridManager = new GridManager(gridViewport);
     const zoomer = new ZoomAndDrag({
         'viewport': gridViewport,
-        'grid': gridManager.element,
-        // 'zoomableZone': gridManager.element,
-        // 'gridContainer': gridViewport,
-        // 'maxScale': 1.4,
-        // 'initialScale': 0.4,
+        'grid': gridManager.element
     })
+    // Tempo
 })

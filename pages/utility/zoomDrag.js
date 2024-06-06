@@ -8,7 +8,7 @@ class ZoomAndDrag {
    * @param {number} [minScale=0.2] - The minimum scale value.
    * @param {number} [zoomStep=0.05] - The step value for zooming.
    */
-  constructor({ viewport, grid, initialScale = 0.5, maxScale = 1.5, minScale = 0.4, zoomStep = 0.05 }) {
+  constructor({ viewport, grid, initialScale = 0.5, maxScale = 1.5, minScale = 0.3, zoomStep = 0.05 }) {
     this.viewport = viewport;
     this.grid = grid;
     this.scale = initialScale;

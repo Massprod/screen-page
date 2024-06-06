@@ -7,10 +7,13 @@ import WheelStackRowData from "./wheelStackRowData.js";
 export default class WheelStackRowElement {
     constructor(
         rowIdentifier,
+        setRowIdentifier,  // tempo
         columnsOrder,
         columns,
         container,
     ) {
+        //tempo
+        this.setRowIdentifier = setRowIdentifier;
         this.wheelStacksUrl = BACK_URLS.GET_WHEELSTACK_DATA_URl;
         // Element creation
         this.container = container;
@@ -38,6 +41,7 @@ export default class WheelStackRowElement {
             const wheelStackData = await response.json();
             return wheelStackData;
         } catch (error) {
+            console.log(`Server response: ${response}`);
             console.error('Error fetching wheel stack data:', error);
             throw error;
         }
@@ -45,11 +49,26 @@ export default class WheelStackRowElement {
 
 
     async #createRow() {
+        // tempo
+        if (this.setRowIdentifier) {
+            const element = new WheelStackElement(
+                this.element,
+                this.wheelStackRowData.rowIdentifier,
+                '0'
+            );
+            element.setAsIdentifier(this.wheelStackRowData.rowIdentifier);
+            this.allWheelstacks['0'] = element;
+        }
+        // ---
         const columnsOrdering = this.wheelStackRowData.columnsOrder;
         const columns = this.wheelStackRowData.columns;
         for (const column of columnsOrdering) {
             const wheelStackInfo = columns[column];
-            const wheelStackElement = new WheelStackElement(this.element);
+            const wheelStackElement = new WheelStackElement(
+                this.element,
+                this.wheelStackRowData.rowIdentifier,
+                column,
+            );
             this.allWheelstacks[column] = wheelStackElement;
             // Empty element !== whiteSpace
             if (true == wheelStackInfo['whiteSpace']) {

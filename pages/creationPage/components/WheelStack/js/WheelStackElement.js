@@ -1,9 +1,28 @@
 import WheelStackData from './WheelStackData.js';
 import { CLASS_NAMES } from '../../constants.js';
+import HoverDisplayManager from '../../hoverWheelstack/js/hoverDisplayManager.js';
+import ContextMenuManager from '../../../components/contextMenu/js/contextMenuManager.js';
+import { TEMPO_CONSTS } from '../../constants.js';
 
+// TEMPO Hover
+const hoverDisplayManager = new HoverDisplayManager(
+  CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK,
+  CLASS_NAMES.TOOLTIP,
+);
+// ----
+
+// Tempo click
+const contextMenuManager = new ContextMenuManager(
+  TEMPO_CONSTS.CONTEXT_MENU_CLASS
+)
+// ----
 
 export default class WheelStackElement {
-  constructor(container)
+  constructor(
+    container,
+    rowPlacement = null,
+    colPlacement = null,
+  )
   {
     // Only represents element on page, all data in different class.
     // It can be one of 3 options for now:
@@ -17,14 +36,69 @@ export default class WheelStackElement {
     this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
     this.container.appendChild(this.element);
     this.wheelStackData = null;
-    this.element.addEventListener('click', () => {
-      console.log('123');
-      console.log(this.wheelStackData);
-      console.log(this.whiteSpace);
-      console.log(this.rowIdentifier);
+    this.rowPlacement = rowPlacement;
+    this.colPlacement = colPlacement; 
+    // Tempo click
+    document.addEventListener('click', (event) => {
+      this.hideContextMenu(event);
+    });
+
+    this.element.addEventListener('click', (event) => {
+      this.showContextMenu(event);
     })
+    // ----
+    // Tempo hover
+    this.element.addEventListener('mouseover', (event) => {
+      this.showHoverDetails(event);
+    })
+    this.element.addEventListener('mouseout', (event) => {
+      this.hideHoverDetails(event);
+    })
+    this.element.addEventListener('mousemove', (event) => {
+      this.updateHoverDisplay(event);
+    })
+    // ----
   }
-  
+
+  // Tempo hover
+  showHoverDetails(event) {
+    if (!this.whiteSpace && !this.rowIdentifier) {
+      const hoverContent = `R-${this.rowPlacement}<br>C-${this.colPlacement}`;
+      hoverDisplayManager.element.innerHTML = hoverContent;
+      hoverDisplayManager.element.style.display = 'block';
+      hoverDisplayManager.showHoverDisplay(event);
+      hoverDisplayManager.updateHoverDisplayPosition(event);
+    }
+  }
+
+  hideHoverDetails(event) {
+    hoverDisplayManager.hideHoverDisplay(event);
+  }
+
+  updateHoverDisplay(event) {
+   hoverDisplayManager.updateHoverDisplayPosition(event); 
+  }
+  // ----
+
+  // Tempo Click
+  showContextMenu(event) {
+    if (!this.whiteSpace && !this.rowIdentifier) {
+      this.contextMenuOpened = true;
+      contextMenuManager.showContextMenu(event, this.wheelStackData);
+    }
+  }
+
+  hideContextMenu(event) {
+    if (contextMenuManager.element.contains(event.target)) {
+      console.log('testTrage')
+    }
+    if ('none' !== contextMenuManager.element.style.display && !(event.target.className in TEMPO_CONSTS.CONTEXT_MENU_ALLOWED_STYLES)) {
+      contextMenuManager.hideContextMenu();
+    }
+  }
+  // ----
+
+  // Main of element
   resetElement() {
     this.whiteSpace = false,
     this.rowIdentifier = '';
@@ -45,7 +119,7 @@ export default class WheelStackElement {
     this.resetElement();
     this.rowIdentifier = identifier;
     this.element.textContent =  this.rowIdentifier;
-    this.element.style = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK + CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_IDENTIFIER;
+    this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_IDENTIFIER}`;
   }
 
   setAsWhiteSpace() {
@@ -68,14 +142,5 @@ export default class WheelStackElement {
     )
     this.updateVisual();
   }
-  
-  // Because we rebuilded everything with Async.
-  // We can't get hold of the element before it's created.
-  // And I have no idea how we can get it from allRows and columns like planned.
-  // But I can assign it with simple eventListener and add context-menus like that.
-  // We will get all the data we need, and all operations are done on Back anyway0999
-  attachEvent(eventType, handler) {
-    this.element.addEventListener(eventType, handler);
-  }
-
+  // ---
 }

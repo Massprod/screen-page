@@ -35,6 +35,7 @@ export default class BasePlatformManager {
     async #createRow(rowIdentifier, rowData) {
         const newRow = new WheelStackRowElement(
             rowIdentifier,
+            false,
             rowData['columnsOrder'],
             rowData['columns'],
             this.element,
@@ -54,14 +55,14 @@ export default class BasePlatformManager {
     }
 
     async #updateRow(rowIdentifier, newRowData) {
-        const wheelStackRowElement = this.allRows[rowIdentifier]
+        const wheelStackRowElement = this.allRows[rowIdentifier];
         wheelStackRowElement.updateRowData(newRowData);
     }
 
     async #updatePlatform() {
         const data = await this.#fetchPlatform(this.getPlatformUrl);
         for (const row in data['rows']) {
-            const newRowData = data['rows'][row] 
+            const newRowData = data['rows'][row];
             await this.#updateRow(row, newRowData);
         }
     }
