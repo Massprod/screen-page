@@ -12,22 +12,67 @@
   justify-content: var(--wheel-stack-justify-content);
   color: var(--wheel-stack-text-color);
   font-size: var(--wheel-stack-font-size);
+  font-family: var(--wheel-stack-font-family);
   margin: var(--wheel-stack-margin);
   transition: var(--wheel-stack-transition);
   min-width: var(--wheel-stack-height);
   min-height: var(--wheel-stack-width);
 }
 
+.wheel-stack-base-platform {
+  width: var(--wheel-stack-base-width);
+  height: var(--wheel-stack-base-height);
+  min-width: var(--wheel-stack-base-min-width);
+  min-height: var(--wheel-stack-base-height);
+}
+
 .wheel-stack:hover {
-  background-color: var(--border-color);
+  background-color: #296529; /* Black Background */
+  color: #ffffffe8; /* Vibrant Red Text */
+  transform: scale(1.10); /* Slightly Enlarge */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Soft Shadow */
+}
+
+/* Active effect */
+.wheel-stack.active {
+  background-color: #3e5bab; /* Vibrant Red Background */
+  color: #FFFFFF; /* White Text */
+  transform: scale(0.95); /* Slightly Shrink */
+  box-shadow: none; /* Remove Shadow */
 }
 
 .wheel-stack-whitespace {
+  width: var(--wheel-stack-height);
+  height: var(--wheel-stack-width);
   border: var(--wheel-stack-whitespace-border);
+  background-color: var(--wheel-stack-bg-color);
+  display: var(--wheel-stack-whitespace-display);
+  margin: var(--wheel-stack-margin);
+  min-width: var(--wheel-stack-height);
+  min-height: var(--wheel-stack-width);  
 }
 
 .wheel-stack-identifier {
-  border: var(--wheel-stack-identifier-border);
+  width: var(--wheel-stack-height);
+  height: var(--wheel-stack-width);
+  border: var(--wheel-stack-whitespace-border);
+  display: var(--wheel-stack-display);
+  margin: var(--wheel-stack-margin);
+  min-width: var(--wheel-stack-height);
+  min-height: var(--wheel-stack-width);
+  font-family: var(--wheel-stack-font-family);
+  justify-content: var(--wheel-stack-justify-content);
+  align-items: var(--wheel-stack-align-items);
+  /* diff */
+  background-color: var(--wheel-stack-bg-color);
+  font-size: var(--wheel-stack-identifier-font-size);
+}
+
+.wheel-stack-identifier:hover {
+  background-color: var(--background-color-hover);
+  border: var(--wheel-stack-border-width) var(--wheel-stack-border-style) var(--wheel-stack-bg-color);
+  border-radius: var(--wheel-stack-border-radius); 
+  box-shadow: var(--basic-box-shadow);
 }
 
 .wheel-stack-context-menu {

@@ -14,8 +14,41 @@ export default class ContextMenuManager{
         this.maxWheels = maxWheels;
         this.storedWheels = {}
         this.#wheelOptions();
+        this.intervalId = null;
+        this.assignedWheelStackElement = null;
     }
     
+    // tempo
+
+    #updateWheelstackData() {
+        this.clearWheelsData();
+        const newWheels = this.assignedWheelStackElement.wheelStackData.wheels;
+        for (let wheelId in newWheels) {
+            const chosenWheel = this.storedWheels[wheelId];
+            chosenWheel.setWheel(newWheels[wheelId]);
+        }
+    }
+
+    startUpdating() {
+        if (this.intervalId !== null) {
+            return;
+        }
+        this.intervalId = setInterval(() => {
+            this.#updateWheelstackData();
+        }, 500)
+    }
+
+    stopUpdating() {
+        if (this.intervalId === null) {
+            return;
+        }
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+    }
+
+    // ---
+
+
 
     #wheelOptions() {
         for (let wheel = this.maxWheels - 1; wheel >= 0; wheel -= 1) {            
@@ -32,23 +65,22 @@ export default class ContextMenuManager{
         }
     }
 
-    showContextMenu(event, wheelStackData) {
+    showContextMenu(event, wheelStackElement) {
         this.clearWheelsData();
         event.preventDefault();
         this.element.style.display = 'block';
         this.updateContextMenuPosition(event);
-        // populate with data
-        if (!wheelStackData) {
-            return
-        }
-        const storedWheels = wheelStackData.wheels;
+        this.assignedWheelStackElement = wheelStackElement;
+        const wheelStackData = this.assignedWheelStackElement.wheelStackData;
         for (let wheel in wheelStackData.wheels) {
             const chosenWheel = this.storedWheels[wheel];
             chosenWheel.setWheel(wheelStackData.wheels[wheel]);
         }
+        this.startUpdating();
     }
 
     hideContextMenu() {
+        this.stopUpdating();
         this.element.style.display = 'none';
     }
 

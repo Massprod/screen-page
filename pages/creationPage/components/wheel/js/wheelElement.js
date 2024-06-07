@@ -14,7 +14,8 @@ export default class WheelElement {
         // tempo menu
         this.wheelContextMenuManager = wheelContextMenuManager;
         this.element.addEventListener('click', (event) => {
-            this.wheelContextMenuManager.showWheel(event, this.wheelId);
+            // console.log(this.wheelId);
+            this.wheelContextMenuManager.showWheel(event, this);
         })
         // ---
     }

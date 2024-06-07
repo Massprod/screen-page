@@ -2,5 +2,5 @@
 :root {
     --wheel-stack-row-display: flex;
     --wheel-stack-row-flex-direction: row;
-    --wheel-stack-row-gap: 5px;
+    --wheel-stack-row-gap: 15px;
 }

@@ -1,5 +1,6 @@
 import { TEMPO_CONSTS } from "../../constants.js";
 import { BACK_URLS } from "../../constants.js";
+import convertISOToCustomFormat from "../../.././../utility/convertToIso.js"
 
 
 export default class WheelContextMenuManager{
@@ -13,12 +14,45 @@ export default class WheelContextMenuManager{
         const row = document.createElement('div');
         this.element.appendChild(row);
 
+        this.firstCallId = null;
+        this.assignedWheelElement = null;
+        this.intervalId = null;
+
         document.body.addEventListener('click', (event) => {
             if (!this.element.contains(event.target))
                 this.hideWheel();
         })
     }
 
+
+    // tempo update
+
+    #checkWheelChange() {
+        // console.log('FirstCall', this.firstCallId);
+        // console.log('ElementId', this.assignedWheelElement.wheelId);
+        if (this.firstCallId !== this.assignedWheelElement.wheelId) {
+            this.stopUpdating();
+            this.hideWheel();
+        }
+    }
+
+    startUpdating() {
+        if (this.intervalId !== null) {
+            return;
+        }
+        this.intervalId = setInterval(() => {
+            this.#checkWheelChange();
+        }, 100)
+    }
+
+    stopUpdating() {
+        if (this.intervalId === null) {
+            return;
+        }
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+    }
+    // ----
 
     async #fetchWheel(url, wheelId) {
         try {
@@ -35,51 +69,65 @@ export default class WheelContextMenuManager{
     }
     
 
-    addRow(rowName, rowContent, isFirst = false) {
+    addRow(_rowName, _rowContent, isFirst = false) {
         const row = document.createElement('div');
-        row.className = 'wheel-details-row';
         if (isFirst) {
-            row.textContent = rowContent;
+            row.className = 'wheel-details-row-header'
+            row.textContent = _rowContent;
             this.element.appendChild(row);
             return;
         }
-        const textSpan = document.createElement('span');
-        textSpan.textContent = rowName;
-        const dataSpan = document.createElement('span');
-        dataSpan.className = 'data'
-        dataSpan.textContent = rowContent;
-        row.appendChild(textSpan);
-        row.appendChild(dataSpan);
+        row.className = 'wheel-details-row'
+        const rowName = document.createElement('div');
+        rowName.className = 'wheel-details-row-name';
+        rowName.textContent = _rowName;
+        row.appendChild(rowName);
+        const rowData = document.createElement('div');
+        rowData.className = 'wheel-details-row-data';
+        rowData.textContent = _rowContent;
+        row.appendChild(rowData);
         this.element.appendChild(row);
     }
 
 
 
     async populateRows(rowsData) {
-        for (let row in rowsData) {
-            this.addRow(row, rowsData[row]);
-            // const newRow = document.createElement('div');
-            // newRow.className = 'wheel-details-row';
-            // newRow.innerHTML = rowsData[row];
-            // this.element.appendChild(newRow);
-        }
+        const wheelId = rowsData['wheelId'];
+        this.addRow('', wheelId, true); 
+        const batchNumber = rowsData['batchNumber'];
+        this.addRow('Партия', batchNumber);
+        const diameter = rowsData['wheelDiameter'] + 'mm';
+        this.addRow('Диаметр', diameter);
+        const receiptDate = Date(rowsData['receiptDate']);
+        this.addRow('Получено', convertISOToCustomFormat(receiptDate));
+        const status = rowsData['status'];
+        this.addRow('Статус', status);
     }
 
     async clearRows() {
         this.element.innerHTML = '';
     }
 
-    async showWheel(event, wheelId) {
+    async showWheel(event, wheelElement) {
+        if (wheelElement.wheelId === null) {
+            return;
+        }
+        this.assignedWheelElement = wheelElement;
+        this.firstCallId = this.assignedWheelElement.wheelId;
         await this.clearRows();
-        const testResp = await this.#fetchWheel(this.getWheelUrl, wheelId);
+        const testResp = await this.#fetchWheel(this.getWheelUrl, this.firstCallId);
         const data = testResp['data'];
         await this.populateRows(data);
         this.element.style.display = 'block';
         this.updateMenuPosition(event);
+        this.startUpdating();
     }
 
     async hideWheel() {
+        await this.clearRows()
         this.element.style.display = 'none';
+        this.stopUpdating();
+        
     }
 
 

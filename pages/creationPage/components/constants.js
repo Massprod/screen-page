@@ -5,6 +5,7 @@ export const CLASS_NAMES = {
     WHEEL_STACK_WHITESPACE: 'wheel-stack-whitespace',
     WHEEL_STACK_CONTEXT_MENU: 'wheel-stack-context-menu',
     WHEEL_STACK_CONTEXT_MENU_HIDDEN: 'wheel-stack-context-menu-hidden',
+    WHEEL_STACK_BASE_PLATFORM: 'wheel-stack-base-platform',
     
     WHEEL_STACK_ROW: 'wheel-stack-row',
   },
@@ -33,10 +34,13 @@ export const TEMPO_CONSTS = {
   WHEEL_CONTEXT_MENU_CLASS: 'wheel-details-menu',
   CONTEXT_MENU_ALLOWED_STYLES: {
     'context-menu': true,
-    'wheel-stack': true,
+    // 'wheel-stack': true,
     'context-menu-option': true,
     'wheel-details-menu': true,
     'wheel-details-row': true,
+    'wheel-details-row-name': true,
+    'wheel-details-row-header': true,
+    'wheel-details-row-data': true,
   },
   WHEEL_CONTEXT_MENU_ALLOWED_STYLES: {
     'wheel-details-menu': true,

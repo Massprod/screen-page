@@ -1,11 +1,12 @@
 :root {
   /* Main color palette */
-  --primary-color: #000000; /* Black */
-  --secondary-color: #FFFFFF; /* White */
-  --background-color: #F5F5F5; /* Light Gray */
-  --border-color: #CCCCCC; /* Medium Gray */
-  --text-color: #333333; /* Dark Gray */
-  --accent-color: #007BFF; /* Blue */
+  --primary-color: #000000;
+  --secondary-color: #FFFFFF;
+  --background-color: #F5F5F5;
+  --background-color-hover: #8374f433;
+  --border-color: #CCCCCC;
+  --text-color: #333333;
+  --accent-color: #007BFF;
   --basic-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   --basic-border-elements: solid;
   --basic-context-menu-paddig: 10px;
@@ -15,4 +16,6 @@
   --basic-column-max-height: 40vh;
   --basic-column-min-width: 250px;
   --basic-column-max-width: 35wv;
+  --font-primary: 'Helvetica, Arial, sans-serif';
+  --font-secondary: 'Georgia, serif';
 }

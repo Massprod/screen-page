@@ -3,5 +3,6 @@
 .wheel-stack-row {
     display: var(--wheel-stack-row-display);
     flex-direction: var(--wheel-stack-row-flex-direction);
-    gap: var(--wheel-stack-row-gap);
+    /* gap: var(--wheel-stack-row-gap); */
+    /* margin: 5px 5px 5px 5px; */
 }

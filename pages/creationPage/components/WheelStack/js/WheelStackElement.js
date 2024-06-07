@@ -34,12 +34,16 @@ export default class WheelStackElement {
     this.container = container;
     this.element = document.createElement('div');
     this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
+    if (this.container.parentNode.className === CLASS_NAMES.BASE_PLATFORM) {
+      this.element.classList.add(CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM);
+    }
     this.container.appendChild(this.element);
     this.wheelStackData = null;
     this.rowPlacement = rowPlacement;
-    this.colPlacement = colPlacement; 
+    this.colPlacement = colPlacement;
+    
     // Tempo click
-    document.addEventListener('click', (event) => {
+    document.addEventListener('mousedown', (event) => {
       this.hideContextMenu(event);
     });
 
@@ -82,16 +86,18 @@ export default class WheelStackElement {
 
   // Tempo Click
   showContextMenu(event) {
+    if (this.wheelStackData === null) {
+      return;
+    }
     if (!this.whiteSpace && !this.rowIdentifier) {
       this.contextMenuOpened = true;
-      contextMenuManager.showContextMenu(event, this.wheelStackData);
+      contextMenuManager.showContextMenu(event, this);
+      this.element.classList.add('active');
     }
   }
 
   hideContextMenu(event) {
-    if (contextMenuManager.element.contains(event.target)) {
-      console.log('testTrage')
-    }
+    this.element.classList.remove('active');
     if ('none' !== contextMenuManager.element.style.display && !(event.target.className in TEMPO_CONSTS.CONTEXT_MENU_ALLOWED_STYLES)) {
       contextMenuManager.hideContextMenu();
     }
@@ -104,6 +110,9 @@ export default class WheelStackElement {
     this.rowIdentifier = '';
     this.element.textContent = this.rowIdentifier;
     this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
+    if (this.container.parentNode.className === CLASS_NAMES.BASE_PLATFORM) {
+      this.element.classList.add(CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM);
+    }
     this.wheelStackData = null;
   }
 
@@ -119,13 +128,13 @@ export default class WheelStackElement {
     this.resetElement();
     this.rowIdentifier = identifier;
     this.element.textContent =  this.rowIdentifier;
-    this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_IDENTIFIER}`;
+    this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_IDENTIFIER}`;
   }
 
   setAsWhiteSpace() {
     this.resetElement();
     this.whiteSpace = true;
-    this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_WHITESPACE}`;
+    this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_WHITESPACE}`;
   }
 
   setAsWheelStack(wheelStackData) {
