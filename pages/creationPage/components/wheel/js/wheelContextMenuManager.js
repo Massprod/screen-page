@@ -1,6 +1,7 @@
 import { TEMPO_CONSTS } from "../../constants.js";
 import { BACK_URLS } from "../../constants.js";
 import convertISOToCustomFormat from "../../.././../utility/convertToIso.js"
+import flashMessage from "../../../../utility/flashMessage.js";
 
 
 export default class WheelContextMenuManager{
@@ -33,6 +34,13 @@ export default class WheelContextMenuManager{
         if (this.firstCallId !== this.assignedWheelElement.wheelId) {
             this.stopUpdating();
             this.hideWheel();
+            flashMessage.show({
+                message: 'Колесо большне не представлено в стопке.',
+                color: 'white',
+                backgroundColor: 'black',
+                position: 'top-center',
+                duration: 3000,
+              });
         }
     }
 
@@ -127,7 +135,7 @@ export default class WheelContextMenuManager{
         await this.clearRows()
         this.element.style.display = 'none';
         this.stopUpdating();
-        
+
     }
 
 

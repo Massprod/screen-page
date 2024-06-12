@@ -1,5 +1,9 @@
-export default class FlashMessage {
+class FlashMessage {
   constructor() {
+    if (FlashMessage.instance) {
+      return FlashMessage.instance;
+    }
+
     this.flashMessage = document.createElement('div');
     this.flashMessage.style.position = 'fixed';
     this.flashMessage.style.zIndex = '1000';
@@ -11,6 +15,8 @@ export default class FlashMessage {
     this.flashMessage.style.whiteSpace = 'pre'; // Line breaks with \r\n
     this.flashMessage.style.textAlign = 'center';
     this.timeoutId = null;
+
+    FlashMessage.instance = this;
   }
 
   show({
@@ -103,4 +109,14 @@ export default class FlashMessage {
       }
     }, { once: true });
   }
+
+  static getInstance() {
+    if (!FlashMessage.instance) {
+      FlashMessage.instance = new FlashMessage();
+    }
+    return FlashMessage.instance;
+  }
 }
+
+// Export the singleton instance
+export default FlashMessage.getInstance();

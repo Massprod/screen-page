@@ -1,21 +1,30 @@
 import WheelStackData from './WheelStackData.js';
 import { CLASS_NAMES } from '../../constants.js';
+import { BACK_GRID_NAMES } from '../../constants.js';
 import HoverDisplayManager from '../../hoverWheelstack/js/hoverDisplayManager.js';
 import ContextMenuManager from '../../../components/contextMenu/js/contextMenuManager.js';
 import { TEMPO_CONSTS } from '../../constants.js';
+import OrderManager from '../../orderManager/js/orderManager.js';
 
-// TEMPO Hover
+
+
+// TEMPO HoverDisplay
 const hoverDisplayManager = new HoverDisplayManager(
   CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK,
   CLASS_NAMES.TOOLTIP,
 );
 // ----
 
-// Tempo click
+// Tempo click ContextMenu
 const contextMenuManager = new ContextMenuManager(
   TEMPO_CONSTS.CONTEXT_MENU_CLASS
 )
 // ----
+
+// TEMPO OrderManager
+const orderManager = new OrderManager();
+// ----
+
 
 export default class WheelStackElement {
   constructor(
@@ -41,6 +50,7 @@ export default class WheelStackElement {
     this.wheelStackData = null;
     this.rowPlacement = rowPlacement;
     this.colPlacement = colPlacement;
+
     
     // Tempo click
     document.addEventListener('mousedown', (event) => {
@@ -49,6 +59,8 @@ export default class WheelStackElement {
 
     this.element.addEventListener('click', (event) => {
       this.showContextMenu(event);
+      // Tempo orderManager
+      // ----
     })
     // ----
     // Tempo hover
@@ -86,12 +98,16 @@ export default class WheelStackElement {
 
   // Tempo Click
   showContextMenu(event) {
-    if (this.wheelStackData === null) {
+    if (this.wheelStackData === null && !orderManager.creatingOrder) {
       return;
     }
     if (!this.whiteSpace && !this.rowIdentifier) {
       this.contextMenuOpened = true;
-      contextMenuManager.showContextMenu(event, this);
+      contextMenuManager.showContextMenu(
+        event,
+        this,
+        orderManager,
+      );
       this.element.classList.add('active');
     }
   }
@@ -120,6 +136,14 @@ export default class WheelStackElement {
     if (null === this.wheelStackData) {
       return false;
     }
+    // Tempo orderManager
+    // After creating orderStorageManager
+    // We will update every row|col placement of wheelStackElement in grid and basePlatform
+    //  to some unique color. Also might be good to store this color, so it will be persistent through pages == store in DB for order.
+    if (this.wheelStackData.blocked) {
+      this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`;
+    }
+    // ----
     this.element.textContent = this.wheelStackData.wheels.length;
     return true;
   }

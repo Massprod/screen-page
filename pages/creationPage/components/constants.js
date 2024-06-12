@@ -6,7 +6,8 @@ export const CLASS_NAMES = {
     WHEEL_STACK_CONTEXT_MENU: 'wheel-stack-context-menu',
     WHEEL_STACK_CONTEXT_MENU_HIDDEN: 'wheel-stack-context-menu-hidden',
     WHEEL_STACK_BASE_PLATFORM: 'wheel-stack-base-platform',
-    
+    WHEEL_STACK_ORDER_BLOCK: 'wheel-stack-order-block',
+
     WHEEL_STACK_ROW: 'wheel-stack-row',
   },
   BASE_PLATFORM: 'base-platform',
@@ -19,12 +20,30 @@ export const BACK_URLS = {
   GET_WHEELSTACK_DATA_URl: 'http://127.0.0.1:8000/wheelstacks/',
   GET_GRID_URL: 'http://127.0.0.1:8000/grid/',
   GET_WHEEL_DATA_URL: 'http://127.0.0.1:8000/wheels/',
+  POST_ORDER_WHOLE_STACK_URL: 'http://127.0.0.1:8000/orders/move',
 }
 
 
 export const SETTINGS = {
   BASE_PLATFORM_UPDATE_TIME: 500,  // ms
   GRID_UPDATE_TIME: 500,  // ms
+}
+
+export const BACK_GRID_NAMES = {
+  BASE_PLATFORM: 'basePlacement',
+  GRID: 'grid',
+}
+
+export const ORDER_MOVE_TYPES = {
+  WHOLE_STACK: 'moveWholeStack',
+  TOP_WHEEL: 'moveTopWheel',
+  TO_LABORATORY: 'moveToLaboratory',
+  MERGE_STACKS: 'mergeWheelStacks',
+}
+
+export const ORDER_BUTTONS_TEXT = {
+  WHOLE_STACK_INACTIVE: 'Переместить\nстопку',
+  WHOLE_STACK_ACTIVE: 'Подтвердить\nперемещение',
 }
 
 
@@ -41,6 +60,7 @@ export const TEMPO_CONSTS = {
     'wheel-details-row-name': true,
     'wheel-details-row-header': true,
     'wheel-details-row-data': true,
+    'context-menu-move-wheelstack-button': true,
   },
   WHEEL_CONTEXT_MENU_ALLOWED_STYLES: {
     'wheel-details-menu': true,

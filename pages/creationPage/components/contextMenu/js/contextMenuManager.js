@@ -1,5 +1,9 @@
 import { TEMPO_CONSTS } from "../../constants.js";
 import WheelElement from "../../wheel/js/wheelElement.js";
+import { CLASS_NAMES } from "../../constants.js";
+import { BACK_GRID_NAMES } from "../../constants.js";
+import { ORDER_MOVE_TYPES } from "../../constants.js";
+import { ORDER_BUTTONS_TEXT } from "../../constants.js";
 
 
 export default class ContextMenuManager{
@@ -9,6 +13,29 @@ export default class ContextMenuManager{
     ) {
         this.element = document.createElement('div');
         this.element.className = elementClass;
+
+        // Tempo orderManager
+        this.orderManager = null;
+        this.button = document.createElement('div');
+        this.button.className = 'context-menu-move-wheelstack-button';
+        this.button.innerText = ORDER_BUTTONS_TEXT.WHOLE_STACK_INACTIVE;
+        this.element.appendChild(this.button);
+        this.button.addEventListener('click', (event) => {
+            if (null !== this.orderManager) {
+                if (!this.orderManager.creatingOrder) {
+                    this.hideContextMenu();
+                    this.orderManager.toggleCreation();
+                    this.orderManager.setSource(this.assignedWheelStackElement);
+                } else {
+                    this.hideContextMenu();
+                    this.orderManager.cancelCreation();
+                    this.orderManager.setDestination(this.assignedWheelStackElement);
+                    this.orderManager.createOrder(ORDER_MOVE_TYPES.WHOLE_STACK);
+                }
+            }
+        })
+        // ----
+
         document.body.appendChild(this.element);
         this.element.style.display = 'block';
         this.maxWheels = maxWheels;
@@ -17,15 +44,17 @@ export default class ContextMenuManager{
         this.intervalId = null;
         this.assignedWheelStackElement = null;
     }
-    
+
     // tempo
 
     #updateWheelstackData() {
         this.clearWheelsData();
-        const newWheels = this.assignedWheelStackElement.wheelStackData.wheels;
-        for (let wheelId in newWheels) {
-            const chosenWheel = this.storedWheels[wheelId];
-            chosenWheel.setWheel(newWheels[wheelId]);
+        const newData = this.assignedWheelStackElement.wheelStackData;
+        if (null !== newData) {
+            for (let wheelId in newData.wheels) {
+                const chosenWheel = this.storedWheels[wheelId];
+                chosenWheel.setWheel(newData.wheels[wheelId]);
+            }
         }
     }
 
@@ -65,16 +94,24 @@ export default class ContextMenuManager{
         }
     }
 
-    showContextMenu(event, wheelStackElement) {
+    showContextMenu(event, wheelStackElement, orderManager = null) {
+        // Tempo orderManager
+        if (null !== orderManager) {
+            this.orderManager = orderManager;    
+            this.orderManager.assignWholeOrderButton(this.button);
+        } 
+        // ----
         this.clearWheelsData();
         event.preventDefault();
         this.element.style.display = 'block';
         this.updateContextMenuPosition(event);
         this.assignedWheelStackElement = wheelStackElement;
         const wheelStackData = this.assignedWheelStackElement.wheelStackData;
-        for (let wheel in wheelStackData.wheels) {
-            const chosenWheel = this.storedWheels[wheel];
-            chosenWheel.setWheel(wheelStackData.wheels[wheel]);
+        if (null !== wheelStackData) {
+            for (let wheel in wheelStackData.wheels) {
+                const chosenWheel = this.storedWheels[wheel];
+                chosenWheel.setWheel(wheelStackData.wheels[wheel]);
+            }
         }
         this.startUpdating();
     }

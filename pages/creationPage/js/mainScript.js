@@ -2,7 +2,7 @@ import ZoomAndDrag from "../../utility/zoomDrag.js";
 import BasePlatformManager from "../components/basePlatform/js/basePlatformManager.js";
 import GridManager from "../components/grid/js/gridManager.js";
 import { TEMPO_CONSTS } from '../components/constants.js';
-
+import OrderManager from "../components/orderManager/js/orderManager.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 

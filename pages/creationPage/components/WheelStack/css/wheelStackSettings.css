@@ -10,9 +10,11 @@
   --wheel-stack-base-width: 75px;
   --wheel-stack-base-min-width: 50px;
   --wheel-stack-base-min-height: 50px;
+  /* bg */
+  --wheel-stack-bg-color: var(--background-color);
+  --wheel-stack-bg-block-color: var(--block-color);
   /* border */
   --wheel-stack-border-radius: 50%;
-  --wheel-stack-bg-color: var(--background-color);
   --wheel-stack-border-width: 4px;
   --wheel-stack-border-style: var(--basic-border-elements);
   --wheel-stack-border-color: var(--primary-color);

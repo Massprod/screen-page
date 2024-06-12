@@ -3,6 +3,7 @@ import WheelContextMenuManager from "./wheelContextMenuManager.js";
 
 const wheelContextMenuManager = new WheelContextMenuManager();
 
+
 export default class WheelElement {
     constructor(className) {
         this.emptyMark = 'Empty wheel spot';

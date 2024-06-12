@@ -103,7 +103,7 @@ html, body {
   background-color: #f1f1f1;
 }
 
-.context-menu-move-stack-button {
+.context-menu-move-wheelstack-button {
   width: 100%;
   margin-bottom: 10px;
   padding: 10px;
@@ -113,10 +113,11 @@ html, body {
   color: white;
   border: none;
   border-radius: 4px;
+  display: block;
 }
 
 .context-menu-move-stack-button:hover {
-  background-color: #0056b3;
+  background-color: #024389;
 }
 
 .wheel-details-menu {
