@@ -34,7 +34,7 @@ export default class WheelStackRowElement {
     async #fetchWheelStackData(wheelStackId, url) {
         const wheelStackUrl = `${url}${wheelStackId}`; // Example URL, change as needed
         try {
-            const response = await fetch(wheelStackUrl);
+            var response = await fetch(wheelStackUrl);
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
@@ -71,12 +71,13 @@ export default class WheelStackRowElement {
             );
             this.allWheelstacks[column] = wheelStackElement;
             // Empty element !== whiteSpace
-            if (true == wheelStackInfo['whiteSpace']) {
+            if (true === wheelStackInfo['whiteSpace']) {
                 wheelStackElement.setAsWhiteSpace();
                 continue;
             }
+            wheelStackElement.blocked = wheelStackInfo['blocked'];
             // We always create it as empty element.
-            if (null == wheelStackInfo['wheelStack']) {
+            if (null === wheelStackInfo['wheelStack']) {
                 continue;
             }
             const wheelStackId = wheelStackInfo['wheelStack'];
@@ -99,6 +100,7 @@ export default class WheelStackRowElement {
             }
             const storedWheelStack = this.allWheelstacks[column];
             const newWheelStackId = wheelStackInfo['wheelStack'];
+            storedWheelStack.blocked = wheelStackInfo['blocked'];
             if (null == newWheelStackId) {
                 storedWheelStack.resetElement();
                 continue;

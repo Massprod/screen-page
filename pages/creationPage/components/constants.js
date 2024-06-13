@@ -7,6 +7,7 @@ export const CLASS_NAMES = {
     WHEEL_STACK_CONTEXT_MENU_HIDDEN: 'wheel-stack-context-menu-hidden',
     WHEEL_STACK_BASE_PLATFORM: 'wheel-stack-base-platform',
     WHEEL_STACK_ORDER_BLOCK: 'wheel-stack-order-block',
+    WHEEL_STACK_CELL_ORDER_BLOCK: 'wheel-stack-cell-order-block',
 
     WHEEL_STACK_ROW: 'wheel-stack-row',
   },
@@ -42,8 +43,9 @@ export const ORDER_MOVE_TYPES = {
 }
 
 export const ORDER_BUTTONS_TEXT = {
-  WHOLE_STACK_INACTIVE: 'Переместить\nстопку',
-  WHOLE_STACK_ACTIVE: 'Подтвердить\nперемещение',
+  WHOLE_STACK_INACTIVE: 'Переместить',
+  WHOLE_STACK_ACTIVE: 'Подтвердить',
+  WHEEL_STACK_BLOCKED: 'Ожидает заказ',
 }
 
 
@@ -51,6 +53,7 @@ export const TEMPO_CONSTS = {
   CONTEXT_MENU_CLASS: 'context-menu',
   CONTEXT_MENU_OPTION: 'context-menu-option',
   WHEEL_CONTEXT_MENU_CLASS: 'wheel-details-menu',
+  WHEEL_CONTEXT_MENU_MOVE_WHEELSTACK_BUTTON: 'context-menu-move-wheelstack-button',
   CONTEXT_MENU_ALLOWED_STYLES: {
     'context-menu': true,
     // 'wheel-stack': true,
@@ -61,6 +64,7 @@ export const TEMPO_CONSTS = {
     'wheel-details-row-header': true,
     'wheel-details-row-data': true,
     'context-menu-move-wheelstack-button': true,
+    'context-menu-cancel-move-wheelstack-button': true,
   },
   WHEEL_CONTEXT_MENU_ALLOWED_STYLES: {
     'wheel-details-menu': true,

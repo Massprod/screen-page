@@ -6,13 +6,14 @@
   --wheel-stack-height: 125px;
   --wheel-stack-width: 125px;
   /* base platform sizes */
-  --wheel-stack-base-height: 75px;
-  --wheel-stack-base-width: 75px;
-  --wheel-stack-base-min-width: 50px;
-  --wheel-stack-base-min-height: 50px;
+  --wheel-stack-base-height: 100px;
+  --wheel-stack-base-width: 100px;
+  --wheel-stack-base-min-width: 85px;
+  --wheel-stack-base-min-height: 85px;
   /* bg */
   --wheel-stack-bg-color: var(--background-color);
   --wheel-stack-bg-block-color: var(--block-color);
+  --wheel-stack-bg-cell-block-color: var(--cell-block-color);
   /* border */
   --wheel-stack-border-radius: 50%;
   --wheel-stack-border-width: 4px;

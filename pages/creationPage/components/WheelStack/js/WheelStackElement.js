@@ -40,6 +40,7 @@ export default class WheelStackElement {
     //   - empty placeholder, we can have empty cells on the row, they should be the same size and style, only `hidden`.
     this.whiteSpace = false;  // to check if it's empty cell
     this.rowIdentifier = '';  // to show as rowIdentifier for row disting.
+    this.blocked = false;
     this.container = container;
     this.element = document.createElement('div');
     this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
@@ -59,8 +60,6 @@ export default class WheelStackElement {
 
     this.element.addEventListener('click', (event) => {
       this.showContextMenu(event);
-      // Tempo orderManager
-      // ----
     })
     // ----
     // Tempo hover
@@ -124,26 +123,35 @@ export default class WheelStackElement {
   resetElement() {
     this.whiteSpace = false,
     this.rowIdentifier = '';
+    this.blocked = false;
     this.element.textContent = this.rowIdentifier;
     this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
     if (this.container.parentNode.className === CLASS_NAMES.BASE_PLATFORM) {
       this.element.classList.add(CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM);
     }
     this.wheelStackData = null;
+    this.updateVisual();
   }
 
   updateVisual() {
-    if (null === this.wheelStackData) {
-      return false;
-    }
     // Tempo orderManager
     // After creating orderStorageManager
     // We will update every row|col placement of wheelStackElement in grid and basePlatform
     //  to some unique color. Also might be good to store this color, so it will be persistent through pages == store in DB for order.
-    if (this.wheelStackData.blocked) {
-      this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`;
+    if (this.blocked) {
+      this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_CELL_ORDER_BLOCK}`;
     }
     // ----
+    if (null === this.wheelStackData) {
+      return false;
+    }
+    if (this.wheelStackData.blocked) {
+      if (CLASS_NAMES.BASE_PLATFORM === this.container.parentNode.className) {
+        this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`;
+      } else {
+        this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`
+      }
+    }
     this.element.textContent = this.wheelStackData.wheels.length;
     return true;
   }

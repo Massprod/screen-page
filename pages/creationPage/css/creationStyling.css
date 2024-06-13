@@ -22,7 +22,8 @@ html, body {
 
 .top-half {
   display: flex;
-  flex: 0 0 40vh;
+  flex-direction: row;
+  /* flex: 0 0 40vh; */
   border-bottom: 2px solid #ccc;
 }
 
@@ -85,14 +86,16 @@ html, body {
 
 
 .context-menu .context-menu-option {
-  display: block;
+  display: flex;
+  flex-direction: row;
   width: 100%;
   margin-top: 10px;
-  padding: 5px 10px;
+  margin-bottom: 10px;
+  padding: 5px 5px 5px 5px;
   background-color: #f4f4f4;
   border: none;
   cursor: pointer;
-  text-align: center;
+  align-items: center;
 }
 
 .context-menu .context-menu-option:hover {
@@ -103,22 +106,48 @@ html, body {
   background-color: #f1f1f1;
 }
 
+/* Move orders */
 .context-menu-move-wheelstack-button {
   width: 100%;
-  margin-bottom: 10px;
-  padding: 10px;
+  margin: 5px;
   text-align: center;
   cursor: pointer;
   background-color: #007BFF;
   color: white;
   border: none;
   border-radius: 4px;
-  display: block;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  display: flex;
+  box-sizing: border-box;
 }
 
-.context-menu-move-stack-button:hover {
+.context-menu-move-wheelstack-button:hover {
   background-color: #024389;
 }
+
+.context-menu-move-wheelstack-button:disabled {
+  background-color: #333;
+}
+
+.context-menu-cancel-move-wheelstack-button {
+  width: 100%;
+  margin: 5px;
+  text-align: center; /* Center text horizontally */
+  cursor: pointer;
+  background-color: coral;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  display: none; /* Use flexbox */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  padding: 10px; /* Adjust padding as needed */
+  box-sizing: border-box; /* Include padding in the element's total width and height */
+}
+
+/* ---- */
 
 .wheel-details-menu {
   position: absolute;

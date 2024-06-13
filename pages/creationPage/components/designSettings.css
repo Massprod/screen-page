@@ -5,6 +5,7 @@
   --background-color: #F5F5F5;
   --background-color-hover: #8374f433;
   --block-color: #904747;
+  --cell-block-color: #a97676;
   --border-color: #CCCCCC;
   --text-color: #333333;
   --accent-color: #007BFF;
@@ -13,10 +14,10 @@
   --basic-context-menu-paddig: 10px;
   --basic-border-size: 1px;
   /* Top columns */
-  --basic-column-min-height: 300px;
-  --basic-column-max-height: 40vh;
-  --basic-column-min-width: 250px;
-  --basic-column-max-width: 35wv;
+  --basic-column-min-height: 325px;
+  --basic-column-max-height: 100%;
+  --basic-column-min-width: 450px;
+  --basic-column-max-width: 40%;
   --font-primary: 'Helvetica, Arial, sans-serif';
   --font-secondary: 'Georgia, serif';
 }

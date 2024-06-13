@@ -18,7 +18,8 @@ export default class OrderManager {
         this.destinationRow = null;
         this.destinationColumn = null;
 
-        this.assignedButtonElement = null;
+        this.assignedMoveWholeButton = null;
+        this.assignedCancelMoveWholeButton = null;
     }
 
     async #fetchCreateOrder(url, data) {
@@ -66,16 +67,27 @@ export default class OrderManager {
             // Also make flashMessages styling as constants, so we can reuse and change them in 1 place.
             if (409 === response.status) {
                 flashMessage.show({
-                    message: 'Выбранная стопка уже отмечена к перемещению другим заказом.'
-                              + '\nЛибо выбранная позиция уже ожидает помещения Стопки.',
+                    message: 'Перемещение стопки запрещено\n',
                     color: 'white',
                     backgroundColor: 'black',
                     position: 'top-center',
                     duration: 3000,
                   });
+                return;
             }
         }
         this.cancelCreation();
+    }
+
+
+    clearOrderData() {
+        this.chosenSource = null;
+        this.sourceRow = null;
+        this.sourceColumn = null;
+
+        this.chosenDestination = null;
+        this.destinationRow = null;
+        this.destinationColumn = null;
     }
 
     setSource(targetWheelstack) {
@@ -108,16 +120,36 @@ export default class OrderManager {
 
     toggleCreation() {
         this.creatingOrder = true;
-        this.assignedButtonElement.innerText = ORDER_BUTTONS_TEXT.WHOLE_STACK_ACTIVE;
+        this.assignedMoveWholeButton.setButtonText(ORDER_BUTTONS_TEXT.WHOLE_STACK_ACTIVE);
+        this.assignedCancelMoveWholeButton.showButton();
     }
 
     cancelCreation() {
         this.creatingOrder = false;
-        this.assignedButtonElement.innerText = ORDER_BUTTONS_TEXT.WHOLE_STACK_INACTIVE;
+        this.assignedMoveWholeButton.setButtonText(ORDER_BUTTONS_TEXT.WHOLE_STACK_INACTIVE);
+        this.assignedCancelMoveWholeButton.hideButton();
+        this.clearOrderData();
     }
 
-    assignWholeOrderButton(buttonElement) {
-        this.assignedButtonElement = buttonElement;
+    assignMoveWholeOrderButton(button) {
+        this.assignedMoveWholeButton = button;
+    }
+
+    assignCancelMoveWholeOrderButton(button) {
+        this.assignedCancelMoveWholeButton= button;
+    }
+
+    isSource(wheelStackElement) {
+        if (null === wheelStackElement) {
+            return false;
+        }
+        if (null === this.chosenSource && null === this.sourceRow && null === this.sourceColumn) {
+            return false;
+        };
+        if (wheelStackElement.rowPlacement === this.sourceRow && wheelStackElement.colPlacement === this.sourceColumn) {
+            return true;
+        }
+        return false;
     }
 }
 

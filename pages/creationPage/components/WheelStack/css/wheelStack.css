@@ -24,6 +24,9 @@
   background-color: var(--wheel-stack-bg-block-color);
 }
 
+.wheel-stack.wheel-stack-cell-order-block {
+  background-color: var(--wheel-stack-bg-cell-block-color);
+}
 
 .wheel-stack-base-platform {
   width: var(--wheel-stack-base-width);
@@ -31,7 +34,6 @@
   min-width: var(--wheel-stack-base-min-width);
   min-height: var(--wheel-stack-base-height);
 }
-
 
 .wheel-stack:hover {
   background-color: #296529; /* Black Background */
