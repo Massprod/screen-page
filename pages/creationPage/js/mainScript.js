@@ -3,19 +3,13 @@ import BasePlatformManager from "../components/basePlatform/js/basePlatformManag
 import GridManager from "../components/grid/js/gridManager.js";
 import { TEMPO_CONSTS } from '../components/constants.js';
 import OrderManager from "../components/orderManager/js/orderManager.js";
+import TablesContainer from "../components/ordersContainer/tablesContainer/js/tablesContainerElement.js";
 
 
 document.addEventListener('DOMContentLoaded', () => {
     const topSideContainer = document.getElementsByClassName('top-half');
     const topHalf = topSideContainer[0];
     const platformManager = new BasePlatformManager(topHalf);
-
-
-    // tempo Zone
-    // -----
-
-
-
     const mainViewport = document.getElementsByClassName('viewport');
     const gridViewport = mainViewport[0]
     const gridManager = new GridManager(gridViewport);
@@ -23,4 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'viewport': gridViewport,
         'grid': gridManager.element
     })
+
+
+    // tempo Zone
+    const ordersTableContainer = new TablesContainer(
+        topHalf,
+        platformManager,
+        gridManager,
+    );
+    // -----
+
+    
 })

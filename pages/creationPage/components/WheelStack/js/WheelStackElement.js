@@ -123,7 +123,6 @@ export default class WheelStackElement {
   resetElement() {
     this.whiteSpace = false,
     this.rowIdentifier = '';
-    this.blocked = false;
     this.element.textContent = this.rowIdentifier;
     this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
     if (this.container.parentNode.className === CLASS_NAMES.BASE_PLATFORM) {
