@@ -23,11 +23,11 @@ export default class GridManager {
     async #testCreation() {
         // cringe, but it's too hard to rebuild on BACK, and it's w.e for now.
         var element = this.allRows['B'].allWheelstacks['0'];
-        element.setAsIdentifier(' ');
+        element.setAsWhiteSpace();
         element = this.allRows['A'].allWheelstacks['0'];
-        element.setAsIdentifier(' ');
+        element.setAsWhiteSpace();
         element = this.allRows['C'].allWheelstacks['0'];
-        element.setAsIdentifier(' ');
+        element.setAsWhiteSpace();
         for (let column = 1; column < 31; column += 1) {
             element = this.allRows['C'].allWheelstacks[column];
             element.setAsIdentifier(column);

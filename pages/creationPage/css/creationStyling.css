@@ -2,8 +2,9 @@
 @import url(../components/WheelStackRow/css/wheelStackRow.css);
 @import url(../components/basePlatform/css/basePlatform.css);
 @import url(../components/grid/css/grid.css);
-@import url(../components/ordersContainer/ordersTable/css/tablesContainer.css);
 @import url(../components/ordersContainer/ordersTable/css/ordersTable.css);
+@import url(../components/ordersContainer/tablesContainer/css/tablesContainer.css);
+@import url(../components/ordersContainer/switchButtons/css/switchButtons.css);
 
 
 /* Base page settings, can be left alone */
@@ -27,6 +28,10 @@ html, body {
   flex-direction: row;
   /* flex: 0 0 40vh; */
   border-bottom: 2px solid #ccc;
+  max-width: 100%;
+  /* Questionable, we need to learn more about % sizing */
+  max-height: 350px;
+  min-height: 350px;
 }
 
 

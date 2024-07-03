@@ -1,19 +1,43 @@
-
 /* tables styling */
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* Fixed layout for uniform cell sizes */
 }
 
-th, td {
+.table-hidden {
+    display: none;
+}
+
+.table-visible {
+    display: table;
+}
+
+tr {
+    height: 20px; /* Set consistent height for rows */
+}
+
+td, th {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 0; /* Remove padding to ensure consistent sizes */
+    text-align: center;
+}
+
+td {
+    max-width: 100px;
+    min-width: 50px;
+    height: 30px; /* Consistent height */
 }
 
 th {
+    max-width: 100px;
+    min-width: 75px;
+    height: 45px; /* Consistent height */
     cursor: pointer;
     background-color: #f2f2f2;
-    position: relative;
+    top: 0;
+    z-index: 1;
+    position: sticky;
 }
 
 th.sort-asc::after {
@@ -22,4 +46,19 @@ th.sort-asc::after {
 
 th.sort-desc::after {
     content: ' ▼'; /* Unicode for down arrow */
+}
+
+/* Alternating row colors */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Hover effect on rows */
+tr:hover {
+    background-color: #ddd;
+}
+
+/* Highlight selected row */
+tr.selected {
+    background-color: #ff0;
 }

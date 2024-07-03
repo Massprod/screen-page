@@ -17,11 +17,15 @@ export const CLASS_NAMES = {
 }
 
 export const BACK_URLS = {
+  // Change all domens to one variable for reuse. But later.
   GET_BASE_PLATFORM_URL: 'http://127.0.0.1:8000/platform/',
   GET_WHEELSTACK_DATA_URl: 'http://127.0.0.1:8000/wheelstacks/',
   GET_GRID_URL: 'http://127.0.0.1:8000/grid/',
   GET_WHEEL_DATA_URL: 'http://127.0.0.1:8000/wheels/',
   POST_ORDER_WHOLE_STACK_URL: 'http://127.0.0.1:8000/orders/move',
+  GET_ALL_ACTIVE_ORDERS_URL: 'http://127.0.0.1:8000/orders/active',
+  GET_ALL_COMPLETED_ORDERS_URL: 'http://127.0.0.1:8000/orders/completed',
+  GET_ALL_CANCELED_ORDERS_URL: 'http://127.0.0.1:8000/orders/canceled',
 }
 
 
@@ -40,6 +44,13 @@ export const ORDER_MOVE_TYPES = {
   TOP_WHEEL: 'moveTopWheel',
   TO_LABORATORY: 'moveToLaboratory',
   MERGE_STACKS: 'mergeWheelStacks',
+}
+
+export const ORDER_MOVE_TYPES_TRANSLATION = {
+  'moveWholeStack': 'Перенос стопки',
+  'moveTopWheel': 'Перенос верхнего колеса',
+  'moveToLaboratory': 'Перенос в лабораторию',
+  'mergeWheelStacks': 'Объединение стопок',
 }
 
 export const ORDER_BUTTONS_TEXT = {
