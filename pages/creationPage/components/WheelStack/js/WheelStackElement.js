@@ -124,10 +124,22 @@ export default class WheelStackElement {
     this.whiteSpace = false,
     this.rowIdentifier = '';
     this.element.textContent = this.rowIdentifier;
-    this.element.className = CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK;
+    // TODO: marking
+    let marked = false;
+    if (this.element.classList.contains('wheel-stack-marked')) {
+      marked = true;
+    }
+    // ---
+    this.element.classList = []
+    this.element.classList.add(CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK);
     if (this.container.parentNode.className === CLASS_NAMES.BASE_PLATFORM) {
       this.element.classList.add(CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM);
     }
+    // TODO: marking
+    if (marked) {
+      this.element.classList.add('wheel-stack-marked');
+    }
+    // ---
     this.wheelStackData = null;
     this.updateVisual();
   }
@@ -138,7 +150,8 @@ export default class WheelStackElement {
     // We will update every row|col placement of wheelStackElement in grid and basePlatform
     //  to some unique color. Also might be good to store this color, so it will be persistent through pages == store in DB for order.
     if (this.blocked) {
-      this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_CELL_ORDER_BLOCK}`;
+      this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
+      this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_CELL_ORDER_BLOCK}`);
     }
     // ----
     if (null === this.wheelStackData) {
@@ -146,9 +159,12 @@ export default class WheelStackElement {
     }
     if (this.wheelStackData.blocked) {
       if (CLASS_NAMES.BASE_PLATFORM === this.container.parentNode.className) {
-        this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`;
+        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
+        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM}`); 
+        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`);
       } else {
-        this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK} ${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`
+        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
+        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`);
       }
     }
     this.element.textContent = this.wheelStackData.wheels.length;
@@ -158,14 +174,16 @@ export default class WheelStackElement {
   setAsIdentifier(identifier) {
     this.resetElement();
     this.rowIdentifier = identifier;
-    this.element.textContent =  this.rowIdentifier;
-    this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_IDENTIFIER}`;
+    this.element.textContent = this.rowIdentifier;
+    this.element.classList = [];
+    this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_IDENTIFIER}`);
   }
 
   setAsWhiteSpace() {
     this.resetElement();
     this.whiteSpace = true;
-    this.element.className = `${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_WHITESPACE}`;
+    this.element.classList = [];
+    this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_WHITESPACE}`);
   }
 
   setAsWheelStack(wheelStackData) {

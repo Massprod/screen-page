@@ -1,3 +1,6 @@
+@import url("../../../WheelStack/css/wheelStackSettings.css");
+
+
 /* tables styling */
 table {
     width: 100%;
@@ -70,6 +73,6 @@ tr:hover {
 
 /* Highlight selected row */
 tr.selected {
-    background-color: #ff0;
+    background-color: #81ed1d;
 }
 

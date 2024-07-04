@@ -103,3 +103,8 @@
   z-index: var(--wheel-stack-context-menu-z-index);
   display: var(--wheel-stack-context-menu-display-hidden);
 }
+
+
+.wheel-stack.wheel-stack-marked {
+  background-color: var(--wheel-stack-marked-background-color);
+}

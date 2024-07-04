@@ -50,4 +50,7 @@
   --wheel-stack-context-menu-display: flex;
   --wheel-stack-context-menu-display-hidden: none;
   /* ----- */
+  /* wheel-stack-marked */
+  --wheel-stack-marked-background-color: #81ed1d;
+  /* ----- */
 }

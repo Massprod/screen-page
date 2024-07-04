@@ -34,6 +34,9 @@ export default class OrdersTableManager{
         // ---
         // Add rowStorage and use Object(OrderId) as an unique identifier.
         this.tableRows = {};
+        // TODO: marking
+        this.markedRow = null;
+        // ---
     }
 
     setNewHeaders(headRow, headers) {
@@ -62,7 +65,7 @@ export default class OrdersTableManager{
     }
 
     addRow(rowData) {
-        const newRow = new OrdersTableRow(this.headers);
+        const newRow = new OrdersTableRow(this);
         this.tableBody.appendChild(newRow.populateRow(rowData, this.tableName));
         return newRow;
     }
@@ -110,8 +113,7 @@ export default class OrdersTableManager{
             }
         }
     }
-
-
+    
     async updateTable(dataUrl = null) {
         if (this.element.classList.contains('table-hidden')) {
             return;
@@ -121,6 +123,9 @@ export default class OrdersTableManager{
         }
         const response = await this.#fetchTableData(dataUrl);
         const newTableData = response['data'];
+        // TODO: tempo limit == change for pagination later.
+        var limit = 0;
+        // ---
         for (const [orderId, tableRow] of Object.entries(this.tableRows)) {
             if (!newTableData[orderId]) {
                 continue;
@@ -130,8 +135,16 @@ export default class OrdersTableManager{
             delete newTableData[orderId];
         }
         for (const [ orderId, orderData ] of Object.entries(newTableData)) {
+            // TODO: tempo limit = change for paginatio later
+            if (limit > 500) {
+                break
+            }
+            // --
             if (!this.tableRows[orderId]) {
                 this.tableRows[orderId] = this.addRow(orderData);
+                // TODO: tempo limit = change for paginatio later
+                limit += 1;
+                // ---
             } else {
                 this.tableRows[orderId].populateRow(orderData, this.tableName);
             }

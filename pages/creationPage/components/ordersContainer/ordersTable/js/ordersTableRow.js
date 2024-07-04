@@ -1,14 +1,18 @@
 import { ORDER_MOVE_TYPES_TRANSLATION } from "../../../constants.js";
 import { formatDate } from "../../../utils.js";
-
+import { gridManager, platformManager } from "../../../../js/mainScript.js";
+ 
 
 export default class OrdersTableRow{
-    constructor(headers) {
-        this.tableHeaders = headers;
+    constructor(table) {
+        this.table = table;
+        this.tableHeaders = this.table.headers;
         this.rowData = {};
         this.element = document.createElement('tr');
         this.element.className = 'tr';
         this.orderStarted = false;
+        this.element.addEventListener('click', event => this.markSelected(event));
+
     }
 
     
@@ -94,4 +98,62 @@ export default class OrdersTableRow{
         }
         return this.element;
     }
+
+    // clickMarking
+    markSelected(event) {
+        let targets = null;
+        if (this.element.classList.contains('selected')) {
+            this.table.markedRow = null;
+            this.element.classList.remove('selected')
+            this.unmarkTargets(this.getWheelstackTargets());
+        } else {
+            if (null !== this.table.markedRow ) {
+                const markedRow = this.table.markedRow;
+                markedRow.element.classList.remove('selected');
+                this.unmarkTargets(markedRow.getWheelstackTargets());
+            }
+            this.table.markedRow = this;
+            this.element.classList.add('selected');
+            this.markTargets(this.getWheelstackTargets());
+        }
+    }
+
+    getWheelstackTargets() {
+        // SOURCE
+        const sourceType = this.rowData['source']['type'];
+        const [sourceRow, sourceCol ] = this.rowData['source']['identifier'].split(',');
+        let sourceWheelstackElement = null;
+        if ('grid' === sourceType) {
+            sourceWheelstackElement = this.getWheelStackElement(gridManager, sourceRow, sourceCol)
+        } else {
+            sourceWheelstackElement = this.getWheelStackElement(platformManager, sourceRow, sourceCol)
+        }
+        // DESTINATION
+        const destinationType = this.rowData['destination']['type'];
+        const [ destinationRow, destinationCol ] = this.rowData['destination']['identifier'].split(',');
+        let destinationWheelstackElement = null
+        if ('grid' === sourceType) {
+            destinationWheelstackElement = this.getWheelStackElement(gridManager, destinationRow, destinationCol)
+        } else {
+            destinationWheelstackElement = this.getWheelStackElement(platformManager, destinationRow, destinationCol)
+        }
+        return [sourceWheelstackElement, destinationWheelstackElement];
+    }
+
+    getWheelStackElement(manager, row, col) {
+        return manager.allRows[row].allWheelstacks[col].element;
+    }
+
+    markTargets(targets) {
+        targets.forEach(target => {
+            target.classList.add('wheel-stack-marked');
+        })
+    }
+
+    unmarkTargets(targets) {
+        targets.forEach(target => {
+            target.classList.remove('wheel-stack-marked')
+        })
+    }
+    // ---
 }
