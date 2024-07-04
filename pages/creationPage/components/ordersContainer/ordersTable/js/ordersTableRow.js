@@ -68,6 +68,12 @@ export default class OrdersTableRow{
     }
 
     populateRow(rowData, tableName) {
+        if ('inProgress' === rowData['status']) {
+            this.element.classList.add('in-progress');
+        } else {
+            this.element.classList.remove('in-progress');
+        }
+
         this.rowData = rowData;
         this.element.innerHTML = '';
         this.assignedTableName = tableName;
@@ -88,5 +94,4 @@ export default class OrdersTableRow{
         }
         return this.element;
     }
-
 }

@@ -19,8 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
 
-    // tempo Zone
+    // tempo Zone for tabless
 
+    // change to some constant function or w.e
     // active
     const orderTableManager = new TablesContainerManager(
         topHalf,
@@ -95,8 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     );
     orderTableManager.addNewSwitchButton('completed', 'Выполненные');
-    orderTableManager.assignedTables['completed'].updateTable(BACK_URLS.GET_ALL_COMPLETED_ORDERS_URL);
-    orderTableManager.setTableUpdating('completed', 500, BACK_URLS.GET_ALL_COMPLETED_ORDERS_URL);
+    // orderTableManager.assignedTables['completed'].updateTable(BACK_URLS.GET_ALL_COMPLETED_ORDERS_URL);
+    // orderTableManager.setTableUpdating('completed', 500, BACK_URLS.GET_ALL_COMPLETED_ORDERS_URL);
     // ---
     // canceled
     orderTableManager.addNewtable(
@@ -130,10 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     );
     orderTableManager.addNewSwitchButton('canceled', 'Отменённые');
-    orderTableManager.assignedTables['canceled'].updateTable(BACK_URLS.GET_ALL_CANCELED_ORDERS_URL);
-    orderTableManager.setTableUpdating('canceled', 500, BACK_URLS.GET_ALL_CANCELED_ORDERS_URL);
+    // orderTableManager.assignedTables['canceled'].updateTable(BACK_URLS.GET_ALL_CANCELED_ORDERS_URL);
+    // orderTableManager.setTableUpdating('canceled', 500, BACK_URLS.GET_ALL_CANCELED_ORDERS_URL);
     // ---
     // -----
-
     
 })

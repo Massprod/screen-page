@@ -13,17 +13,23 @@ table {
     display: table;
 }
 
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
 tr {
-    height: 20px; /* Set consistent height for rows */
+    height: 35px; /* Set consistent height for rows */
 }
 
 td, th {
-    border: 1px solid #ddd;
     padding: 0; /* Remove padding to ensure consistent sizes */
     text-align: center;
 }
 
 td {
+    border: 1px solid #ddd;
     max-width: 100px;
     min-width: 50px;
     height: 30px; /* Consistent height */
@@ -36,7 +42,7 @@ th {
     cursor: pointer;
     background-color: #f2f2f2;
     top: 0;
-    z-index: 1;
+    z-index: 100;
     position: sticky;
 }
 
@@ -53,12 +59,17 @@ tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
+tr.in-progress {
+    background-color: aquamarine;
+}
+
 /* Hover effect on rows */
 tr:hover {
-    background-color: #ddd;
+    background-color: #c5c2c2;
 }
 
 /* Highlight selected row */
 tr.selected {
     background-color: #ff0;
 }
+

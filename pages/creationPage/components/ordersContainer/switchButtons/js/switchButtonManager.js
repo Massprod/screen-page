@@ -29,6 +29,7 @@ export default class SwitchButtonManager{
             tableElement.classList.add('table-hidden');
         })
         this.assignedTable.showTable();
+        this.assignedTable.updateTable();
     }
 
     #activateAssignedButton() {

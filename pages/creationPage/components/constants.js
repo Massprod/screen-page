@@ -28,6 +28,12 @@ export const BACK_URLS = {
   GET_ALL_CANCELED_ORDERS_URL: 'http://127.0.0.1:8000/orders/canceled',
 }
 
+export const TABLE_UPDATE_URLS = {
+  'active': BACK_URLS.GET_ALL_ACTIVE_ORDERS_URL,
+  'completed': BACK_URLS.GET_ALL_COMPLETED_ORDERS_URL,
+  'canceled': BACK_URLS.GET_ALL_CANCELED_ORDERS_URL,
+}
+
 
 export const SETTINGS = {
   BASE_PLATFORM_UPDATE_TIME: 500,  // ms

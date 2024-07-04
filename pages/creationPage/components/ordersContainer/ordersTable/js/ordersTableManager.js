@@ -1,4 +1,5 @@
 import OrdersTableRow from "../js/ordersTableRow.js";
+import { TABLE_UPDATE_URLS } from "../../../constants.js";
 
 
 export default class OrdersTableManager{
@@ -45,10 +46,14 @@ export default class OrdersTableManager{
             newHeader.className = header['columnStyle'];
             newHeader.innerHTML = `<b>${header['columnName']}</b>`;
             newHeader.id = `${headerName}`;
-            // Add Even on click for sorting.
-            newHeader.addEventListener('click', () => {
-                this.sortTable(newHeader.id);
-            })
+            // For now, just filter by name. We don't care about active sorting.
+            // We will just add them as we get from Back, and show `inProgress` as a first ones.
+            // any other ordering is irrelevant for this Table.
+            if ('active' !== this.tableName) {
+                newHeader.addEventListener('click', () => {
+                    this.sortTable(newHeader.id);
+                })
+            }
             // ---
             headRow.appendChild(newHeader);
             this.headers[headerName] = header;
@@ -96,17 +101,41 @@ export default class OrdersTableManager{
         }
     }
 
-    async updateTable(dataUrl) {
+
+    async switchInProgressToTop(rowData, rowElement) {
+        if ('inProgress' === rowData['status']) {
+            const childrens = this.tableBody.children;
+            if (childrens.length > 1) {
+                this.tableBody.insertBefore(rowElement, childrens[0]);
+            }
+        }
+    }
+
+
+    async updateTable(dataUrl = null) {
         if (this.element.classList.contains('table-hidden')) {
             return;
         }
-        const newTableData = await this.#fetchTableData(dataUrl);
-        for (const [ orderId, orderData ] of Object.entries(newTableData['data'])) {
+        if (null === dataUrl) {
+            dataUrl = TABLE_UPDATE_URLS[this.tableName];
+        }
+        const response = await this.#fetchTableData(dataUrl);
+        const newTableData = response['data'];
+        for (const [orderId, tableRow] of Object.entries(this.tableRows)) {
+            if (!newTableData[orderId]) {
+                continue;
+            }
+            tableRow.populateRow(newTableData[orderId], this.tableName);
+            await this.switchInProgressToTop(newTableData[orderId], tableRow.element);
+            delete newTableData[orderId];
+        }
+        for (const [ orderId, orderData ] of Object.entries(newTableData)) {
             if (!this.tableRows[orderId]) {
                 this.tableRows[orderId] = this.addRow(orderData);
             } else {
                 this.tableRows[orderId].populateRow(orderData, this.tableName);
             }
+            await this.switchInProgressToTop(orderData, this.tableRows[orderId].element);
         }
     }
 

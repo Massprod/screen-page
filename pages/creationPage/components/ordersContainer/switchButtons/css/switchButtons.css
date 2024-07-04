@@ -25,5 +25,5 @@
 .switch-button.active {
     background-color: coral;
     color: white;
-    cursor: default;
+    cursor: pointer;
 }
