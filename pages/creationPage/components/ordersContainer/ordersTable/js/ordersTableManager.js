@@ -128,6 +128,11 @@ export default class OrdersTableManager{
         // ---
         for (const [orderId, tableRow] of Object.entries(this.tableRows)) {
             if (!newTableData[orderId]) {
+                console.log('check deletion');
+                this.tableRows[orderId].unmarkBlocked();
+                this.tableRows[orderId].closeContextMenus();
+                this.tableRows[orderId].element.remove();
+                delete this.tableRows[orderId];
                 continue;
             }
             tableRow.populateRow(newTableData[orderId], this.tableName);

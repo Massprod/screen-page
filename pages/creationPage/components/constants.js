@@ -45,6 +45,13 @@ export const BACK_GRID_NAMES = {
   GRID: 'grid',
 }
 
+
+export const BACK_GRID_TYPE_TRANSLATIONS = {
+  'basePlacement': 'Челнок',
+  'grid': 'Приямок',
+}
+
+
 export const ORDER_MOVE_TYPES = {
   WHOLE_STACK: 'moveWholeStack',
   TOP_WHEEL: 'moveTopWheel',

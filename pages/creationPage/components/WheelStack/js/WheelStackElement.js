@@ -4,7 +4,7 @@ import { BACK_GRID_NAMES } from '../../constants.js';
 import HoverDisplayManager from '../../hoverWheelstack/js/hoverDisplayManager.js';
 import ContextMenuManager from '../../../components/contextMenu/js/contextMenuManager.js';
 import { TEMPO_CONSTS } from '../../constants.js';
-import OrderManager from '../../orderManager/js/orderManager.js';
+import { orderManager } from '../../../js/mainScript.js';
 
 
 
@@ -22,7 +22,6 @@ const contextMenuManager = new ContextMenuManager(
 // ----
 
 // TEMPO OrderManager
-const orderManager = new OrderManager();
 // ----
 
 
@@ -130,7 +129,7 @@ export default class WheelStackElement {
       marked = true;
     }
     // ---
-    this.element.classList = []
+    // this.element.classList = []
     this.element.classList.add(CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK);
     if (this.container.parentNode.className === CLASS_NAMES.BASE_PLATFORM) {
       this.element.classList.add(CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM);
@@ -149,24 +148,24 @@ export default class WheelStackElement {
     // After creating orderStorageManager
     // We will update every row|col placement of wheelStackElement in grid and basePlatform
     //  to some unique color. Also might be good to store this color, so it will be persistent through pages == store in DB for order.
-    if (this.blocked) {
-      this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
-      this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_CELL_ORDER_BLOCK}`);
-    }
+    // if (this.blocked) {
+    //   this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
+    //   this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_CELL_ORDER_BLOCK}`);
+    // }
     // ----
     if (null === this.wheelStackData) {
       return false;
     }
-    if (this.wheelStackData.blocked) {
-      if (CLASS_NAMES.BASE_PLATFORM === this.container.parentNode.className) {
-        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
-        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM}`); 
-        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`);
-      } else {
-        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
-        this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`);
-      }
-    }
+    // if (this.wheelStackData.blocked) {
+    //   if (CLASS_NAMES.BASE_PLATFORM === this.container.parentNode.className) {
+    //     this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
+    //     this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_BASE_PLATFORM}`); 
+    //     this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`);
+    //   } else {
+    //     this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK}`);
+    //     this.element.classList.add(`${CLASS_NAMES.WHEEL_STACK_ELEMENT.WHEEL_STACK_ORDER_BLOCK}`);
+    //   }
+    // }
     this.element.textContent = this.wheelStackData.wheels.length;
     return true;
   }

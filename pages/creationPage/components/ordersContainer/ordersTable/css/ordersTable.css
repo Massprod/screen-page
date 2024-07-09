@@ -5,7 +5,7 @@
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* Fixed layout for uniform cell sizes */
+    /* table-layout: fixed; */
 }
 
 .table-hidden {
@@ -19,7 +19,7 @@ table {
 thead {
     position: sticky;
     top: 0;
-    z-index: 100;
+    /* z-index: 100; */
 }
 
 tr {
@@ -45,7 +45,7 @@ th {
     cursor: pointer;
     background-color: #f2f2f2;
     top: 0;
-    z-index: 100;
+    /* z-index: 100; */
     position: sticky;
 }
 

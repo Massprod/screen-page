@@ -4,6 +4,7 @@
     width: 100%;
     max-height: 20%;
     display: flex;
+    border: 1px solid black;
 }
 
 .switch-buttons-container.active {

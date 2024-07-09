@@ -1,7 +1,8 @@
 import { ORDER_MOVE_TYPES_TRANSLATION } from "../../../constants.js";
-import { formatDate } from "../../../utils.js";
+import { formatDate } from "../../../../../utility/utils.js";
 import { gridManager, platformManager } from "../../../../js/mainScript.js";
- 
+import ordersTableContextMenu from "../../contextMenu/js/ordersTableContextMenu.js"; 
+
 
 export default class OrdersTableRow{
     constructor(table) {
@@ -12,10 +13,36 @@ export default class OrdersTableRow{
         this.element.className = 'tr';
         this.orderStarted = false;
         this.element.addEventListener('click', event => this.markSelected(event));
-
+        this.element.addEventListener('contextmenu', event => this.#showContextMenu(event));
+        this.assignedContextMenu = null;
     }
 
+
+    // tempo contextMenu
+    #showContextMenu(event) {
+        event.preventDefault();
+        const alrOpened = document.querySelectorAll('.order-context-menu');
+        alrOpened.forEach((element) => {
+            element.remove();
+        })
+        const contextMenu = new ordersTableContextMenu(this);
+        contextMenu.show(event);
+        this.assignedContextMenu = contextMenu;
+    }
     
+    closeContextMenus() {
+        this.assignedContextMenu.forceClose()
+        // console.log(this.assignedContextMenu);
+        // console.log(this.table.markedRow);
+        if (this.assignedContextMenu.assignedRow === this.table.markedRow) {
+            const markedRow = this.table.markedRow;
+            markedRow.element.classList.remove('selected');
+            this.unmarkTargets(markedRow.getWheelstackTargets());
+        }
+    }
+
+
+    // ---
 
     #activeTableFilter(column, columnData) {
         if ('source' === column || 'destination' == column) {
@@ -77,7 +104,6 @@ export default class OrdersTableRow{
         } else {
             this.element.classList.remove('in-progress');
         }
-
         this.rowData = rowData;
         this.element.innerHTML = '';
         this.assignedTableName = tableName;
@@ -96,12 +122,39 @@ export default class OrdersTableRow{
             }
             this.element.appendChild(cell);
         }
+        if ('active' === this.table.tableName ) {
+            let targets = this.getWheelstackTargets();
+            if (null != targets[0] && null != targets[1]) {
+                this.markWithClass(targets[0], 'wheel-stack-order-block');
+                this.markWithClass(targets[1], 'wheel-stack-cell-order-block');
+            }
+        };
         return this.element;
     }
 
+
+    markWithClass(wheelStack, markClass) {
+        try {
+            wheelStack.element.classList.add(markClass);
+        } catch (error) {
+            console.log('change everything if needed');
+            console.log(wheelStackElement);
+        }
+        
+    }
+
+
+    unmarkBlocked() {
+        let targets = this.getWheelstackTargets();
+        if (null != targets[0] && null != targets[1]) {
+            targets[0].element.classList.remove('wheel-stack-order-block');
+            targets[1].element.classList.remove('wheel-stack-cell-order-block');
+        }
+    }
+
+
     // clickMarking
     markSelected(event) {
-        let targets = null;
         if (this.element.classList.contains('selected')) {
             this.table.markedRow = null;
             this.element.classList.remove('selected')
@@ -122,37 +175,41 @@ export default class OrdersTableRow{
         // SOURCE
         const sourceType = this.rowData['source']['type'];
         const [sourceRow, sourceCol ] = this.rowData['source']['identifier'].split(',');
-        let sourceWheelstackElement = null;
+        let sourceWheelstack = null;
         if ('grid' === sourceType) {
-            sourceWheelstackElement = this.getWheelStackElement(gridManager, sourceRow, sourceCol)
+            sourceWheelstack = this.getWheelStack(gridManager, sourceRow, sourceCol)
         } else {
-            sourceWheelstackElement = this.getWheelStackElement(platformManager, sourceRow, sourceCol)
+            sourceWheelstack = this.getWheelStack(platformManager, sourceRow, sourceCol)
         }
         // DESTINATION
         const destinationType = this.rowData['destination']['type'];
         const [ destinationRow, destinationCol ] = this.rowData['destination']['identifier'].split(',');
-        let destinationWheelstackElement = null
-        if ('grid' === sourceType) {
-            destinationWheelstackElement = this.getWheelStackElement(gridManager, destinationRow, destinationCol)
+        let destinationWheelstack = null
+        if ('grid' === destinationType) {
+            destinationWheelstack = this.getWheelStack(gridManager, destinationRow, destinationCol)
         } else {
-            destinationWheelstackElement = this.getWheelStackElement(platformManager, destinationRow, destinationCol)
+            destinationWheelstack = this.getWheelStack(platformManager, destinationRow, destinationCol)
         }
-        return [sourceWheelstackElement, destinationWheelstackElement];
+        return [sourceWheelstack, destinationWheelstack];
     }
 
-    getWheelStackElement(manager, row, col) {
-        return manager.allRows[row].allWheelstacks[col].element;
+    getWheelStack(manager, row, col) {
+        try {
+            return manager.allRows[row].allWheelstacks[col];
+        } catch (error) {
+            return null;
+        }    
     }
 
     markTargets(targets) {
         targets.forEach(target => {
-            target.classList.add('wheel-stack-marked');
+            target.element.classList.add('wheel-stack-marked');
         })
     }
 
     unmarkTargets(targets) {
         targets.forEach(target => {
-            target.classList.remove('wheel-stack-marked')
+            target.element.classList.remove('wheel-stack-marked')
         })
     }
     // ---

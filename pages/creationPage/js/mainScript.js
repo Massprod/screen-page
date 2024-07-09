@@ -8,7 +8,7 @@ import ColorManager from "../../utility/colorManager.js";
 
 let platformManager = null;
 let gridManager = null;
-// let colorManager = null;
+let orderManager = new OrderManager();
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -144,4 +144,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
 })
 
-export { platformManager, gridManager }
+export { platformManager, gridManager, orderManager }
