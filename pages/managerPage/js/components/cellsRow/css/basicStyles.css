@@ -1,0 +1,6 @@
+
+.cells-row {
+    display: flex;
+    flex-direction: row;
+    gap: var(--platforms-container-vertical-gap);
+}

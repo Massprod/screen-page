@@ -1,0 +1,14 @@
+
+
+.base-platform{
+    min-height: var(--platforms-container-height);
+    height: var(--platforms-container-height);
+    min-width: var(--platforms-container-width);
+    max-width: var(--platforms-container-width);
+    display: var(--platforms-container-display);
+    flex-direction: var(--platforms-container-flex-direction);
+    background-color: var(--viewport-main-background);
+    justify-content: var(--platforms-container-justify-content);
+    align-items: var(--platforms-container-align-items);
+    gap: var(--platforms-container-vertical-gap);
+}

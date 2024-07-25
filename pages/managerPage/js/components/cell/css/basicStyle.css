@@ -1,0 +1,32 @@
+@import url("../../../../designConstants.css");
+
+
+.cell{
+    height: var(--cell-height);
+    width: var(--cell-width);
+    border-radius: var(--cell-border-radius);
+    border: var(--cell-border-size) var(--standard-border-style) var(--primary-color);
+    background-color: var(--cell-background-color);
+    font: var(--font-primary);
+}
+
+.cell:hover{
+    background-color: var(--cell-background-hover);
+    box-shadow: var(--standard-box-shadow);
+}
+
+.cell-identifier{
+    height: var(--cell-height);
+    width: var(--cell-width);
+    border-radius: var(--cell-border-radius);
+    border: var(--cell-border-size) var(--standard-border-style) var(--primary-color);
+    background-color: var(--cell-background-color);
+    font: var(--font-primary);
+}
+
+.cell-whitespace{
+    height: var(--cell-height);
+    width: var(--cell-width);
+    border: var(--cell-border-size) var(--standard-border-style) var(--primary-color);
+    visibility: var(--whitespace-visibility);
+}
