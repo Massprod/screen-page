@@ -1,0 +1,15 @@
+@import url("../../../../designConstants.css");
+
+
+.grid-container {
+    display: var(--grid-container-display);
+    flex-direction: var(--grid-container-flex-direction);
+    border: var(--grid-container-border);
+    position: var(--grid-container-position);
+    top: var(--grid-container-top);
+    left: var(--grid-container-left);
+    transform-origin: var(--grid-container-transform-origin);
+    transition: var(--grid-container-transition);
+    padding: var(--grid-container-padding);
+    gap: var(--grid-container-gap);
+}

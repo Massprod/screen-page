@@ -1,42 +1,65 @@
 :root {
+    /* COLORS */
     --primary-color: #000000;
     --secondary-color: #FFFFFF;
-    --viewport-main-background: whitesmoke;
-    /* PLATFORMS CONTAINER */
+    --grids-container-main-background: whitesmoke;
+    /* ------ */
+    /* FONTS */
+    --font-primary: "Helvetica, Arial, sans-serif";
+    --font-secondary: "Georgia, serif";
+    /* ------ */
+    /* ALL ELEMENTS */
+    --standard-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    --standard-border-style: solid;
+    --standard-padding: 10px;
+    --standard-border-size: 1px;
+    /* ------ */
+    /* PLATFORM RELATED */
+     /* PLATFORMS CONTAINER */
     --platforms-container-height: 100%;
     --platforms-container-width: 100%;
     --platforms-container-display: flex;
     --platforms-container-align-items: center;
     --platforms-container-justify-content: center;
     --platforms-container-flex-direction: column;
-    --platforms-container-vertical-gap: 7px;
-    /* CELL */
+    --platforms-container-vertical-gap: 10px;
+    /* ------ */
+    /* GRID RELATED */
+     /* GRID */
+    --grid-container-display: flex;
+    --grid-container-flex-direction: column;
+    --grid-container-border: none;
+    --grid-container-position: absolute;
+    --grid-container-top: 0;
+    --grid-container-left: 0;
+    --grid-container-transform-origin: top left;
+    --grid-container-transition: transform 0.1 ease-out;
+    --grid-container-padding: 350px;
+    --grid-container-gap: 15px;
+    /* ------ */
+    /* CELLS RELATED */
+     /* CELL */
     --cell-height: 125px;
     --cell-width: 125px;
     --cell-border-radius: 50%;
-    --cell-background-color: #F5F5F5;
-    --cell-background-hover: #61a98a33;
-    --cell-background-color-blocked: #904747;
+    --cell-background-color: #9aa99a;
+    --cell-background-hover: #3d27d066;
+    --cell-background-color-blocked: #773939;
     --cell-text-color: #333333;
     --cell-border-size: 4px;
     --cell-display: flex;
     --cell-align-items: center;
     --cell-justify-content: center;
-    /* CELL TEXT */
+     /* CELL TEXT */
     --cell-text-margin: 0;
     --cell-text-font-size: 5em;
-    /* EMPTY CELL */
-    --empty-cell-background-color-blocked: #ca9999;
+     /* EMPTY CELL */
+    --empty-cell-background-color-blocked: #b37777;
     --empty-cell-background-color: #eef5ec;
-    /* WHITESPACE */
+     /* WHITESPACE */
     --whitespace-background-color: whitesmoke;
     --whitespace-visibility: hidden;
-    /* ALL ELEMENTS */
-    --standard-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    --standard-border-style: solid;
-    --standard-padding: 10px;
-    --standard-border-size: 1px;
-    /* FONTS */
-    --font-primary: "Helvetica, Arial, sans-serif";
-    --font-secondary: "Georgia, serif";
+     /* IDENTIFIER */
+    --identifier-font-size: 4em;
+    /* ------ */
 }

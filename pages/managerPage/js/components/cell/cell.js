@@ -60,12 +60,17 @@ export default class Cell{
     setAsWhitespace() {
         this.element.classList = [];
         this.element.classList.add("cell-whitespace");
+        this.element.id = "whitespace";
     }
     
     setAsIdentifier(identifierString) {
         this.element.classList = [];
         this.element.classList.add("cell-identifier");
-        this.element.innerHTML = identifierString;
+        const parag = document.createElement('p');
+        parag.innerText = identifierString;
+        this.element.innerHTML = "";
+        this.element.appendChild(parag);
+        this.element.id = "identifier";
     }
 
     setAsEmptyCell() {

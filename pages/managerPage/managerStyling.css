@@ -1,6 +1,7 @@
 @import url("/screen/pages/managerPage/js/components/basePlatform/css/basicStyles.css");
 @import url("/screen/pages/managerPage/js/components/cell/css/basicStyle.css");
 @import url("/screen/pages/managerPage/js/components/cellsRow/css/basicStyles.css");
+@import url("/screen/pages/managerPage/js/components/grid/css/basicStyle.css");
 
 
 /* +++ CORRECT */
@@ -40,10 +41,10 @@ html, body {
   max-height: 100VH;
 }
 
-.viewport {
+.grids-container {
   width: 100%;
   height: 100%;
-  background-color: var(--viewport-main-background);
+  background-color: var(--grids-container-main-background);
   overflow: hidden;
   position: relative;
   display: flex;

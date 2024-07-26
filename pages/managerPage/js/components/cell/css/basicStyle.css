@@ -39,9 +39,16 @@
     height: var(--cell-height);
     width: var(--cell-width);
     border-radius: var(--cell-border-radius);
-    border: var(--cell-border-size) var(--standard-border-style) var(--primary-color);
-    background-color: var(--cell-background-color);
+    background-color: var(--grids-container-main-background);
+    align-items: var(--cell-align-items);
+    justify-content: var(--cell-justify-content);
+    display: var(--cell-display);
+}
+
+.cell-identifier p {
     font: var(--font-primary);
+    margin: var(--cell-text-margin);
+    font-size: var(--identifier-font-size);
 }
 
 .cell-whitespace{
