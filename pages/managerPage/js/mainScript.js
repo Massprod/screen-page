@@ -3,6 +3,8 @@ import ZoomAndDrag from "../../utility/zoomDrag.js";
 import { BASIC_PRESET_NAMES, TEST_PLATFORM_GRID_NAME } from "./constants.js";
 
 let platformManager = null;
+let gridManager = null;
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const platformsContainer = document.getElementById("platformsContainer");
@@ -11,7 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         platformsContainer
     );
     await platformManager.updatePreset(platformPresetName);
-    platformManager.buildPlatform();
     platformManager.platformName = TEST_PLATFORM_GRID_NAME;
-    platformManager.updatePlatformCells();
+    await platformManager.buildPlatform();
+    await platformManager.updatePlatformCells();
+    platformManager.startUpdating();
 })

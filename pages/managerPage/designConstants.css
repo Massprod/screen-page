@@ -19,8 +19,15 @@
     --cell-background-color-blocked: #904747;
     --cell-text-color: #333333;
     --cell-border-size: 4px;
+    --cell-display: flex;
+    --cell-align-items: center;
+    --cell-justify-content: center;
+    /* CELL TEXT */
+    --cell-text-margin: 0;
+    --cell-text-font-size: 5em;
     /* EMPTY CELL */
-    --empty-cell-background-color-blocked: #a97676;
+    --empty-cell-background-color-blocked: #ca9999;
+    --empty-cell-background-color: #eef5ec;
     /* WHITESPACE */
     --whitespace-background-color: whitesmoke;
     --whitespace-visibility: hidden;

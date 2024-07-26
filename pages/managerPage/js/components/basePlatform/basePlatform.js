@@ -1,21 +1,23 @@
-import { CLASS_NAMES } from "../../constants.js"
-import { BACK_URLS } from "../../constants.js";
+import { CLASS_NAMES, BACK_URLS, UPDATE_PERIODS } from "../../constants.js"
 import CellsRow from "../cellsRow/cellsRow.js";
+
 
 export default class BasePlatformManager{
     constructor(
         container
     ) {
-        this.presetName = "";
         this.container = container;
         this.getPresetURL = `${BACK_URLS.GET_PRESET_BY_NAME}`;
         this.getCellsDataURL = `${BACK_URLS.GET_PLATFORM_CELLS_DATA_BY_NAME}`;
+        this.getCellsLastChange = `${BACK_URLS.GET_PLATFORM_LAST_CHANGE_BY_ID}`;
         this.#init();
         this.presetData = null;
         this.platformRows = {};
         this.extraElements = {};
         this.platformName = "";
+        this.platformId = "";
         this.lastChange = null;
+        this.updateIntervalId = null;
     }
 
     #init(){
@@ -57,20 +59,34 @@ export default class BasePlatformManager{
         // Start from 1, because we're skipping identifiers in platform,
         // And first row is always only identifiers.
         for (let index = 1; index < rowsOrder.length; index += 1) {
-            var rowId = rowsOrder[index];
+            let rowId = rowsOrder[index];
             const rowElement = new CellsRow(this.element);
             this.platformRows[rowId] = rowElement;
             const rowData = this.presetData['rows'][rowId];
-            rowElement.buildRow(rowData);
+            rowElement.buildRow(rowData, false, rowId);
         }
     }
 
     async updatePlatformCells(){
+        if (this.lastChange !== null) {
+            const lastChangeUrl = `${this.getCellsLastChange}/${this.platformId}`;
+            const lastChangeData = await this.#getData(lastChangeUrl);
+            const newChangeTime = new Date(lastChangeData['lastChange']);
+            // console.log(`OLD_TIME: ${this.lastChange}`);
+            // console.log(`NEW_TIME: ${newChangeTime}`);
+            if (this.lastChange >= newChangeTime) {
+                return;
+            }
+        }
+        // console.log("UPDATING STARTED");
         // TODO: We need to add CHOOSE options for a PLATFORM_IDs.
         //  Because we need to be able to have more than 1 platform and we need to choose them.
         //  But it won't interfere with the main goal, so it's all later.
         const url = `${this.getCellsDataURL}/${this.platformName}`
         const platformData = await this.#getData(url);
+        this.platformId = platformData['_id'];
+        this.element.id = this.platformId;
+        this.lastChange = new Date(platformData['lastChange']);
         if (this.presetData['_id'] !== platformData['preset'])
             throw new Error(`Platform is using different preset = ${this.presetData['_id']}.
                              Trying to update with data for = ${platformData['preset']}`);
@@ -84,10 +100,31 @@ export default class BasePlatformManager{
                 const cell = columns[colId];
                 const cellData = platformData['rows'][rowId]['columns'][colId];
                 cell.data = cellData;
+                if (cellData['wheelStack'] !== null) {
+                    await cell.updateElementData();
+                } else {
+                    cell.elementData = null;
+                }
+                cell.updateCellState();
             }
         }
     }
 
+    async startUpdating() {
+        if (this.updateIntervalId !== null) {
+            return;
+        }
+        this.updateIntervalId = setInterval(() => {
+            this.updatePlatformCells();
+        }, UPDATE_PERIODS.BASE_PLATFORM
+    )
+    }
 
-
+    async stopUpdating() {
+        if (this.updateIntervalId === null) {
+            return;
+        }
+        clearInterval(this.updateIntervalId);
+        this.updateIntervalId = null;
+    }
 }

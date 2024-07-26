@@ -7,12 +7,32 @@
     border-radius: var(--cell-border-radius);
     border: var(--cell-border-size) var(--standard-border-style) var(--primary-color);
     background-color: var(--cell-background-color);
+    align-items: var(--cell-align-items);
+    justify-content: var(--cell-justify-content);
+    display: var(--cell-display);
+}
+
+.cell p {
     font: var(--font-primary);
+    margin: var(--cell-text-margin);
+    font-size: var(--cell-text-font-size);
 }
 
 .cell:hover{
     background-color: var(--cell-background-hover);
     box-shadow: var(--standard-box-shadow);
+}
+
+.cell-blocked{
+    background-color: var(--cell-background-color-blocked);
+}
+
+.cell-empty{
+    background-color: var(--empty-cell-background-color);
+}
+
+.cell-empty-blocked{
+    background-color: var(--empty-cell-background-color-blocked);
 }
 
 .cell-identifier{
