@@ -1,10 +1,26 @@
 import BasePlatformManager from "./components/basePlatform/basePlatform.js";
 import ZoomAndDrag from "../../utility/zoomDrag.js";
-import { BASIC_PRESET_NAMES, TEST_GRID_NAME, TEST_PLATFORM_NAME } from "./constants.js";
+import CellHoverCoordinate from "../../utility/cellHover/cellHoverCoordinate.js";
+import {
+    BASIC_PRESET_NAMES,
+    TEST_GRID_NAME,
+    TEST_PLATFORM_NAME,
+    BACK_URLS
+} from "./constants.js";
 import GridManager from "./components/grid/grid.js";
+import OrdersContextMenu from "./components/ordersContextMenu/ordersContextMenu.js";
+import flashMessage from "../../utility/flashMessage.js";
+
 
 let platformManager = null;
 let gridManager = null;
+let hoverCoord = new CellHoverCoordinate("cell");
+let ordersContextMenu = new OrdersContextMenu(
+    BACK_URLS.GET_ORDER_DATA_BY_ID,
+    true,
+    false,
+    false,
+);
 
 
 // TODO: Think about CLASS_NAMES, because if we change class name in CSS.
@@ -29,8 +45,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // +++ GRID SETUP
     const gridsContainer = document.getElementById("gridsContainer");
     const gridPresetName = BASIC_PRESET_NAMES.PMK_GRID;
+    const extraElementsContainer = document.getElementById("botContainer");
     gridManager = new GridManager(
-        gridsContainer
+        gridsContainer, extraElementsContainer,
     );
     await gridManager.updatePreset(gridPresetName);
     const zoomer = new ZoomAndDrag({
@@ -43,4 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     gridManager.startUpdating();
     // GRID SETUP ---
 
+
 })
+
+export { platformManager, gridManager, ordersContextMenu }

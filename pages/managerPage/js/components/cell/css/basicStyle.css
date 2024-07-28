@@ -10,6 +10,7 @@
     align-items: var(--cell-align-items);
     justify-content: var(--cell-justify-content);
     display: var(--cell-display);
+    cursor: pointer;
 }
 
 .cell p {
@@ -22,6 +23,7 @@
     background-color: var(--cell-background-hover);
     box-shadow: var(--standard-box-shadow);
 }
+
 
 .cell-blocked{
     background-color: var(--cell-background-color-blocked);
@@ -56,4 +58,15 @@
     width: var(--cell-width);
     border: var(--cell-border-size) var(--standard-border-style) var(--primary-color);
     visibility: var(--whitespace-visibility);
+}
+
+.cell-grid {
+    height: var(--cell-grid-height);
+    width: var(--cell-grid-width);
+}
+
+.cell-grid p {
+    font: var(--font-primary);
+    margin: var(--cell-text-margin);
+    font-size: var(--cell-grid-font-size);
 }

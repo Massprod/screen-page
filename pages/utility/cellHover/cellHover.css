@@ -1,0 +1,30 @@
+
+
+.cell-hover-coordinate {
+    position: absolute;
+    background-color: #000000b3;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 1.7em;
+    display: none;
+    pointer-events: none;
+    text-align: left;
+    line-height: normal;
+    z-index: 100000;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px #000000b3;
+    opacity: 0; 
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; 
+    font: "Georgia, serif";
+}
+
+.cell-hover-coordinate.show {
+display: block;
+opacity: 1;
+transform: translateY(0);
+}
+
+.cell-hover-coordinate.hidden {
+transform: translateY(-10px);
+}

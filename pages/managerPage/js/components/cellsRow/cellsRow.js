@@ -3,16 +3,23 @@ import Cell from "../cell/cell.js";
 
 export default class CellsRow{
     constructor(
-        container
+        container,
+        grid = false,
     ) {
         this.container = container;
+        this.grid = grid;
         this.#init();
         this.columns = {};
     }
 
     #init(){
         this.element = document.createElement("div");
-        this.element.className = "cells-row";
+        this.element.classList.add('cells-row')
+        if (this.grid){
+            this.element.classList.add('cells-row-grid');
+        } else{
+            this.element.classList.add("cells-row-platform");
+        }
         this.container.appendChild(this.element);
     }
 

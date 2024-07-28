@@ -1,5 +1,6 @@
 import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
 import CellsRow from "../cellsRow/cellsRow.js";
+import ExtraElement from "../extraElement/extraElement.js";
 
 // TODO: Merge GridManager AND BasePlatformManager
 //  They're basically doing the same, I was expecting them to build differently, because extra elements.
@@ -8,9 +9,10 @@ import CellsRow from "../cellsRow/cellsRow.js";
 
 export default class GridManager{
     constructor(
-        container
+        container, extraElementsContainer,
     ) {
         this.container = container;
+        this.extraElementsContainer = extraElementsContainer;
         this.getPresetURL = `${BACK_URLS.GET_PRESET_BY_NAME}`;
         this.getCellsDataURL = `${BACK_URLS.GET_GRID_CELLS_DATA_BY_NAME}`;
         this.getCellsLastChange = `${BACK_URLS.GET_GRID_LAST_CHANGE_BY_ID}`;
@@ -22,6 +24,9 @@ export default class GridManager{
         this.gridId = "";
         this.lastChange = null;
         this.updateIntervalId = null;
+        // Extra elements
+        this.extraElementsOpened = false;
+        this.extraContainer = null;
     }
 
     #init() {
@@ -61,14 +66,62 @@ export default class GridManager{
         const rowsOrder = this.presetData['rowsOrder'];
         for (let index = 0; index < rowsOrder.length; index += 1) {
             let rowId = rowsOrder[index];
-            const rowElement = new CellsRow(this.element);
+            const rowElement = new CellsRow(this.element, true);
             this.gridRows[rowId] = rowElement;
             const rowData = this.presetData['rows'][rowId];
             rowElement.buildRow(rowData, true, rowId);
         }
     }
 
+    async buildExtraContainer() {
+        // Container
+        const extraElementsContainer = document.createElement('div');
+        extraElementsContainer.classList.add('extra-elements-container');
+        extraElementsContainer.id = "extraElements";
+        // Header
+        const extraElementsHeader = document.createElement('div');
+        extraElementsHeader.classList.add('extra-elements-header');
+        extraElementsHeader.id = "extraElementsHeader";
+        extraElementsHeader.innerText = "Дополнительные Краны";
+        extraElementsContainer.appendChild(extraElementsHeader);
+        // Content
+        const extraElementsContent = document.createElement('div');
+        extraElementsContent.classList.add('extra-elements-content');
+        extraElementsContent.id = "extraElementsContent";
+        extraElementsContainer.appendChild(extraElementsContent);
+        // Open|Close Action
+        extraElementsHeader.addEventListener('click', () => {
+            if (this.extraElementsOpened) {
+                extraElementsContent.style.maxHeight = '0px';
+                const exist = document.querySelector('.extra-element-expanded-container');
+                if (exist) {
+                    exist.remove()
+                }
+                this.extraElementsOpened = false;
+            } else {
+                this.extraElementsOpened = true;
+                extraElementsContent.style.maxHeight = '250px';
+            }
+        });
+        this.extraElementsContainer.appendChild(extraElementsContainer);
+        return extraElementsContent;
+    }
 
+    async buildExtraElements(extraElementsData) {
+        // TODO: Check if EXTRA elements will ever change, then we need to remove them from `this.extraElements`.
+        if (!this.extraContainer) {
+            this.extraContainer = await this.buildExtraContainer();
+        } 
+        for (let elementName in extraElementsData) {
+            const elementData = extraElementsData[elementName];
+            if (this.extraElements[elementName]) {
+                this.extraElements[elementName].elementData = elementData;
+                continue;
+            }
+            const extraElement = new ExtraElement(this.extraContainer, elementName, elementData);
+            this.extraElements[elementName] = extraElement;
+        }
+    }
 
     async updateGridCells() {
         if (this.lastChange !== null) {
@@ -98,6 +151,7 @@ export default class GridManager{
                 const cell = columns[colId];
                 const cellData = gridData['rows'][rowId]['columns'][colId];
                 cell.data = cellData;
+                cell.gridCell = true;
                 if (cellData['wheelStack'] !== null) {
                     await cell.updateElementData();
                 } else {
@@ -106,6 +160,11 @@ export default class GridManager{
                 cell.updateCellState();
             }
         }
+        const extraElements = Object.keys(gridData['extra']);
+        if (0 === extraElements.length) {
+            return;
+        }
+        this.buildExtraElements(gridData['extra']);
     }
 
     async startUpdating() {

@@ -14,7 +14,8 @@ export default class Cell{
         this.cellColId = cellColId;
         this.#init();
         this.data = {};
-        this.elementData = {};
+        this.elementData = null;
+        this.gridCell = false;
     }
 
     async #getElementData(url) {
@@ -60,12 +61,14 @@ export default class Cell{
     setAsWhitespace() {
         this.element.classList = [];
         this.element.classList.add("cell-whitespace");
+        this.element.classList.add("cell-grid");
         this.element.id = "whitespace";
     }
     
     setAsIdentifier(identifierString) {
         this.element.classList = [];
         this.element.classList.add("cell-identifier");
+        this.element.classList.add("cell-grid");
         const parag = document.createElement('p');
         parag.innerText = identifierString;
         this.element.innerHTML = "";
@@ -75,12 +78,19 @@ export default class Cell{
 
     setAsEmptyCell() {
         this.element.classList = [];
+        this.element.innerHTML = ""
         this.element.classList.add("cell");
         this.element.classList.add("cell-empty");
+        if (this.gridCell) {
+            this.element.classList.add('cell-grid');
+        }
         if (this.data['blockedBy'] !== null || this.data['blocked']) {
             this.element.classList.add("cell-empty-blocked")
         } else {
             this.element.classList.remove("cell-empty-blocked");
+        }
+        if (this.orderMarked) {
+            this.element.classList.add('highlight');
         }
     }
 
@@ -91,6 +101,12 @@ export default class Cell{
             this.element.classList.add("cell-blocked");
         } else {
             this.element.classList.remove("cell-blocked");
+        }
+        if (this.gridCell) {
+            this.element.classList.add('cell-grid');
+        }
+        if (this.orderMarked) {
+            this.element.classList.add('highlight');
         }
         const parag = document.createElement('p');
         parag.innerText = this.elementData['wheels'].length;
@@ -110,7 +126,7 @@ export default class Cell{
         const elementId = this.data['wheelStack'];
         const dataUrl = `${this.elementDataURL}/${elementId}`;
         let newData = null;
-        if (!this.elementData['lastChange']) {
+        if (this.elementData === null) {
             newData = await this.#getElementData(dataUrl);
         } else {
             const prevUpdateTime = this.elementData['lastChange'];

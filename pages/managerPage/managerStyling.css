@@ -1,13 +1,20 @@
-@import url("/screen/pages/managerPage/js/components/basePlatform/css/basicStyles.css");
-@import url("/screen/pages/managerPage/js/components/cell/css/basicStyle.css");
-@import url("/screen/pages/managerPage/js/components/cellsRow/css/basicStyles.css");
-@import url("/screen/pages/managerPage/js/components/grid/css/basicStyle.css");
-
+@import url("./js/components/basePlatform/css/basicStyles.css");
+@import url("./js/components/cell/css/basicStyle.css");
+@import url("./js/components/cellsRow/css/basicStyles.css");
+@import url("./js/components/grid/css/basicStyle.css");
+@import url("../utility/cellHover/cellHover.css");
+@import url("./js/components/extraElement/css/basicStyle.css");
+@import url("./js/components/ordersContextMenu/css/basicStyle.css");
+@import url("./designConstants.css");
 
 /* +++ CORRECT */
 
 * {
   box-sizing: border-box;
+  /* Custom touch feedback color */
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); /* Close-to-black with some transparency */
+  outline: none; /* Remove the default outline */
+
 }
 html, body {
   margin: 0;
@@ -60,13 +67,13 @@ html, body {
   display: block;
 }
 
-.tooltip {
+.cell-hover-coordinate {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 5px;
   border-radius: 5px;
-  font-size: 15px;
+  font-size: 1.6em;
   display: none;
   pointer-events: none;
   text-align: left;
@@ -76,4 +83,81 @@ html, body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Optional: Add shadow for better visibility */
 }
 
+/* .highlight{
+  background-color: var(--cell-highlighted-by-order);
+} */
+
+
+@keyframes beacon-flash {
+  0% {
+    background-color: #f5a623; /* Warm orange */
+    opacity: 1;
+  }
+  50% {
+    background-color: #f7c065; /* Slightly lighter shade of orange */
+    opacity: 0.7;
+  }
+  100% {
+    background-color: #f5a623;
+    opacity: 1;
+  }
+}
+
+.highlight {
+  animation: beacon-flash 2s infinite ease-in-out;
+  transition: background-color 0.2s ease-in-out;
+}
+
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+  height: 8px; /* Height of the scrollbar for horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0; /* Background of the scrollbar track */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888; /* Color of the scrollbar thumb */
+  border-radius: 4px; /* Rounded corners for the scrollbar thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker color when hovering over the scrollbar thumb */
+}
+
+
+*::-webkit-tap-highlight {
+  border-radius: 50%; /* Make the highlight a circle */
+}
 /* CORRECT ---*/
+
+
+
+.flash-messages-container {
+  position: fixed;
+  z-index: 1999000;
+  max-width: 800px;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.flash-message {
+  position: relative;
+  margin: 10px 0; /* Margin to space out messages */
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  background-color: whitesmoke;
+  color: midnightblue;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  opacity: 0; /* Initially hidden */
+  transition: opacity 1s ease-out; /* Smooth transition for appearing and fading out */
+  pointer-events: auto; /* Allow interaction with the message */
+  word-break: break-word; /* Ensure text breaks within the width */
+}

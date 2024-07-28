@@ -14,6 +14,8 @@ export const BACK_URLS = {
     // GRID
     GET_GRID_LAST_CHANGE_BY_ID: `${mainAddress}/grid/change_time`,
     GET_GRID_CELLS_DATA_BY_NAME: `${mainAddress}/grid/name`, 
+    // ORDERS
+    GET_ORDER_DATA_BY_ID: `${mainAddress}/orders/order`
 }
 
 export const BASIC_PRESET_NAMES = {
@@ -24,7 +26,32 @@ export const BASIC_PRESET_NAMES = {
 export const TEST_PLATFORM_NAME = "test";
 export const TEST_GRID_NAME = "test2";
 
+export const ORDER_CLICKABLE_ROW_CLASSES = {
+    'extra-element-expanded-row': true,
+}
+
+
+export const FLASH_MESSAGES = {
+    FETCH_ERROR_BG_COLOR: 'white',
+    FETCH_ERROR_FONT_COLOR: 'red',
+    FETCH_ERROR_DURATION: 1500,
+    FETCH_NOT_FOUND_BG_COLOR: 'black',
+    FETCH_NOT_FOUND_FONT_COLOR: 'white',
+    FETCH_NOT_FOUND_DURATION: 1000,
+}
+
+export const ORDER_TYPES_TRANSLATE = {
+    "moveWholeStack": "Перенос стопки",
+    "moveTopWheel": "Перенос верхнего колеса",
+    "moveToLaboratory": "Перенос в лабораторию",
+    "mergeWheelStacks": "Объединение стопок",
+    "moveToProcessing": "Перенос в обработку",
+    "moveToRejected": "Перенос в брак",   
+}
+
+
 export const UPDATE_PERIODS = {
     BASE_PLATFORM: 500,
     GRID: 500,
+    EXTRA_ELEMENT_ORDERS_CONTAINER: 500,
 }

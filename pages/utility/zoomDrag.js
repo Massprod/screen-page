@@ -1,14 +1,5 @@
 class ZoomAndDrag {
-  /**
-   * Create a ZoomAndDrag instance.
-   * @param {HTMLElement} viewport - The element that contains the zoomable area.
-   * @param {HTMLElement} grid - The element that will be zoomed and dragged.
-   * @param {number} [initialScale=0.3] - The initial scale value.
-   * @param {number} [maxScale=1.5] - The maximum scale value.
-   * @param {number} [minScale=0.2] - The minimum scale value.
-   * @param {number} [zoomStep=0.05] - The step value for zooming.
-   */
-  constructor({ viewport, grid, initialScale = 0.5, maxScale = 1.5, minScale = 0.3, zoomStep = 0.05 }) {
+  constructor({ viewport, grid, initialScale = 0.5, maxScale = 1.5, minScale = 0.15, zoomStep = 0.05 }) {
     this.viewport = viewport;
     this.grid = grid;
     this.scale = initialScale;
@@ -18,6 +9,8 @@ class ZoomAndDrag {
     this.dragging = false;
     this.lastMousePos = { x: 0, y: 0 };
     this.translation = { x: 0, y: 0 };
+    this.initialTouchDistance = null;
+    this.initialScale = null;
 
     this.init();
   }
@@ -29,6 +22,11 @@ class ZoomAndDrag {
     this.viewport.addEventListener('mousedown', this.onMouseDown.bind(this));
     this.viewport.addEventListener('mousemove', this.onMouseMove.bind(this));
     document.addEventListener('mouseup', this.onMouseUp.bind(this));
+    
+    // Touch events for mobile devices
+    this.viewport.addEventListener('touchstart', this.onTouchStart.bind(this));
+    this.viewport.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
+    this.viewport.addEventListener('touchend', this.onTouchEnd.bind(this));
   }
 
   onWheel(event) {
@@ -47,11 +45,10 @@ class ZoomAndDrag {
 
     const scaleRatio = this.scale / prevScale;
 
-    // Adjust the translation to keep the zoom centered on the mouse pointer
     this.translation.x = offsetX - scaleRatio * (offsetX - this.translation.x);
     this.translation.y = offsetY - scaleRatio * (offsetY - this.translation.y);
 
-    this.updateTransform();
+    this.updateTransform(true); // Indicate that this is a zoom operation
   }
 
   onMouseDown(event) {
@@ -59,7 +56,6 @@ class ZoomAndDrag {
     this.dragging = true;
     this.lastMousePos = { x: event.clientX, y: event.clientY };
     clearTimeout(this.dragTimeout);
-
   }
 
   onMouseMove(event) {
@@ -73,7 +69,7 @@ class ZoomAndDrag {
 
     this.lastMousePos = { x: event.clientX, y: event.clientY };
 
-    this.updateTransform();
+    this.updateTransform(false); // Indicate that this is a drag operation
   }
 
   onMouseUp() {
@@ -82,17 +78,67 @@ class ZoomAndDrag {
     }
   }
 
-  updateTransform() {
+  // Touch event handlers for mobile
+  onTouchStart(event) {
+    if (event.touches.length === 1) {
+      this.dragging = true;
+      this.lastMousePos = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    } else if (event.touches.length === 2) {
+      this.dragging = false;
+      this.initialTouchDistance = this.getTouchDistance(event.touches);
+      this.initialScale = this.scale;
+    }
+  }
+
+  onTouchMove(event) {
+    event.preventDefault();
+    if (this.dragging && event.touches.length === 1) {
+      const deltaX = event.touches[0].clientX - this.lastMousePos.x;
+      const deltaY = event.touches[0].clientY - this.lastMousePos.y;
+
+      this.translation.x += deltaX;
+      this.translation.y += deltaY;
+
+      this.lastMousePos = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+
+      this.updateTransform(false); // Indicate that this is a drag operation
+    } else if (event.touches.length === 2) {
+      const currentTouchDistance = this.getTouchDistance(event.touches);
+      const scaleRatio = currentTouchDistance / this.initialTouchDistance;
+      this.scale = Math.max(this.minScale, Math.min(this.maxScale, this.initialScale * scaleRatio));
+      console.log("Pinch zoom triggered"); // Add console log here
+      this.updateTransform(true); // Indicate that this is a zoom operation
+    }
+  }
+
+  onTouchEnd(event) {
+    if (this.dragging && event.touches.length === 0) {
+      this.dragging = false;
+    }
+  }
+
+  getTouchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  updateTransform(isZoom = false) {
     const viewportRect = this.viewport.getBoundingClientRect();
     const scaledWidth = this.grid.offsetWidth * this.scale;
     const scaledHeight = this.grid.offsetHeight * this.scale;
 
-    // Ensure the grid stays within the bounds of the viewport
     const minTranslateX = Math.min(0, viewportRect.width - scaledWidth);
     const minTranslateY = Math.min(0, viewportRect.height - scaledHeight);
 
     this.translation.x = Math.max(minTranslateX, Math.min(0, this.translation.x));
     this.translation.y = Math.max(minTranslateY, Math.min(0, this.translation.y));
+
+    if (isZoom) {
+      this.grid.style.transition = 'transform 0.3s ease'; // Smooth transition for zooming
+    } else {
+      this.grid.style.transition = 'none'; // No transition for dragging
+    }
 
     this.grid.style.transform = `translate(${this.translation.x}px, ${this.translation.y}px) scale(${this.scale})`;
   }

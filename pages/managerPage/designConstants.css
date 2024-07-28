@@ -22,7 +22,7 @@
     --platforms-container-align-items: center;
     --platforms-container-justify-content: center;
     --platforms-container-flex-direction: column;
-    --platforms-container-vertical-gap: 10px;
+    --platforms-container-vertical-gap: 12px;
     /* ------ */
     /* GRID RELATED */
      /* GRID */
@@ -33,9 +33,9 @@
     --grid-container-top: 0;
     --grid-container-left: 0;
     --grid-container-transform-origin: top left;
-    --grid-container-transition: transform 0.1 ease-out;
+    --grid-container-transition: transform 0.1s ease;
     --grid-container-padding: 350px;
-    --grid-container-gap: 15px;
+    --grid-container-gap: 25px;  /* vertical gap */
     /* ------ */
     /* CELLS RELATED */
      /* CELL */
@@ -50,6 +50,14 @@
     --cell-display: flex;
     --cell-align-items: center;
     --cell-justify-content: center;
+    --cell-highlighted-by-order: #b9d255;
+    /* CELLS ROW */
+    --cells-row-grid-gap: 40px;     /* horizontal gap */
+    --cells-row-platform-gap: 12px; /* horizontal gap */
+     /* CELL GRID */
+    --cell-grid-height: 200px;
+    --cell-grid-width: 200px;
+    --cell-grid-font-size: 8em;
      /* CELL TEXT */
     --cell-text-margin: 0;
     --cell-text-font-size: 5em;
@@ -60,6 +68,6 @@
     --whitespace-background-color: whitesmoke;
     --whitespace-visibility: hidden;
      /* IDENTIFIER */
-    --identifier-font-size: 4em;
+    --identifier-font-size: 7em;
     /* ------ */
 }

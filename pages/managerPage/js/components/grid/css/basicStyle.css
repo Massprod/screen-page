@@ -13,3 +13,35 @@
     padding: var(--grid-container-padding);
     gap: var(--grid-container-gap);
 }
+
+/* EXTRA ELEMENTS */
+
+.extra-elements-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 300px;
+    border: 1px solid #333;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10000;
+}
+
+.extra-elements-header {
+    background-color: #444; /* Dark gray background */
+    padding: 10px;
+    cursor: pointer;
+    user-select: none;
+    color: #fff; /* White text color */
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.extra-elements-content {
+    max-height: 0px; /* Set maximum height for the dropdown content to show 5 rows */
+    overflow-y: auto; /* Enable vertical scrolling when content exceeds max height */
+    transition: max-height 0.3s ease-out;
+    background-color: #fff; /* White background for content */
+    border-top: 1px solid #333; /* Dark gray border */
+}

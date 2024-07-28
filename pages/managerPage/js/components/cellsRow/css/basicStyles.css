@@ -3,5 +3,14 @@
 .cells-row {
     display: flex;
     flex-direction: row;
-    gap: var(--platforms-container-vertical-gap);
+    
 }
+
+.cells-row-grid {
+    gap: var(--cells-row-grid-gap)
+}
+
+.cells-row-platform {
+    gap: var(--cells-row-platform-gap);
+}
+
