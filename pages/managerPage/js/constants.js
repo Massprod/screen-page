@@ -15,7 +15,9 @@ export const BACK_URLS = {
     GET_GRID_LAST_CHANGE_BY_ID: `${mainAddress}/grid/change_time`,
     GET_GRID_CELLS_DATA_BY_NAME: `${mainAddress}/grid/name`, 
     // ORDERS
-    GET_ORDER_DATA_BY_ID: `${mainAddress}/orders/order`
+    GET_ORDER_DATA_BY_ID: `${mainAddress}/orders/order`,
+    COMPLETE_ORDER_BY_ID: `${mainAddress}/orders/complete`,
+    CANCEL_ORDER_BY_ID: `${mainAddress}/orders/cancel`,
 }
 
 export const BASIC_PRESET_NAMES = {

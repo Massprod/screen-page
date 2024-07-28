@@ -20,6 +20,8 @@ let ordersContextMenu = new OrdersContextMenu(
     true,
     false,
     false,
+    BACK_URLS.COMPLETE_ORDER_BY_ID,
+    BACK_URLS.CANCEL_ORDER_BY_ID,
 );
 
 

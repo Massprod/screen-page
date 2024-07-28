@@ -13,8 +13,12 @@ export default class OrdersContextMenu{
         active,
         completed,
         canceled,
+        completeOrdersUrl,
+        cancelOrdersUrl,
     ) {
         this.orderDataUrl = `${ordersDataUrl}`;
+        this.completeOrdersUrl = `${completeOrdersUrl}`;
+        this.cancelOrdersUrl = `${cancelOrdersUrl}`;
         this.activeFilter = `active_order=${active}`;
         this.completedFilter = `completed_order=${completed}`;
         this.canceledFilter = `canceled_order=${canceled}`;
@@ -42,6 +46,30 @@ export default class OrdersContextMenu{
         } catch (error) {
             console.error(
                 `There was a problem with getting orderData: ${error}`
+            );
+            throw error
+        }
+    }
+
+    async #postOrderData(url) {
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+            });
+            if (!response.ok) {
+                flashMessage.show({
+                    message: `Ошибка при обновлении статуса заказа: ${response.status}`,
+                    color: FLASH_MESSAGES.FETCH_ERROR_FONT_COLOR,
+                    backgroundColor: FLASH_MESSAGES.FETCH_ERROR_BG_COLOR,
+                    position: 'top-center',
+                    duration: 5000,
+                });
+                throw new Error(`Error while updating orderStatus ${response.statusText}. URL = ${url}`);
+            }
+            return response
+        } catch (error) {
+            console.error(
+                `There was a problem with updating orderStatus: ${error}`
             );
             throw error
         }
@@ -90,6 +118,48 @@ export default class OrdersContextMenu{
         orderTypeParag.innerHTML = `Тип: ${orderType}`;
         orderTypeRow.appendChild(orderTypeParag);
         this.element.appendChild(orderTypeRow);
+        // +++ BUTTONS ROW
+        const orderButtonsRow = document.createElement('div');
+        orderButtonsRow.classList.add('orders-context-menu-buttons-row');
+        orderButtonsRow.id = 'orderButtons';
+        //   COMPLETE BUTTON
+        const orderCompleteButton = document.createElement('div');
+        orderCompleteButton.classList.add('orders-context-menu-button');
+        orderCompleteButton.classList.add('order-complete');
+        orderCompleteButton.id = 'orderComplete';
+        orderCompleteButton.textContent = 'Выполнить';
+        orderCompleteButton.addEventListener('click', async () => {
+            const completeUrl = `${this.completeOrdersUrl}/${this.orderData['_id']}`;
+            const response = await this.#postOrderData(completeUrl);
+            flashMessage.show({
+                message: `Статус заказа "${this.orderData['_id']}" изменён на Выполнен`,
+                color: FLASH_MESSAGES.FETCH_ERROR_FONT_COLOR,
+                backgroundColor: FLASH_MESSAGES.FETCH_ERROR_BG_COLOR,
+                position: 'top-center',
+                duration: 6000,
+            });
+        })
+        orderButtonsRow.appendChild(orderCompleteButton);
+        //   CANCEL BUTTON
+        const orderCancelButton = document.createElement('div');
+        orderCancelButton.classList.add("orders-context-menu-button");
+        orderCancelButton.classList.add('order-cancel')
+        orderCancelButton.id = 'orderCancel';
+        orderCancelButton.textContent = 'Отменить';
+        orderCancelButton.addEventListener('click', async () => {
+            const cancelUrl = `${this.cancelOrdersUrl}/${this.orderData['_id']}`;
+            const response =await this.#postOrderData(cancelUrl);
+            flashMessage.show({
+                message: `Статус заказа "${this.orderData['_id']}" изменён на Отменён`,
+                color: FLASH_MESSAGES.FETCH_ERROR_FONT_COLOR,
+                backgroundColor: FLASH_MESSAGES.FETCH_ERROR_BG_COLOR,
+                position: 'top-center',
+                duration: 6000,
+            });
+        })
+        orderButtonsRow.appendChild(orderCancelButton);
+        this.element.appendChild(orderButtonsRow);
+        // BUTTONS ROW ---
         document.body.appendChild(this.element);
         document.addEventListener("click", (event) => {
             if (this.element && !this.element.contains(event.target)) {
@@ -257,9 +327,9 @@ export default class OrdersContextMenu{
         if (this.orderData) {
             const orderDataUrl = `${this.orderDataUrl}/${this.orderData['_id']}?${this.activeFilter}&${this.completedFilter}&${this.canceledFilter}`;
             const orderData = await this.#getOrderData(orderDataUrl);
-            console.log("EXISTENCE_CHECK");
+            // console.log("EXISTENCE_CHECK");
             if (null === orderData) {
-                console.log('EXISTENCE_CLOSED');
+                // console.log('EXISTENCE_CLOSED'   );
                 this.#removeMenu();
                 this.stopUpdating();
             }
