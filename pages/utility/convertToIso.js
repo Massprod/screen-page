@@ -1,4 +1,4 @@
-export default function convertISOToCustomFormat(isoDate) {
+export default function convertISOToCustomFormat(isoDate, withBreaker = false) {
     // Parse the ISO date string
     const date = new Date(isoDate);
     
@@ -8,9 +8,14 @@ export default function convertISOToCustomFormat(isoDate) {
     const year = date.getFullYear();
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
+    const secs = String(date.getSeconds()).padStart(2, '0');
 
-    // Format the date as ddMMyyyy mmHH
-    const formattedDate = `${minutes}:${hours} - ${day}.${month}.${year}`;
+    let formattedDate = '';
+    if (withBreaker) {
+        formattedDate = `${hours}:${minutes}:${secs} <br> ${day}.${month}.${year}`;
+    } else {
+        formattedDate = `${hours}:${minutes}:${secs} - ${day}.${month}.${year}`;
+    }
 
     return formattedDate;
 }
