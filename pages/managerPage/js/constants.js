@@ -18,6 +18,9 @@ export const BACK_URLS = {
     GET_ORDER_DATA_BY_ID: `${mainAddress}/orders/order`,
     COMPLETE_ORDER_BY_ID: `${mainAddress}/orders/complete`,
     CANCEL_ORDER_BY_ID: `${mainAddress}/orders/cancel`,
+    GET_ALL_ORDERS_DATA: `${mainAddress}/orders/all`,
+    // WHEELSTACK
+    GET_WHEELSTACK_DATA_BY_ID: `${mainAddress}/wheelstacks/id`,
 }
 
 export const BASIC_PRESET_NAMES = {
@@ -32,6 +35,10 @@ export const ORDER_CLICKABLE_ROW_CLASSES = {
     'extra-element-expanded-row': true,
 }
 
+export const PLACEMENT_TYPES = {
+    "grid": "Приямок",
+    "basePlatform": "Челнок",
+}
 
 export const FLASH_MESSAGES = {
     FETCH_ERROR_BG_COLOR: 'white',
@@ -51,9 +58,19 @@ export const ORDER_TYPES_TRANSLATE = {
     "moveToRejected": "Перенос в брак",   
 }
 
+export const ORDERS_TABLE_COLUMNS_TRANSLATE = {
+    "batchNumber": "Номер партии",
+    "orderId": "Номер заказа",
+    "orderType": "Тип заказа",
+    "source": "Исходная",
+    "destination": "Конечная",
+    "createdAt": "Время поступления",
+}
+
 
 export const UPDATE_PERIODS = {
     BASE_PLATFORM: 500,
     GRID: 500,
     EXTRA_ELEMENT_ORDERS_CONTAINER: 500,
+    ORDERS_TABLE_UPDATE_RATE: 500,
 }
