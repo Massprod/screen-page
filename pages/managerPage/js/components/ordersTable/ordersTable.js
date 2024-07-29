@@ -115,6 +115,7 @@ export default class OrdersTable{
         row.appendChild(column);
         column = document.createElement('td');
         column.innerHTML = `${ORDER_TYPES_TRANSLATE[orderData['orderType']]}`;
+        column.id = orderData['_id'];
         row.appendChild(column);
         column = document.createElement('td');
         const sourceType = orderData['source']['placementType'];
@@ -123,6 +124,7 @@ export default class OrdersTable{
         const sourceCol = orderData['source']['columnPlacement'];
         column.innerHTML = `<b>${PLACEMENT_TYPES[sourceType]}</b> - ${sourceId}<br>
                             <b>Ряд</b>: ${sourceRow} | <b>Колонна</b> ${sourceCol}`;
+        column.id = orderData['_id'];
         row.appendChild(column);
         column = document.createElement('td');
         const destinationType = orderData['destination']['placementType'];
@@ -131,10 +133,12 @@ export default class OrdersTable{
         const destinationCol = orderData['destination']['columnPlacement'];
         column.innerHTML = `<b>${PLACEMENT_TYPES[destinationType]}</b> - ${destinationId}<br>
                             <b>Ряд</b>: ${destinationRow} | <b>Колонна</b> ${destinationCol}`;
+        column.id = orderData['_id'];
         row.appendChild(column);
         column = document.createElement('td');
         const creationTime = convertISOToCustomFormat(orderData['createdAt'], true);
         column.innerHTML = `<b>${creationTime}</b>`;
+        column.id = orderData['_id'];
         row.appendChild(column);
         this.createdRows[orderId] = row;
         this.contentTableBody.appendChild(row);
