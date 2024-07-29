@@ -192,8 +192,8 @@ export default class OrdersContextMenu{
         }
         if (sourceType === 'grid') {
             this.sourceCell = gridManager['gridRows'][sourceRow].columns[sourceCol];
-        } else if (sourceType = 'basePlatform') {
-            this.sourceCell = gridManager['platformRows'][sourceRow].columns[sourceCol];
+        } else if (sourceType === 'basePlatform') {
+            this.sourceCell = platformManager['platformRows'][sourceRow].columns[sourceCol];
         }
         // DESTINATION <- only can be a GRID
         const destinationId = this.orderData['destination']['placementId'];
