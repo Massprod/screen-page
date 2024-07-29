@@ -17,31 +17,31 @@
 /* EXTRA ELEMENTS */
 
 .extra-elements-container {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 300px;
-    border: 1px solid #333;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 10000;
+    position: var(--extra-elements-container-position);
+    top: var(--extra-elements-container-top);
+    left: var(--extra-elements-container-left);
+    width: var(--extra-elements-container-width);
+    border: var(--extra-elements-container-border);
+    background-color: var(--extra-elements-container-background-color);
+    box-shadow: var(--extra-elements-container-box-shadow);
+    z-index: var(--extra-elements-container-z-index);
 }
 
 .extra-elements-header {
-    background-color: #444; /* Dark gray background */
-    padding: 10px;
-    cursor: pointer;
-    user-select: none;
-    color: #fff; /* White text color */
-    font-weight: bold;
-    text-align: center;
-    font-size: 1.5em;
+    background-color: var(--extra-elements-header-background-color);
+    padding: var(--extra-elements-header-padding);
+    cursor: var(--extra-elements-header-cursor);
+    user-select: var(--extra-elements-header-user-select);
+    color: var(--extra-elements-header-color);
+    font-weight: var(--extra-elements-header-font-weight);
+    text-align: var(--extra-elements-header-text-align);
+    font-size: var(--extra-elements-header-font-size);
 }
 
 .extra-elements-content {
-    max-height: 0px; /* Set maximum height for the dropdown content to show 5 rows */
-    overflow-y: auto; /* Enable vertical scrolling when content exceeds max height */
-    transition: max-height 0.3s ease-out;
-    background-color: #fff; /* White background for content */
-    border-top: 1px solid #333; /* Dark gray border */
+    max-height: var(--extra-elements-content-max-height);
+    overflow-y: var(--extra-elements-content-overflow-y);
+    transition: var(--extra-elements-content-transition);
+    background-color: var(--extra-elements-content-background-color);
+    border-top: var(--extra-elements-content-border-top);
 }

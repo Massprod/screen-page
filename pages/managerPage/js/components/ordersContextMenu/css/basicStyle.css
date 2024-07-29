@@ -45,3 +45,45 @@
     border: 1px solid black;
     border-radius: 7px;
 }
+
+
+.orders-context-menu-buttons-row {
+    padding: 20px 10px 20px 10px;
+    display: flex;
+    width: 100%;
+    gap: 10px; /* Space between buttons */
+}
+  
+.orders-context-menu-button {
+    flex: 1; /* Make buttons fill the row */
+    padding: 10px;
+    font-size: 1.3em;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    height: 100%; /* Ensure buttons fill the height of the container */
+}
+
+.orders-context-menu-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.orders-context-menu-button.order-complete {
+    background-color: #6daa6d; /* Less bright green */  
+}
+
+.orders-context-menu-button.order-complete:hover {
+    background-color: #5b945b; /* Darker green on hover */
+}
+
+.orders-context-menu-button.order-cancel {
+    background-color: #e57373; /* Less bright red */
+}
+
+.orders-context-menu-button.order-cancel:hover {
+    background-color: #d32f2f; /* Darker red on hover */
+}

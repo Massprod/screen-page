@@ -1,15 +1,23 @@
+@import url("../../../../designConstants.css");
 
 
 .extra-element-dropdown-row{
-    background-color: #e0e0e0; /* Light gray for rows */
-    border-bottom: 1px solid #ccc; /* Medium gray border */
-    padding: 10px;
-    color: #333; /* Dark text color */
-    margin: 0; /* No margin between rows */
+    background-color: var(--grids-container-main-background);
+    border-bottom: var(--extra-elements-border-top); /* Medium gray border */
+    padding: var(--extra-elements-header-padding);
+    color: var(--primary-font-color);
+    margin: 0;
     cursor: pointer;
-    box-sizing: border-box; /* Ensure padding is included in height calculation */
+    /* box-sizing: border-box; */
     align-items: center;
 }
+
+.extra-element-dropdown-row:hover {
+    background-color: #e7e4e4; /* Slightly darker on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
+    color: black;
+}
+
 
 .extra-element-dropdown-row p {
     margin: 0;
@@ -17,6 +25,8 @@
     font-size: 1.5em;
     text-align: center;
 }
+
+
 
 .extra-element-expanded-container {
     position: absolute;
