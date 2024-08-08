@@ -71,6 +71,9 @@ export default class GridManager{
             const rowData = this.presetData['rows'][rowId];
             rowElement.buildRow(rowData, true, rowId);
         }
+        this.element.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+        })
     }
 
     async buildExtraContainer() {

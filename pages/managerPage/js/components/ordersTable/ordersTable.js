@@ -108,6 +108,7 @@ export default class OrdersTable{
         // TODO: Adjust creation of a class and rows, so we could loop and create by set COLUMNS.
         let column = document.createElement('td');
         column.innerHTML = `${wheelstackData['batchNumber']}`;
+        column.id = orderData['_id'];
         row.appendChild(column);
         column = document.createElement('td');
         column.innerHTML = `${orderData['_id']}`;

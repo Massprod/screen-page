@@ -7,6 +7,7 @@
 @import url("./js/components/ordersContextMenu/css/basicStyle.css");
 @import url("./designConstants.css");
 @import url("./js/components/ordersTable/css/basicStyle.css");
+@import url("./js/components/cellsContextMenu/css/basicStyle.css");
 
 
 /* +++ CORRECT */
@@ -37,8 +38,8 @@ html, body {
   border-bottom: 2px solid #ccc;
   max-width: 100%;
   min-width: 100%;
-  max-height: 40%;
-  min-height: 350px;
+  max-height: 400px;
+  min-height: 400px;
 }
 
 .bottom-half {

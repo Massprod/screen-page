@@ -12,6 +12,8 @@ import OrdersContextMenu from "./components/ordersContextMenu/ordersContextMenu.
 import flashMessage from "../../utility/flashMessage.js";
 import OrdersTable from "./components/ordersTable/ordersTable.js";
 import ColumnResizer from "../../utility/columnsResize/resizer.js";
+import CellsContextMenu from "./components/cellsContextMenu/cellsContextMenu.js";
+
 
 
 let platformManager = null;
@@ -25,6 +27,7 @@ let ordersContextMenu = new OrdersContextMenu(
     BACK_URLS.COMPLETE_ORDER_BY_ID,
     BACK_URLS.CANCEL_ORDER_BY_ID,
 );
+
 
 
 // TODO: Think about CLASS_NAMES, because if we change class name in CSS.
@@ -72,6 +75,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         BACK_URLS.GET_ALL_ORDERS_DATA,
         ["batchNumber", "orderId", "orderType", "source", "destination", "createdAt"],
     )
+    
+    let cellsContextMenu = new CellsContextMenu(
+        "cell",
+        BACK_URLS.CREATE_MOVE_WHOLE_ORDER,
+    );
+
     // ORDERS TABLE ---
     // TODO: MAYBE finish and apply it. But it was just an experiment and we don't need it.
     // +++ TABLE RESIZER 

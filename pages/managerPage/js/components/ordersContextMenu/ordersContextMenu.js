@@ -76,6 +76,9 @@ export default class OrdersContextMenu{
     }
 
     #buildMenu(event) {
+        if (this.element) {
+            this.element.remove();
+        }
         this.element = document.createElement('div');
         this.element.classList.add("orders-context-menu-container");
         this.element.id = `OrderMenu:${this.orderData['_id']}`;
@@ -161,12 +164,15 @@ export default class OrdersContextMenu{
         this.element.appendChild(orderButtonsRow);
         // BUTTONS ROW ---
         document.body.appendChild(this.element);
-        document.addEventListener("click", (event) => {
+        this.menuCloser = (event) => {
             if (this.element && !this.element.contains(event.target)) {
-                this.#removeMenu(true);
+                this.removeMenu(true);
                 this.stopUpdating();
+                document.removeEventListener('click', this.menuCloser);
+                this.menuCloser = null;
             }
-        })
+        } 
+        document.addEventListener("click", this.menuCloser);
         this.updateMenuPosition(event)
     }
 
@@ -254,7 +260,7 @@ export default class OrdersContextMenu{
             if (null == orderData) {
                 this.clearHighlightInterval();
                 this.unmarkHiglighted();
-                this.#removeMenu();
+                this.removeMenu();
                 this.cellsMarked = false;
                 flashMessage.show({
                     message: 'Данные заказа более не представлены среди Активных',
@@ -278,7 +284,7 @@ export default class OrdersContextMenu{
         this.highlightIntervalId = null;
     }
 
-    #removeMenu() {
+    removeMenu() {
         if (this.element) {
             this.element.remove();
             this.orderData = null;
@@ -286,18 +292,20 @@ export default class OrdersContextMenu{
             if (this.highlightTimeout) {
                 clearTimeout(this.highlightTimeout);
             }
-            this.highlightTimeout = setTimeout(() => {
-                this.clearHighlightInterval();
-                this.unmarkHiglighted();
-                this.cellsMarked = false;
-                flashMessage.show({
-                    message: 'Выделение объектов заказа отключено',
-                    color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
-                    backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
-                    position: 'top-center',
-                    duration: 4000,
-                });
-            }, 20000);
+            if (this.highlightIntervalId) {
+                this.highlightTimeout = setTimeout(() => {
+                    this.clearHighlightInterval();
+                    this.unmarkHiglighted();
+                    this.cellsMarked = false;
+                    flashMessage.show({
+                        message: 'Выделение объектов заказа отключено',
+                        color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
+                        backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
+                        position: 'top-center',
+                        duration: 4000,
+                    });
+                }, 20000);
+            }
         }
     }
 
@@ -312,13 +320,11 @@ export default class OrdersContextMenu{
                 position: 'top-center',
                 duration: FLASH_MESSAGES.FETCH_NOT_FOUND_DURATION,
             });
-            this.#removeMenu();
+            this.removeMenu();
             return;
         }
         this.orderData = orderData;
-        if (!this.element) {
-            this.#buildMenu(event);
-        }
+        this.#buildMenu(event);
         this.updateMenuPosition(event);
         this.startUpdating();
     }
@@ -330,7 +336,7 @@ export default class OrdersContextMenu{
             // console.log("EXISTENCE_CHECK");
             if (null === orderData) {
                 // console.log('EXISTENCE_CLOSED'   );
-                this.#removeMenu();
+                this.removeMenu();
                 this.stopUpdating();
             }
         }

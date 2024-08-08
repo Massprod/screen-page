@@ -19,6 +19,10 @@ export const BACK_URLS = {
     COMPLETE_ORDER_BY_ID: `${mainAddress}/orders/complete`,
     CANCEL_ORDER_BY_ID: `${mainAddress}/orders/cancel`,
     GET_ALL_ORDERS_DATA: `${mainAddress}/orders/all`,
+    CREATE_MOVE_WHOLE_ORDER: `${mainAddress}/orders/create/move`,
+    CREATE_MOVE_TO_PROCESSING_ORDER: `${mainAddress}/orders/create/process`,  
+    CREATE_MOVE_TO_REJECTED_ORDER: `${mainAddress}/orders/create/reject`, 
+    CREATE_MOVE_TO_LAB_ORDER: `${mainAddress}/orders/create/laboratory`,
     // WHEELSTACK
     GET_WHEELSTACK_DATA_BY_ID: `${mainAddress}/wheelstacks/id`,
 }
@@ -66,7 +70,6 @@ export const ORDERS_TABLE_COLUMNS_TRANSLATE = {
     "destination": "Конечная",
     "createdAt": "Время поступления",
 }
-
 
 export const UPDATE_PERIODS = {
     BASE_PLATFORM: 500,

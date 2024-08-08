@@ -86,6 +86,7 @@ export default class Cell{
         }
         if (this.data['blockedBy'] !== null || this.data['blocked']) {
             this.element.classList.add("cell-empty-blocked")
+            this.element.classList.remove('cell-empty');
         } else {
             this.element.classList.remove("cell-empty-blocked");
         }

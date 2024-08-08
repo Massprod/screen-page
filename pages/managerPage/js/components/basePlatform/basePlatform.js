@@ -63,6 +63,9 @@ export default class BasePlatformManager{
             const rowData = this.presetData['rows'][rowId];
             rowElement.buildRow(rowData, false, rowId);
         }
+        this.element.addEventListener("context-menu", (event) => {
+            event.preventDefault();
+        })
     }
 
     async updatePlatformCells() {
