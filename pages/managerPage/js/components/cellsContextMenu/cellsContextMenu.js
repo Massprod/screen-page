@@ -1,5 +1,5 @@
 import flashMessage from "../../../../utility/flashMessage.js";
-import { gridManager, platformManager, ordersContextMenu } from "../../mainScript.js";
+import { gridManager, platformManager, ordersContextMenu, batchesContextMenu } from "../../mainScript.js";
 import { BACK_URLS, FLASH_MESSAGES } from "../../constants.js";
 
 
@@ -60,7 +60,7 @@ export default class CellsContextMenu{
             const orderData = await response.json();
             return orderData;
         } catch (error) {
-            console.error('Error fetching creation of the order:', error);
+            console.error('Error getting data of the order:', error);
             throw error;
         }
     }
@@ -559,6 +559,12 @@ export default class CellsContextMenu{
                 this.batchRow.classList.remove("batch-highlight");
             }
         })
+        this.batchRow.addEventListener("contextmenu", (event) => {
+            if (this.batchRow.contains(event.target)) {
+                batchesContextMenu.buildMenu(event, this.batchRow.id);
+            }
+        })
+
         this.wheelsContainer.appendChild(this.batchRow);
         // ---
     }
@@ -614,6 +620,9 @@ export default class CellsContextMenu{
                     if (this.wheelsMenu && this.wheelsMenu.contains(event.target)) {
                         return;
                     }
+                    if (batchesContextMenu.element && batchesContextMenu.element.contains(event.target)) {
+                        return;
+                    }
                     this.hideMenu();
                 }
             }
@@ -656,6 +665,7 @@ export default class CellsContextMenu{
         // this.chosenBatch = null;
         this.stopUpdating();
         ordersContextMenu.removeMenu()
+        batchesContextMenu.removeMenu();
     }
 
 
@@ -697,7 +707,6 @@ export default class CellsContextMenu{
     }
     
     
-
 
     #isEmpty() {
         if (!this.targetCell) {

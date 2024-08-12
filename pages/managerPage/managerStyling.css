@@ -8,6 +8,7 @@
 @import url("./designConstants.css");
 @import url("./js/components/ordersTable/css/basicStyle.css");
 @import url("./js/components/cellsContextMenu/css/basicStyle.css");
+@import url("./js/components/batchesContextMenu/css/basicStyle.css");
 
 
 /* +++ CORRECT */
@@ -157,4 +158,10 @@ html, body {
   transition: background-color 0.2s ease-in-out;
 }
 
+.batch-mark {
+  background-color: rgb(196, 3, 209);
+}
+.batch-mark:hover{
+  background-color: rgb(196, 3, 209);
+}
 /* CORRECT ---*/

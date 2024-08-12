@@ -25,6 +25,8 @@ export const BACK_URLS = {
     CREATE_MOVE_TO_LAB_ORDER: `${mainAddress}/orders/create/laboratory`,
     // WHEELSTACK
     GET_WHEELSTACK_DATA_BY_ID: `${mainAddress}/wheelstacks/id`,
+    // BATCH_NUMBER
+    GET_BATCH_NUMBER_DATA_BY_ID: `${mainAddress}/batch_number/batch_number`
 }
 
 export const BASIC_PRESET_NAMES = {
@@ -32,8 +34,8 @@ export const BASIC_PRESET_NAMES = {
     PMK_GRID: "pmkGrid",
 }
 
-export const TEST_PLATFORM_NAME = "test";
-export const TEST_GRID_NAME = "test2";
+export const TEST_PLATFORM_NAME = "pmkBase1";
+export const TEST_GRID_NAME = "pmkGrid1";
 
 export const ORDER_CLICKABLE_ROW_CLASSES = {
     'extra-element-expanded-row': true,

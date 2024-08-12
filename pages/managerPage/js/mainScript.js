@@ -13,6 +13,7 @@ import flashMessage from "../../utility/flashMessage.js";
 import OrdersTable from "./components/ordersTable/ordersTable.js";
 import ColumnResizer from "../../utility/columnsResize/resizer.js";
 import CellsContextMenu from "./components/cellsContextMenu/cellsContextMenu.js";
+import BatchesContextMenu from "./components/batchesContextMenu/batchesContextMenu.js";
 
 
 
@@ -27,7 +28,10 @@ let ordersContextMenu = new OrdersContextMenu(
     BACK_URLS.COMPLETE_ORDER_BY_ID,
     BACK_URLS.CANCEL_ORDER_BY_ID,
 );
-
+let batchesContextMenu = new BatchesContextMenu(
+    "batch-row",
+    BACK_URLS.GET_BATCH_NUMBER_DATA_BY_ID,
+)
 
 
 // TODO: Think about CLASS_NAMES, because if we change class name in CSS.
@@ -129,4 +133,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     
 })
 
-export { platformManager, gridManager, ordersContextMenu }
+export { platformManager, gridManager, ordersContextMenu, batchesContextMenu }

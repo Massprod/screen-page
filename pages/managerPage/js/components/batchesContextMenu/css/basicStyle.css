@@ -1,0 +1,57 @@
+.batch-context-menu-container {
+    position: absolute;
+    background-color: #f1f0f0;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 11111;
+    display: flex;
+    flex-direction: column;
+    min-width: 400px;
+    max-width: 500px;
+    max-height: 650px;
+    overflow-y: auto;
+    border-radius: 7px;   
+}
+
+.batch-context-menu-row {
+    margin: 10px;
+    display: flex;
+    background-color: #ebe8e8;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.batch-context-menu-row:hover {
+    background-color: #e7e4e4;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: black;
+}
+
+.batch-context-menu-row p {
+    padding: 5px 10px 5px 10px;
+    width: 100%;
+    height: 100%;
+    margin: 0px 10px 0px 10px;
+    color: #333;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    text-align: left;
+    font-size: 1.3em;
+    border: 1px solid black;
+    border-radius: 7px;
+    text-align: center;
+}
+
+.batch-context-menu-container.not-tested {
+    background-color: #f7efce;
+}
+
+.batch-context-menu-container.not-passed {
+    background-color: #f8cccc;
+}
+
+.batch-context-menu-container.passed {
+    background-color: #d3f8cc;
+}

@@ -109,8 +109,12 @@ export default class Cell{
         if (this.orderMarked) {
             this.element.classList.add('highlight');
         }
+        if (this.batchMarked) {
+            this.element.classList.add('batch-mark');
+        }
         const parag = document.createElement('p');
         parag.innerText = this.elementData['wheels'].length;
+        parag.id = `${this.cellRowId}|${this.cellColId}`
         this.element.innerHTML = "";
         this.element.appendChild(parag);
     }
