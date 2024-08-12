@@ -38,7 +38,7 @@ export default class CellHoverCoordinate {
 
     showCoordinate(event) {
         const target = event.targetTouches ? event.targetTouches[0].target : event.target;
-        if (!target.classList.contains(this.hoverClass)) {
+        if (!target.classList.contains(this.hoverClass) && (target.parentElement &&  !target.parentElement.classList.contains(this.hoverClass))) {
             return;
         }
         this.element.classList.remove('hidden');
