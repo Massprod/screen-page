@@ -111,7 +111,10 @@ export default class Cell{
             this.element.classList.add('highlight');
         }
         if (batchesContextMenu.markingBatch && batchesContextMenu.markingBatch === this.elementData['batchNumber']) {
-            this.element.classList.add('batch-mark')
+            this.element.classList.add('batch-mark');
+        }
+        if (this.markedChosen) {
+            this.element.classList.add('mark-chosen');
         }
         const parag = document.createElement('p');
         parag.innerText = this.elementData['wheels'].length;

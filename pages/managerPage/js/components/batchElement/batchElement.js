@@ -1,6 +1,5 @@
-import { batchesContextMenu, cellsContextMenu } from "../../mainScript.js";
+import { batchesContextMenu, cellsContextMenu, gridManager } from "../../mainScript.js";
 import { BACK_URLS } from "../../constants.js";
-
 
 
 export default class BatchElement{
@@ -27,14 +26,16 @@ export default class BatchElement{
             event.preventDefault();
             batchesContextMenu.buildMenu(event, this.batchNumber);
         })
-        this.element.addEventListener('click', (event) => {
+        this.element.addEventListener('click', async (event) => {
             event.preventDefault();
-            const exist = document.getElementById(`${this.batchNumber}WheelstacksContainer`);
-            if (exist) {
-                exist.remove();
+            if (gridManager.wheelstacksContainer && gridManager.wheelstacksContainer.id === this.batchNumber) {
+                gridManager.wheelstacksContainer.remove()
+                await this.stopUpdating();
+                gridManager.wheelstacksContainer = null;
                 return;
             }
-            this.showWheelstacks();
+            await this.showWheelstacks();
+            await this.startUpdating();
         })
     }
 
@@ -49,37 +50,116 @@ export default class BatchElement{
         parag.innerHTML = `В.К: ${lastWheelData['wheelId']}`;
         parag.id = lastWheelObjectId;
         wheelstackRow.appendChild(parag);
-        wheelstackRow.id = lastWheelObjectId;
+        wheelstackRow.id = wheelstackData['_id'];
         if (wheelstackData['blocked']) {
             wheelstackRow.classList.add('wheelstack-row-element-blocked');
-            wheelstackRow.id = wheelstackData['lastOrder'];
+            parag.id = wheelstackData['lastOrder'];
         }
         return wheelstackRow;
     }
 
     async showWheelstacks() {
-        const exist = document.querySelector('.batch-element-expanded-container');
-        if (exist) {
-            exist.remove();
+        if (gridManager.wheelstacksContainer) {
+            gridManager.wheelstacksContainer.remove();
         }
-        const wheelstacksContainer = document.createElement('div');
-        wheelstacksContainer.classList.add('batch-element-expanded-container');
-        wheelstacksContainer.id = `${this.batchNumber}WheelstacksContainer`;
+        gridManager.wheelstacksContainer = document.createElement('div');
+        gridManager.wheelstacksContainer.classList.add('batch-element-expanded-container');
+        gridManager.wheelstacksContainer.id = `${this.batchNumber}`;
         const coordinates = this.element.getBoundingClientRect();
         const leftTopCoordinate = coordinates.top;
         const rightTopCoordinate = coordinates.right + 3;
-        wheelstacksContainer.style.top = `${leftTopCoordinate}px`;
-        wheelstacksContainer.style.left = `${rightTopCoordinate}px`;
-        wheelstacksContainer.style.display = 'block';
+        gridManager.wheelstacksContainer.style.top = `${leftTopCoordinate}px`;
+        gridManager.wheelstacksContainer.style.left = `${rightTopCoordinate}px`;
+        gridManager.wheelstacksContainer.style.display = 'block';
         Object.values(this.batchData).forEach(async (element) => {
             let wheelstackRow = await this.createWheelstackRow(element.elementData);
             wheelstackRow.addEventListener('contextmenu', (event) => {
                 event.preventDefault();
                 cellsContextMenu.buildMenu(event, element);
             })
-            wheelstacksContainer.appendChild(wheelstackRow);
+            wheelstackRow.addEventListener('click', async (event) => {
+                if (gridManager.markChosen) {
+                    clearInterval(gridManager.markChosen);
+                    gridManager.markChosen = null;
+                    gridManager.markChosenElement.element.classList.remove('mark-chosen');
+                    gridManager.markChosenElement.markChosen = false;
+                    gridManager.markChosenWheelstackRow.classList.remove('mark-chosen');
+                    if (gridManager.markChosenWheelstackRow === wheelstackRow) {
+                        gridManager.markChosenWheelstackRow = null;
+                        return;
+                    }
+                }
+                gridManager.markChosenElement = element;
+                gridManager.markChosenWheelstackRow = wheelstackRow;
+                gridManager.markChosenElement.element.classList.add('mark-chosen');
+                gridManager.markChosenElement.markChosen = true;
+                gridManager.markChosenWheelstackRow.classList.add('mark-chosen');
+                gridManager.markChosen = setTimeout( () => {
+                    gridManager.markChosenElement.element.classList.remove('mark-chosen');
+                    gridManager.markChosenElement.markChosen = false;
+                    gridManager.markChosenWheelstackRow.classList.remove('mark-chosen');
+                    gridManager.markChosen = null;
+                    gridManager.markChosenWheelstackRow = null;
+                }, 10000);
+            })
+            gridManager.wheelstacksContainer.appendChild(wheelstackRow);
         })
-        document.body.appendChild(wheelstacksContainer);
+        document.body.appendChild(gridManager.wheelstacksContainer);
+    }
+
+    async updateWheelstack(wheelstackElement, wheelstackData) {
+        if (wheelstackData['blocked']) {
+            wheelstackElement.classList.add('wheelstack-row-element-blocked');
+        } else {
+            wheelstackElement.classList.remove('wheelstack-row-element-blocked');
+        }
+        // TODO: add updating of the IDs
+
+    }
+
+    async updateWheelstacks() {
+        if (gridManager.wheelstacksContainer.id !== this.batchNumber) {
+            this.stopUpdating();
+            return;
+        }
+        Object.values(this.batchData).forEach( async (element) => {
+            const wheelstackObjectId = element.elementData['_id'];
+            const wheelstackElement = gridManager.wheelstacksContainer.querySelector(`#${CSS.escape(wheelstackObjectId)}`)
+            if (wheelstackElement) {
+                await this.updateWheelstack(wheelstackElement, element.elementData);
+                return;
+            }
+            let wheelstackRow = await this.createWheelstackRow(element.elementData);
+            wheelstackRow.addEventListener('contextmenu', (event) => {
+                event.preventDefault();
+                cellsContextMenu.buildMenu(event, element);
+            })
+            gridManager.wheelstacksContainer.appendChild(wheelstackRow);
+        })
+        gridManager.wheelstacksContainer.childNodes.forEach( (element) => {
+            if (!this.batchData[element.id]) {
+                element.remove();
+            }
+        })
+    }
+
+
+    async startUpdating() {
+        if (this.updatingInterval) {
+            return;
+        }
+        this.updatingInterval = setInterval( async () => {
+            await this.updateWheelstacks();
+        }, 100
+        )
+    }
+
+    async stopUpdating() {
+        if (!this.updatingInterval) {
+            return;
+        }
+        clearInterval(this.updatingInterval);
+        this.updatingInterval = null;
     }
 
 }

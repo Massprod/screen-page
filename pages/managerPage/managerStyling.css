@@ -165,4 +165,11 @@ html, body {
 .batch-mark:hover{
   background-color: rgb(196, 3, 209);
 }
+
+.mark-chosen {
+  background-color: #2ba72b;
+}
+.mark-chosen:hover {
+  background-color: #2ba72b;
+}
 /* CORRECT ---*/
