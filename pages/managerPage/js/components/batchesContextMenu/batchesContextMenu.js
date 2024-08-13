@@ -1,7 +1,7 @@
 import flashMessage from "../../../../utility/flashMessage.js";
 import { FLASH_MESSAGES } from "../../constants.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
-import { gridManager } from "../../mainScript.js";
+import { gridManager, platformManager } from "../../mainScript.js";
 
 
 export default class BatchesContextMenu{
@@ -41,6 +41,17 @@ export default class BatchesContextMenu{
         }
         if (this.batchRow) {
             this.batchRow.classList.add('batch-mark');
+        }
+        for (let rowId in platformManager.platformRows) {
+            const row = platformManager.platformRows[rowId];
+            for (let colId in row.columns) {
+                const cell = row.columns[colId];
+                const cellData = cell.elementData;
+                if (cellData && cellData['batchNumber'] === batchNumber) {
+                    cell.element.classList.add('batch-mark');
+                    cell.batchMarked = true;
+                }
+            }
         }
         for (let rowId in gridManager.gridRows) {
             const row = gridManager.gridRows[rowId];

@@ -94,3 +94,11 @@
 .extra-element-dropdown-row.passed {
     background-color: #d3f8cc;
 }
+
+
+.extra-element-dropdown-row.batch-mark {
+    background-color: rgb(196, 3, 209);
+  }
+.extra-element-dropdown-row.batch-mark:hover{
+    background-color: rgb(196, 3, 209);
+}
