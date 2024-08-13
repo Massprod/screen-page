@@ -18,7 +18,7 @@ export default class BatchElement{
         this.element = document.createElement('div');
         this.element.classList.add("extra-element-dropdown-row");
         const parag = document.createElement('p');
-        parag.innerHTML = `<b>Партия</b> ${this.batchNumber}`;
+        parag.innerHTML = `${this.batchNumber}`;
         this.element.appendChild(parag);
         this.element.id = this.batchNumber;
         this.container.appendChild(this.element);
@@ -67,7 +67,7 @@ export default class BatchElement{
         gridManager.wheelstacksContainer.id = `${this.batchNumber}`;
         const coordinates = this.element.getBoundingClientRect();
         const leftTopCoordinate = coordinates.top;
-        const rightTopCoordinate = coordinates.right + 3;
+        const rightTopCoordinate = coordinates.right + 5;
         gridManager.wheelstacksContainer.style.top = `${leftTopCoordinate}px`;
         gridManager.wheelstacksContainer.style.left = `${rightTopCoordinate}px`;
         gridManager.wheelstacksContainer.style.display = 'block';
@@ -113,8 +113,7 @@ export default class BatchElement{
         } else {
             wheelstackElement.classList.remove('wheelstack-row-element-blocked');
         }
-        // TODO: add updating of the IDs
-
+        wheelstackElement.id = wheelstackData['_id'];
     }
 
     async updateWheelstacks() {
