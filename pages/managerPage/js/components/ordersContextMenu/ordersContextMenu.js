@@ -19,9 +19,9 @@ export default class OrdersContextMenu{
         this.orderDataUrl = `${ordersDataUrl}`;
         this.completeOrdersUrl = `${completeOrdersUrl}`;
         this.cancelOrdersUrl = `${cancelOrdersUrl}`;
-        this.activeFilter = `active_order=${active}`;
-        this.completedFilter = `completed_order=${completed}`;
-        this.canceledFilter = `canceled_order=${canceled}`;
+        this.activeFilter = `active_orders=${active}`;
+        this.completedFilter = `completed_orders=${completed}`;
+        this.canceledFilter = `canceled_orders=${canceled}`;
         this.orderData = null;
     }
 

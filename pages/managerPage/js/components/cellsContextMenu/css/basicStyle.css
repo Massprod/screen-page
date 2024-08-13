@@ -92,7 +92,7 @@
 }
 
 .cell-context-menu-button:hover {
-    transform: scale(1.05);
+    transform: scale(0.95);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -206,9 +206,28 @@
     background-color: #123f21;
     align-self: center;
     margin: 5% 10% 5% 10%;
+    width: 70%;
+    font-size: 1.3em;
+    max-height: 50px;
+    padding: 0px;
+}
+
+.cell-context-menu-button.extra-reject {
+    background-color: #da7a7a;
+    align-self: center;
+    margin: 5% 10% 5% 10%;
+    width: 70%;
+    font-size: 1.3em;
+    max-height: 50px;
+    padding: 0px;
 }
 
 .cell-context-menu-button.extra-confirm:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transform: none;
+    transform: scale(1.05);
+}
+
+.cell-context-menu-button.extra-reject:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
 }

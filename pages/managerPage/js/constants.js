@@ -43,6 +43,8 @@ export const ORDER_CLICKABLE_ROW_CLASSES = {
     'extra-element-expanded-row': true,
 }
 
+export const LABORATORY_NAME = "laboratory";
+
 export const PLACEMENT_TYPES = {
     "grid": "Приямок",
     "basePlatform": "Челнок",
