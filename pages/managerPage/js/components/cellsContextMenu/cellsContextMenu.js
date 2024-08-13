@@ -10,7 +10,7 @@ export default class CellsContextMenu{
         createMoveWholeURL,
     ) {
         this.targetClass = targetClass;
-        this.createMoveWholeURL = `${createMoveWholeURL}`; 
+        this.createMoveWholeURL = createMoveWholeURL;
         this.#init();
         this.gridCellsOrderExecuteListeners = new Map();
     }
@@ -47,6 +47,9 @@ export default class CellsContextMenu{
     async #getOrderdata(url) {
         try {
             const response = await fetch(url);
+            if (response.status === 404) {
+                return null;
+            }
             if (!response.ok) {
                 flashMessage.show({
                     message: `Ошибка при получении данных заказа: ${response.status}`,
@@ -65,6 +68,27 @@ export default class CellsContextMenu{
         }
     }
 
+    async getWheelData(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                flashMessage.show({
+                    message: `Ошибка при получении данных о колесе: ${response.status}`,
+                    color: FLASH_MESSAGES.FETCH_ERROR_FONT_COLOR,
+                    backgroundColor: FLASH_MESSAGES.FETCH_ERROR_BG_COLOR,
+                    position: 'top-center',
+                    duration: 2000,
+                });
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            const orderData = await response.json();
+            return orderData;
+        } catch (error) {
+            console.error('Error getting data of the wheel:', error);
+            throw error;
+        }
+    }
+
     #init() {
         const allTargets = document.querySelectorAll(`.${this.targetClass}`);
         allTargets.forEach(async (target) => {
@@ -73,7 +97,6 @@ export default class CellsContextMenu{
                 if (this.activeOrderMarking && !this.sourceData['targetElement'].contains(event.target)) {
                     return;
                 }
-                event.preventDefault();
                 const [ cellRow, cellCol ] = target.id.split('|')
                 // console.log(cellRow);
                 // console.log(cellCol);
@@ -92,6 +115,9 @@ export default class CellsContextMenu{
     // 
     // +++ WHEELS_MENU
     async buildWheelMenu(event1, wheelId) {
+        if (this.blockedWheel) {
+            return;
+        }
         this.wheelsMenuCloser = (event, force = false) =>  {
             if (force) {
                 this.wheelsMenu.remove();
@@ -100,52 +126,18 @@ export default class CellsContextMenu{
             if (this.wheelsMenu && !this.wheelsMenu.contains(event.target)) {
                 this.wheelsMenu.remove();
                 this.wheelsMenu = null;
-                document.body.removeEventListener('mousedown', this.wheelsMenuCloser);
+                document.body.removeEventListener('pointerdown', this.wheelsMenuCloser);
             }
         }
         this.wheelsMenu = document.createElement("div");
         this.wheelsMenu.classList.add("cell-extra-elements-menu-container");
         this.wheelsMenu.id = "wheelMenu";
-        // console.log(gridManager);
-        const gridExtraElements = gridManager.extraElements;
-        for (let extraElement in gridExtraElements) {
-            const extraElementRow = document.createElement("div");
-            extraElementRow.classList.add('cell-extra-elements-menu-row');
-            extraElementRow.id = extraElement;
-            extraElementRow.addEventListener("click", (event) => {
-                if (this.chosenExtraElement && this.chosenExtraElement.classList.contains("chosen-highlight") && this.chosenExtraElement.contains(event.target)){
-                    this.chosenExtraElement.classList.remove("chosen-highlight")
-                    this.chosenExtraElement = null;
-                    return;
-                }
-                if (!this.chosenExtraElement) {
-                    this.chosenExtraElement = extraElementRow;
-                    this.chosenExtraElement.classList.add("chosen-highlight");
-                } else {
-                    this.chosenExtraElement.classList.remove("chosen-highlight");
-                    this.chosenExtraElement = extraElementRow;
-                    this.chosenExtraElement.classList.add("chosen-highlight");
-                }
-            })
-            const parag = document.createElement("p");
-            parag.innerHTML = `${extraElement}`;
-            extraElementRow.appendChild(parag);
-            this.wheelsMenu.appendChild(extraElementRow);
-        }
         const labButton = document.createElement("button");
         labButton.classList.add("cell-context-menu-button");
         labButton.classList.add("reject");
         labButton.id = "wheelToLab";
         labButton.innerHTML = "Лаборатория";
         labButton.addEventListener("click", async (eve1) => {
-            if (!this.chosenExtraElement) {
-                flashMessage.show({
-                    message: "Выберите место отгрузки",
-                    fontSize: "2em",
-                }
-                )
-                return;
-            }
             const moveToLabURL = `${BACK_URLS.CREATE_MOVE_TO_LAB_ORDER}`;
             const elementData = this.targetCell.elementData; 
             const moveToLabBody = {
@@ -160,7 +152,7 @@ export default class CellsContextMenu{
                 "destination": {
                     "placementType": elementData['placement']['type'],
                     "placementId": elementData['placement']["placementId"],
-                    "elementName": this.chosenExtraElement.id,
+                    "elementName": "laboratory",
                 },
                 "chosenWheel": wheelId,
             }
@@ -168,7 +160,7 @@ export default class CellsContextMenu{
             this.wheelsMenuCloser(eve1, true);
         })
         this.wheelsMenu.appendChild(labButton);
-        document.body.addEventListener('mousedown', this.wheelsMenuCloser);
+        document.body.addEventListener('pointerdown', this.wheelsMenuCloser);
         document.body.appendChild(this.wheelsMenu);
         await this.updateMenuPosition(event1, this.wheelsMenu);
     }
@@ -225,19 +217,18 @@ export default class CellsContextMenu{
             if (force) {
                 this.extraMenuContainer.remove();
                 this.extraMenuContainer = null;
-                document.body.removeEventListener('mousedown', this.extraMenuCloser);
+                document.body.removeEventListener('pointerdown', this.extraMenuCloser);
             }
             if (this.extraMenuContainer && !this.extraMenuContainer.contains(event.target)) {
                 this.extraMenuContainer.remove();
                 this.extraMenuContainer = null;
-                document.body.removeEventListener('mousedown', this.extraMenuCloser);
+                document.body.removeEventListener('pointerdown', this.extraMenuCloser);
             }
         }
-        document.body.addEventListener("mousedown", this.extraMenuCloser);
+        document.body.addEventListener("pointerdown", this.extraMenuCloser);
         this.extraMenuContainer = document.createElement('div');
         this.extraMenuContainer.classList.add('cell-extra-elements-menu-container');
         this.extraMenuContainer.id = "cellExtraMenu";
-        // console.log(gridManager);
         const gridExtraElements = gridManager.extraElements;
         for (let extraElement in gridExtraElements) {
             const extraElementRow = document.createElement("div");
@@ -492,16 +483,18 @@ export default class CellsContextMenu{
         const wheelRow = document.createElement('div');
         wheelRow.id = wheelId;
         wheelRow.classList.add("cell-context-menu-row");
-        if (this.blockedWheel == wheelId) {
+        if (this.blockedWheel === wheelId) {
             wheelRow.classList.add("wheel-blocked");
             wheelRow.id = this.wheelBlockingOrder;
         } else if (this.targetCell.elementData && this.targetCell.elementData['placement']['type'] === "grid") {
-            wheelRow.addEventListener("contextmenu", (event) => {
+            wheelRow.addEventListener("click", (event) => {
                 this.buildWheelMenu(event, wheelId)
             });
         }
+        const wheelDataURL = `${BACK_URLS.GET_WHEEL_DATA_BY_OBJECT_ID}/${wheelId}`;
+        const wheelData = await this.getWheelData(wheelDataURL);
         const parag = document.createElement('p');
-        parag.innerHTML = `${wheelId}`;
+        parag.innerHTML = `${wheelData['wheelId']}`;
         wheelRow.appendChild(parag);
         return wheelRow;
     }
@@ -529,9 +522,11 @@ export default class CellsContextMenu{
         if (this.targetCell.elementData && this.targetCell.elementData['blocked']) {
             const getOrderDataUrl = `${BACK_URLS.GET_ORDER_DATA_BY_ID}/${this.targetCell.elementData['lastOrder']}?active_orders=true&completed_orders=false&canceled_orders=false`;
             const orderData = await this.#getOrderdata(getOrderDataUrl);
-            if ("moveToLaboratory" === orderData['orderType']) {
-                this.wheelBlockingOrder = this.targetCell.elementData['lastOrder'];
-                this.blockedWheel = orderData['affectedWheels']['source'][0];
+            if (orderData) {
+                if ("moveToLaboratory" === orderData['orderType']) {
+                    this.wheelBlockingOrder = this.targetCell.elementData['lastOrder'];
+                    this.blockedWheel = orderData['affectedWheels']['source'][0];
+                }
             }
         }
         const corWheelsOrder = this.targetCell.elementData['wheels'];
@@ -550,13 +545,19 @@ export default class CellsContextMenu{
         const batchParag = document.createElement("p");
         batchParag.innerHTML = `<b>Партия</b> ${batchNumber}`;
         this.batchRow.appendChild(batchParag);
+        if (batchesContextMenu.markingBatch && batchNumber === batchesContextMenu.markingBatch) {
+            this.batchRow.classList.add('batch-mark');
+            this.chosenBatch = batchNumber;
+        }
         this.batchRow.addEventListener("click", (event) => {
             if (!this.chosenBatch) {
                 this.chosenBatch = batchNumber;
-                this.batchRow.classList.add("batch-highlight");
+                this.batchRow.classList.add("batch-mark");
+                batchesContextMenu.markBatch(batchNumber);
             } else {
                 this.chosenBatch = null;
-                this.batchRow.classList.remove("batch-highlight");
+                this.batchRow.classList.remove("batch-mark");
+                batchesContextMenu.unmarkBatch(batchNumber);
             }
         })
         this.batchRow.addEventListener("contextmenu", (event) => {
@@ -610,6 +611,9 @@ export default class CellsContextMenu{
                 // console.log(event.target);
                 // console.log(this.element.contains(event.target));
                 // console.log(ordersContextMenu.element);
+                if (!this.element) {
+                    return;
+                }
                 if (!this.element.contains(event.target)) {
                     if (ordersContextMenu.element && ordersContextMenu.element.contains(event.target)) {
                         return
@@ -627,7 +631,7 @@ export default class CellsContextMenu{
                 }
             }
         }
-        document.addEventListener('mousedown', this.menuCloser)
+        document.addEventListener('pointerdown', this.menuCloser)
         if (!this.element) {
             this.element = document.createElement('div');
             this.element.classList.add("cell-context-menu-container");
@@ -656,7 +660,7 @@ export default class CellsContextMenu{
 
 
     hideMenu() {
-        document.removeEventListener('mousedown', this.menuCloser);
+        document.removeEventListener('pointerdown', this.menuCloser);
         this.menuCloser = null;
         this.element.remove();
         this.element = null;
@@ -664,7 +668,7 @@ export default class CellsContextMenu{
         this.wheels = {};
         // this.chosenBatch = null;
         this.stopUpdating();
-        ordersContextMenu.removeMenu()
+        ordersContextMenu.removeMenu();
         batchesContextMenu.removeMenu();
     }
 
@@ -721,9 +725,9 @@ export default class CellsContextMenu{
         if (this.menuUpdatingInterval) {
             return;
         }
-        this.menuUpdatingInterval = setInterval( () => {
+        this.menuUpdatingInterval = setInterval( async () => {
             // this.#cullExpired();
-            this.#checkBlock();
+            await this.#checkBlock();
             this.#isEmpty();
         }, 100);
     }

@@ -141,6 +141,7 @@ export default class OrdersContextMenu{
                 position: 'top-center',
                 duration: 6000,
             });
+            this.removeMenu();
         })
         orderButtonsRow.appendChild(orderCompleteButton);
         //   CANCEL BUTTON
@@ -159,6 +160,7 @@ export default class OrdersContextMenu{
                 position: 'top-center',
                 duration: 6000,
             });
+            this.removeMenu();
         })
         orderButtonsRow.appendChild(orderCancelButton);
         this.element.appendChild(orderButtonsRow);

@@ -33,6 +33,8 @@ let batchesContextMenu = new BatchesContextMenu(
     BACK_URLS.GET_BATCH_NUMBER_DATA_BY_ID,
 )
 
+let cellsContextMenu = null;
+
 
 // TODO: Think about CLASS_NAMES, because if we change class name in CSS.
 //  It's going to be changed only here, can we store it as styleContants?
@@ -79,12 +81,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         BACK_URLS.GET_ALL_ORDERS_DATA,
         ["batchNumber", "orderId", "orderType", "source", "destination", "createdAt"],
     )
-    
-    let cellsContextMenu = new CellsContextMenu(
+
+    cellsContextMenu = new CellsContextMenu(
         "cell",
         BACK_URLS.CREATE_MOVE_WHOLE_ORDER,
     );
-
     // ORDERS TABLE ---
     // TODO: MAYBE finish and apply it. But it was just an experiment and we don't need it.
     // +++ TABLE RESIZER 
@@ -130,7 +131,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     //     tableBody.appendChild(row);
 
     // }
-    
+
 })
 
-export { platformManager, gridManager, ordersContextMenu, batchesContextMenu }
+
+export { platformManager, gridManager, ordersContextMenu, batchesContextMenu, cellsContextMenu }

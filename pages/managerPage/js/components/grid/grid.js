@@ -1,6 +1,8 @@
 import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
 import CellsRow from "../cellsRow/cellsRow.js";
 import ExtraElement from "../extraElement/extraElement.js";
+import BatchElement from "../batchElement/batchElement.js";
+
 
 // TODO: Merge GridManager AND BasePlatformManager
 //  They're basically doing the same, I was expecting them to build differently, because extra elements.
@@ -13,6 +15,7 @@ export default class GridManager{
     ) {
         this.container = container;
         this.extraElementsContainer = extraElementsContainer;
+        this.batchElementsContainer = extraElementsContainer;
         this.getPresetURL = `${BACK_URLS.GET_PRESET_BY_NAME}`;
         this.getCellsDataURL = `${BACK_URLS.GET_GRID_CELLS_DATA_BY_NAME}`;
         this.getCellsLastChange = `${BACK_URLS.GET_GRID_LAST_CHANGE_BY_ID}`;
@@ -20,6 +23,7 @@ export default class GridManager{
         this.presetData = null;
         this.gridRows = {};
         this.extraElements = {};
+        this.batchElements = {};
         this.gridName = "";
         this.gridId = "";
         this.lastChange = null;
@@ -75,7 +79,67 @@ export default class GridManager{
             event.preventDefault();
         })
     }
+    // +++ BATCH ELEMENTS
+    async buildBatchesContainer() {
+        // Container
+        const batchElementsContainer = document.createElement('div');
+        batchElementsContainer.classList.add('batch-elements-container');
+        batchElementsContainer.id = 'batchElements';
+        // Header
+        const batchElementsHeader = document.createElement('div');
+        batchElementsHeader.classList.add('extra-elements-header');
+        batchElementsHeader.id = 'batchElementsHeader';
+        batchElementsHeader.innerText = "Партии в приямке";
+        batchElementsContainer.appendChild(batchElementsHeader);
+        // Content
+        const batchElementsContent = document.createElement('div');
+        batchElementsContent.classList.add('extra-elements-content');
+        batchElementsContent.id = 'batchElementsContent';
+        batchElementsContainer.appendChild(batchElementsContent);
+        // Open|Close action
+        batchElementsHeader.addEventListener('click', () => {
+            if (this.batchElementsOpened) {
+                batchElementsContent.style.maxHeight = '0px';
+                const exist = document.querySelector('.batch-element-expanded-container');
+                if (exist) {
+                    exist.remove();
+                }
+                this.batchElementsOpened = false;
+            } else {
+                this.batchElementsOpened = true;
+                batchElementsContent.style.maxHeight = '250px';
+                
+            }
+        });
+        this.batchElementsContainer.appendChild(batchElementsContainer);
+        return batchElementsContent;
+    }
+    
+    async buildBatchElements() {
+        if (!this.batchesContainer) {
+            this.batchesContainer = await this.buildBatchesContainer();
+        }
+        if (this.batchElements) {
+            Object.values(this.batchElements).forEach((element) => {
+                if (!this.batchesData[element.batchNumber]) {
+                    element.element.remove();
+                    delete this.batchElements[element.batchNumber];
+                }
+            })
+        }
+        for (let batchNumber in this.batchesData) {
+            const batchData = this.batchesData[batchNumber];
+            if (this.batchElements[batchNumber]) {
+                this.batchElements[batchNumber].batchData = batchData;
+                continue;
+            }
+            const batchElement = new BatchElement(this.batchesContainer, batchNumber, batchData)
+            this.batchElements[batchNumber] = batchElement;
+        }
+    }
+    // BATCH ELEMENTS ---
 
+    // +++ EXTRA ELEMENTS
     async buildExtraContainer() {
         // Container
         const extraElementsContainer = document.createElement('div');
@@ -125,6 +189,7 @@ export default class GridManager{
             this.extraElements[elementName] = extraElement;
         }
     }
+    // EXTRA ELEMENTS ---
 
     async updateGridCells() {
         if (this.lastChange !== null) {
@@ -135,6 +200,7 @@ export default class GridManager{
                 return;
             }
         }
+        this.batchesData = {}
         const cellDataUrl = `${this.getCellsDataURL}/${this.gridName}`;
         const gridData = await this.#getData(cellDataUrl);
         this.gridId = gridData['_id'];
@@ -157,6 +223,13 @@ export default class GridManager{
                 cell.gridCell = true;
                 if (cellData['wheelStack'] !== null) {
                     await cell.updateElementData();
+                    // BATCHES Collect
+                    const curElementData = cell.elementData;
+                    if (!this.batchesData[curElementData['batchNumber']]) {
+                        this.batchesData[curElementData['batchNumber']] = {}
+                    }
+                    this.batchesData[curElementData['batchNumber']][curElementData['_id']] = cell;
+                    // ---
                 } else {
                     cell.elementData = null;
                 }
@@ -168,6 +241,7 @@ export default class GridManager{
             return;
         }
         this.buildExtraElements(gridData['extra']);
+        this.buildBatchElements();
     }
 
     async startUpdating() {

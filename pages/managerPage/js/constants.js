@@ -26,7 +26,9 @@ export const BACK_URLS = {
     // WHEELSTACK
     GET_WHEELSTACK_DATA_BY_ID: `${mainAddress}/wheelstacks/id`,
     // BATCH_NUMBER
-    GET_BATCH_NUMBER_DATA_BY_ID: `${mainAddress}/batch_number/batch_number`
+    GET_BATCH_NUMBER_DATA_BY_ID: `${mainAddress}/batch_number/batch_number`,
+    // WHEELS
+    GET_WHEEL_DATA_BY_OBJECT_ID: `${mainAddress}/wheels/object_id`,
 }
 
 export const BASIC_PRESET_NAMES = {
@@ -74,8 +76,8 @@ export const ORDERS_TABLE_COLUMNS_TRANSLATE = {
 }
 
 export const UPDATE_PERIODS = {
-    BASE_PLATFORM: 500,
-    GRID: 500,
-    EXTRA_ELEMENT_ORDERS_CONTAINER: 500,
-    ORDERS_TABLE_UPDATE_RATE: 500,
+    BASE_PLATFORM: 200,
+    GRID: 200,
+    EXTRA_ELEMENT_ORDERS_CONTAINER: 300,
+    ORDERS_TABLE_UPDATE_RATE: 300,
 }

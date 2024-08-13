@@ -36,7 +36,12 @@ export default class BatchesContextMenu{
 
 
     async markBatch(batchNumber) {
-        this.batchRow.classList.add('batch-mark');
+        if (this.markingBatch) {
+            this.unmarkBatch();
+        }
+        if (this.batchRow) {
+            this.batchRow.classList.add('batch-mark');
+        }
         for (let rowId in gridManager.gridRows) {
             const row = gridManager.gridRows[rowId];
             for (let colId in row.columns) {
@@ -48,6 +53,11 @@ export default class BatchesContextMenu{
                 }
             }
         }
+        const allBatchElements = document.querySelectorAll(`#${batchNumber}`);
+        allBatchElements.forEach( (element) => {
+            element.classList.add('batch-mark');
+        })
+        this.markingBatch = batchNumber;;
     }
 
     async unmarkBatch() {
@@ -93,12 +103,12 @@ export default class BatchesContextMenu{
     }
 
     async updateMenuData() {
+        if (!this.batchData) {
+            this.removeMenu();
+        }
         const getDataURL = this.batchGetURL + `/${this.batchNumber}`;
         const newBatchData = await this.#getBatchdata(getDataURL);
         for (let key in newBatchData) {
-            if (!this.batchData) {
-                break;
-            }
             if (this.batchData[key] !== newBatchData[key]) {
                 await this.updateParags(newBatchData);
                 this.batchData = newBatchData;
@@ -125,15 +135,12 @@ export default class BatchesContextMenu{
             if (this.markingBatch && this.batchNumber !== this.markingBatch) {
                 this.unmarkBatch(this.markingBatch);
                 this.markBatch(this.batchNumber);
-                this.markingBatch = this.batchNumber;
                 return;
             }
             if (!this.markingBatch) {
                 this.markBatch(this.batchNumber);
-                this.markingBatch = this.batchNumber;
             } else {
                 this.unmarkBatch(this.batchNumber);
-                this.markingBatch = null;
             }
         })
 
@@ -192,7 +199,7 @@ export default class BatchesContextMenu{
             this.element = document.createElement('div');
             this.element.classList.add("batch-context-menu-container");
             document.body.appendChild(this.element);
-            document.addEventListener('mousedown', this.menuCloser);
+            document.addEventListener('pointerdown', this.menuCloser);
             this.fillMenu()
         } else {
             this.element.id = this.batchNumber;
@@ -203,7 +210,7 @@ export default class BatchesContextMenu{
     }
 
     removeMenu() {
-        document.removeEventListener('mousedown', this.menuCloser);
+        document.removeEventListener('pointerdown', this.menuCloser);
         this.menuCloser = null;
         if (this.element) {
             this.element.remove();

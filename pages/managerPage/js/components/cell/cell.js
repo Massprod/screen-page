@@ -1,4 +1,5 @@
 import { BACK_URLS } from "../../constants.js";
+import { batchesContextMenu } from "../../mainScript.js";
 
 
 export default class Cell{
@@ -109,8 +110,8 @@ export default class Cell{
         if (this.orderMarked) {
             this.element.classList.add('highlight');
         }
-        if (this.batchMarked) {
-            this.element.classList.add('batch-mark');
+        if (batchesContextMenu.markingBatch && batchesContextMenu.markingBatch === this.elementData['batchNumber']) {
+            this.element.classList.add('batch-mark')
         }
         const parag = document.createElement('p');
         parag.innerText = this.elementData['wheels'].length;

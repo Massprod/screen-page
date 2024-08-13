@@ -20,14 +20,14 @@ export default class ExtraElement{
         this.element = document.createElement("div");
         this.element.classList.add("extra-element-dropdown-row");
         const parag = document.createElement('p');
-        parag.innerHTML = `Имя: <b>${this.elementName}</b>  |  ID: <b>${this.elementData['id']}</b>`;
+        parag.innerHTML = `Имя: <b>${this.elementName}</b>`;
         this.element.appendChild(parag);
         this.element.id = this.elementName;
         this.container.appendChild(this.element);
         this.element.addEventListener("click", (event) => {
             event.preventDefault();
             const exist = document.getElementById(`${this.elementName}OrdersContainer`);
-            if ( exist) {
+            if (exist) {
                 exist.remove();
                 return;
             }
