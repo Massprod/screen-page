@@ -37,6 +37,7 @@ export default class BatchElement{
             await this.showWheelstacks();
             await this.startUpdating();
         })
+        await this.maintainBatchStatus();
     }
 
     async createWheelstackRow(wheelstackData) {
@@ -108,10 +109,19 @@ export default class BatchElement{
     }
 
     async updateWheelstack(wheelstackElement, wheelstackData) {
+        wheelstackElement.classList.remove(['not-tested', 'passed', 'not-passed']);
         if (wheelstackData['blocked']) {
             wheelstackElement.classList.add('wheelstack-row-element-blocked');
+            wheelstackElement.childNodes[0].id = wheelstackData['lastOrder'];
         } else {
             wheelstackElement.classList.remove('wheelstack-row-element-blocked');
+            if (!this.batchStatusData['laboratoryTestDate']) {
+                wheelstackElement.classList.add('not-tested');
+            } else if (this.batchStatusData['laboratoryPassed']) {
+                wheelstackElement.classList.add('passed');
+            } else {
+                wheelstackElement.classList.add('not-passed');
+            }
         }
         wheelstackElement.id = wheelstackData['_id'];
     }
@@ -161,4 +171,23 @@ export default class BatchElement{
         this.updatingInterval = null;
     }
 
+    async maintainBatchStatus() {
+        if (this.maintainInterval) {
+            return;
+        }
+        this.maintainInterval = setInterval( async () => {
+            if (gridManager.batchElementsOpened) {
+                const batchGetURL = BACK_URLS.GET_BATCH_NUMBER_DATA_BY_ID + `/${this.batchNumber}`;
+                this.batchStatusData = await batchesContextMenu.getBatchdata(batchGetURL);
+                this.element.classList.remove(['not-tested', 'passed', 'not-passed']);
+                if (!this.batchStatusData['laboratoryTestDate']) {
+                    this.element.classList.add('not-tested');
+                } else if (this.batchStatusData['laboratoryPassed']) {
+                    this.element.classList.add('passed');
+                } else {
+                    this.element.classList.add('not-passed');
+                }
+            }
+        }, 100);
+    }
 }

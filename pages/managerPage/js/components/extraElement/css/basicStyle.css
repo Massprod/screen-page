@@ -71,3 +71,26 @@
 }
 
 
+.extra-element-expanded-row.not-tested {
+    background-color: #f7efce;
+}
+
+.extra-element-expanded-row.not-passed {
+    background-color: #f8cccc;
+}
+
+.extra-element-expanded-row.passed {
+    background-color: #d3f8cc;
+}
+
+.extra-element-dropdown-row.not-tested {
+    background-color: #f7efce;
+}
+
+.extra-element-dropdown-row.not-passed {
+    background-color: #f8cccc;
+}
+
+.extra-element-dropdown-row.passed {
+    background-color: #d3f8cc;
+}

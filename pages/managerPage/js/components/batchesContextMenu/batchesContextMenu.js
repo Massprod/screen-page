@@ -13,7 +13,7 @@ export default class BatchesContextMenu{
         this.batchGetURL= batchGetURL; 
     }
 
-    async #getBatchdata(url) {
+    async getBatchdata(url) {
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -107,7 +107,7 @@ export default class BatchesContextMenu{
             this.removeMenu();
         }
         const getDataURL = this.batchGetURL + `/${this.batchNumber}`;
-        const newBatchData = await this.#getBatchdata(getDataURL);
+        const newBatchData = await this.getBatchdata(getDataURL);
         for (let key in newBatchData) {
             if (this.batchData[key] !== newBatchData[key]) {
                 await this.updateParags(newBatchData);
@@ -195,7 +195,7 @@ export default class BatchesContextMenu{
         this.batchNumber = batchNumber;
         if (!this.element) {
             const getUrl = this.batchGetURL + `/${this.batchNumber}`;
-            this.batchData = await this.#getBatchdata(getUrl);
+            this.batchData = await this.getBatchdata(getUrl);
             this.element = document.createElement('div');
             this.element.classList.add("batch-context-menu-container");
             document.body.appendChild(this.element);
