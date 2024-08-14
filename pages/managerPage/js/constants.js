@@ -20,7 +20,8 @@ export const BACK_URLS = {
     CANCEL_ORDER_BY_ID: `${mainAddress}/orders/cancel`,
     GET_ALL_ORDERS_DATA: `${mainAddress}/orders/all`,
     CREATE_MOVE_WHOLE_ORDER: `${mainAddress}/orders/create/move`,
-    CREATE_MOVE_TO_PROCESSING_ORDER: `${mainAddress}/orders/create/process`,  
+    CREATE_MOVE_TO_PROCESSING_ORDER: `${mainAddress}/orders/create/process`,
+    CREATE_MOVE_TO_PROCESSING_BULK_ORDERS: `${mainAddress}/orders/create/bulk/process`,
     CREATE_MOVE_TO_REJECTED_ORDER: `${mainAddress}/orders/create/reject`, 
     CREATE_MOVE_TO_LAB_ORDER: `${mainAddress}/orders/create/laboratory`,
     // WHEELSTACK
