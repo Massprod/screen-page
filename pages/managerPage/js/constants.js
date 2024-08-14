@@ -21,7 +21,7 @@ export const BACK_URLS = {
     GET_ALL_ORDERS_DATA: `${mainAddress}/orders/all`,
     CREATE_MOVE_WHOLE_ORDER: `${mainAddress}/orders/create/move`,
     CREATE_MOVE_TO_PROCESSING_ORDER: `${mainAddress}/orders/create/process`,
-    CREATE_MOVE_TO_PROCESSING_BULK_ORDERS: `${mainAddress}/orders/create/bulk/process`,
+    CREATE_MOVE_TO_BULK_PRO_REJ_ORDERS: `${mainAddress}/orders/create/bulk`,
     CREATE_MOVE_TO_REJECTED_ORDER: `${mainAddress}/orders/create/reject`, 
     CREATE_MOVE_TO_LAB_ORDER: `${mainAddress}/orders/create/laboratory`,
     // WHEELSTACK
@@ -48,6 +48,9 @@ export const LABORATORY_NAME = "laboratory";
 
 export const TESTS_NOT_DONE = "TESTS_NOT_DONE";
 export const TESTS_FAILED = "TESTS_FAILED";
+
+export const ORDER_MOVE_TO_PROCESSING = "moveToProcessing";
+export const ORDER_MOVE_TO_REJECTED = "moveToRejected";
 
 export const PLACEMENT_TYPES = {
     "grid": "Приямок",

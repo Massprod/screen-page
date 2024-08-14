@@ -1,7 +1,7 @@
 import flashMessage from "../../../../utility/flashMessage.js";
-import { FLASH_MESSAGES } from "../../constants.js";
+import { FLASH_MESSAGES, LABORATORY_NAME } from "../../constants.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
-import { gridManager, platformManager } from "../../mainScript.js";
+import { cellsContextMenu, gridManager, platformManager } from "../../mainScript.js";
 
 
 export default class BatchesContextMenu{
@@ -9,7 +9,7 @@ export default class BatchesContextMenu{
         targetClass,
         batchGetURL,
     ) {
-        this.targeetClass = targetClass;
+        this.targetClass = targetClass;
         this.batchGetURL= batchGetURL; 
     }
 
@@ -134,6 +134,55 @@ export default class BatchesContextMenu{
         }
     }
 
+    async #buildExtraMenu(event, processing = true) {
+        this.extraMenuCloser = (event, force = false) => {
+            if (force) {
+                this.extraMenuContainer.remove();
+                this.extraMenuContainer = null;
+                document.body.removeEventListener('pointerdown', this.extraMenuCloser);
+            }
+            if (this.extraMenuContainer && !this.extraMenuContainer.contains(event.target)) {
+                this.extraMenuContainer.remove();
+                this.extraMenuContainer = null;
+                document.body.removeEventListener('pointerdown', this.extraMenuCloser);
+            }
+        }
+        this.executeCreation = async (processing, extraElement) => {
+            cellsContextMenu.createProRejBulkOrders(
+                gridManager.gridId, extraElement, this.batchNumber, processing
+            );
+            this.extraMenuCloser(event, true);
+        }
+        this.extraMenuContainer = document.createElement('div');
+        this.extraMenuContainer.classList.add('cell-extra-elements-menu-container');
+        this.extraMenuContainer.id = "batchExtraMenu";
+        const gridExtraElements = gridManager.extraElements;
+        for (let extraElement in gridExtraElements) {
+            if (extraElement === LABORATORY_NAME) {
+                continue;
+            }
+            const extraElementButton = document.createElement("button");
+            extraElementButton.classList.add("cell-context-menu-button");
+            if (processing) {
+                extraElementButton.classList.add('extra-confirm');
+                extraElementButton.classList.add('processing');
+            } else {
+                extraElementButton.classList.add('extra-reject');
+                extraElementButton.classList.add('reject');
+            }
+            extraElementButton.id = extraElement;
+            extraElementButton.innerText = extraElement;
+            extraElementButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.executeCreation(processing, extraElement);
+            })
+            this.extraMenuContainer.appendChild(extraElementButton);
+        }
+        document.body.appendChild(this.extraMenuContainer);
+        document.body.addEventListener('pointerdown', this.extraMenuCloser);
+        this.updateMenuPosition(event, this.extraMenuContainer);
+    }
+
     async fillMenu() {
         // BATCH_ROW
         this.batchRow = document.createElement('div');
@@ -189,11 +238,29 @@ export default class BatchesContextMenu{
         }
         this.lastTestResult.appendChild(this.lastTestResultParag);
         this.element.appendChild(this.lastTestResult);
+        // BUTTONS
+        this.buttonsRow = document.createElement('div');
+        this.buttonsRow.classList.add('cell-context-menu-buttons-row');
+        // PROCESSING BUTTON
+        this.processingButton = document.createElement('button');
+        this.processingButton.classList.add('cell-context-menu-button');
+        this.processingButton.classList.add('processing');
+        this.processingButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            await this.#buildExtraMenu(event, true);
+        })
+        this.buttonsRow.appendChild(this.processingButton);
+
+
+        this.element.appendChild(this.buttonsRow);
     }
 
     async buildMenu(event, batchNumber) {
         if (!this.menuCloser) {
             this.menuCloser = (event) => {
+                if (this.extraMenuContainer && this.extraMenuContainer.contains(event.target)) {
+                    return;
+                }
                 if (!this.element.contains(event.target)) {
                     this.removeMenu();
                 }
@@ -250,7 +317,7 @@ export default class BatchesContextMenu{
         }
         this.menuUpdateInterval = setInterval( () => {
             this.updateMenuData();
-        }, 200);
+        }, 500);
     }
 
     stopUpdating() {

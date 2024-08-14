@@ -159,7 +159,7 @@ export default class BatchElement{
         }
         this.updatingInterval = setInterval( async () => {
             await this.updateWheelstacks();
-        }, 100
+        }, 200
         )
     }
 
@@ -188,6 +188,6 @@ export default class BatchElement{
                     this.element.classList.add('not-passed');
                 }
             }
-        }, 100);
+        }, 1000);
     }
 }
