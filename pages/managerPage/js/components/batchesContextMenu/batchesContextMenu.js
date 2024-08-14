@@ -245,13 +245,22 @@ export default class BatchesContextMenu{
         this.processingButton = document.createElement('button');
         this.processingButton.classList.add('cell-context-menu-button');
         this.processingButton.classList.add('processing');
+        this.processingButton.innerText = 'Обработка';
         this.processingButton.addEventListener('click', async (event) => {
             event.preventDefault();
             await this.#buildExtraMenu(event, true);
         })
         this.buttonsRow.appendChild(this.processingButton);
-
-
+        this.rejectingButton = document.createElement('button');
+        this.rejectingButton.classList.add('cell-context-menu-button');
+        this.rejectingButton.classList.add('reject');
+        this.rejectingButton.innerText = 'Выгрузка';
+        this.rejectingButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            await this.#buildExtraMenu(event, false);
+        })
+        this.buttonsRow.appendChild(this.rejectingButton);
+        
         this.element.appendChild(this.buttonsRow);
     }
 
