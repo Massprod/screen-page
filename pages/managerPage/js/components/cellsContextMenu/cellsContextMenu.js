@@ -1,6 +1,6 @@
 import flashMessage from "../../../../utility/flashMessage.js";
 import { gridManager, platformManager, ordersContextMenu, batchesContextMenu } from "../../mainScript.js";
-import { BACK_URLS, FLASH_MESSAGES, LABORATORY_NAME } from "../../constants.js";
+import { BACK_URLS, FLASH_MESSAGES, LABORATORY_NAME, TESTS_FAILED, TESTS_NOT_DONE } from "../../constants.js";
 
 
 
@@ -24,16 +24,35 @@ export default class CellsContextMenu{
                 },
                 body: JSON.stringify(orderBody)
             });
-            console.log(orderBody);
-            console.log(response);
             if (!response.ok) {
-                flashMessage.show({
-                    message: `Ошибка при создании заказа: ${response.status}`,
-                    color: FLASH_MESSAGES.FETCH_ERROR_FONT_COLOR,
-                    backgroundColor: FLASH_MESSAGES.FETCH_ERROR_BG_COLOR,
-                    position: 'top-center',
-                    duration: 5000,
-                });
+                const respData = await response.json();
+                const respDetail = respData['detail'];
+                if (respDetail === TESTS_NOT_DONE) {
+                    flashMessage.show({
+                        message: `Партия ещё не проходила испытания: ${respDetail}`,
+                        color: FLASH_MESSAGES.FETCH_ERROR_FONT_COLOR,
+                        backgroundColor: FLASH_MESSAGES.FETCH_ERROR_BG_COLOR,
+                        position: 'top-center',
+                        duration: 5000,
+                    })
+                } else if (respDetail === TESTS_FAILED) {
+                    flashMessage.show({
+                        message: `Партия не прошла испытания: ${respDetail}`,
+                        color: FLASH_MESSAGES.FETCH_ERROR_FONT_COLOR,
+                        backgroundColor: FLASH_MESSAGES.FETCH_ERROR_BG_COLOR,
+                        position: 'top-center',
+                        duration: 5000,
+                    })
+                } else {
+                    flashMessage.show({
+                        message: `Ошибка при создании заказа: ${response.status}`,
+                        color: FLASH_MESSAGES.FETCH_ERROR_FONT_COLOR,
+                        backgroundColor: FLASH_MESSAGES.FETCH_ERROR_BG_COLOR,
+                        position: 'top-center',
+                        duration: 3000,
+                    });
+                }
+                
                 throw new Error('Network response was not ok ' + response.statusText);
             }
             const orderData = await response.json();

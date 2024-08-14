@@ -46,6 +46,7 @@ export const ORDER_CLICKABLE_ROW_CLASSES = {
 export const LABORATORY_NAME = "laboratory";
 
 export const TESTS_NOT_DONE = "TESTS_NOT_DONE";
+export const TESTS_FAILED = "TESTS_FAILED";
 
 export const PLACEMENT_TYPES = {
     "grid": "Приямок",
