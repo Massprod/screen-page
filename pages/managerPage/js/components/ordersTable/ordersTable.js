@@ -137,7 +137,7 @@ export default class OrdersTable{
         column.id = orderData['_id'];
         row.appendChild(column);
         column = document.createElement('td');
-        const creationTime = convertISOToCustomFormat(orderData['createdAt'], true);
+        const creationTime = convertISOToCustomFormat(orderData['createdAt'], true, true);
         column.innerHTML = `<b>${creationTime}</b>`;
         column.id = orderData['_id'];
         row.appendChild(column);
