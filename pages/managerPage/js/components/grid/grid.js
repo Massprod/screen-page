@@ -2,6 +2,7 @@ import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
 import CellsRow from "../cellsRow/cellsRow.js";
 import ExtraElement from "../extraElement/extraElement.js";
 import BatchElement from "../batchElement/batchElement.js";
+import flashMessage from "../../../../utility/flashMessage.js";
 
 
 // TODO: Merge GridManager AND BasePlatformManager
@@ -98,6 +99,15 @@ export default class GridManager{
         batchElementsContainer.appendChild(batchElementsContent);
         // Open|Close action
         batchElementsHeader.addEventListener('click', () => {
+            if (0 === Object.keys(this.batchesData).length) {
+                flashMessage.show({
+                    message: `В приямке не представлено ни одной партии`,
+                    color: 'white',
+                    backgroundColor: 'black',
+                    position: 'top-center',
+                    duration: 3000,
+                })
+            }
             if (this.batchElementsOpened) {
                 batchElementsContent.style.maxHeight = '0px';
                 const exist = document.querySelector('.batch-element-expanded-container');
