@@ -30,6 +30,8 @@ export const BACK_URLS = {
     GET_BATCH_NUMBER_DATA_BY_ID: `${mainAddress}/batch_number/batch_number`,
     // WHEELS
     GET_WHEEL_DATA_BY_OBJECT_ID: `${mainAddress}/wheels/object_id`,
+    // STORAGES
+    GET_ALL_STORAGES_NO_DATA: `${mainAddress}/storages/all`
 }
 
 export const BASIC_PRESET_NAMES = {
@@ -45,6 +47,8 @@ export const ORDER_CLICKABLE_ROW_CLASSES = {
 }
 
 export const LABORATORY_NAME = "laboratory";
+export const GRID_NAME = 'grid';
+export const BASE_PLATFORM_NAME = 'basePlatform';
 
 export const TESTS_NOT_DONE = "TESTS_NOT_DONE";
 export const TESTS_FAILED = "TESTS_FAILED";
@@ -89,4 +93,5 @@ export const UPDATE_PERIODS = {
     GRID: 200,
     EXTRA_ELEMENT_ORDERS_CONTAINER: 300,
     ORDERS_TABLE_UPDATE_RATE: 300,
+    STORAGE_ROWS: 200,
 }
