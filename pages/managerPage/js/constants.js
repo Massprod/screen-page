@@ -31,8 +31,9 @@ export const BACK_URLS = {
     // WHEELS
     GET_WHEEL_DATA_BY_OBJECT_ID: `${mainAddress}/wheels/object_id`,
     // STORAGES
-    GET_ALL_STORAGES_NO_DATA: `${mainAddress}/storages/all`,
-    GET_ALL_STORAGES_DATA: `${mainAddress}/storages`,
+    GET_ALL_STORAGES: `${mainAddress}/storages/all`,
+    GET_STORAGE: `${mainAddress}/storages`,
+    PATCH_CLEAR_EMPTY_BATCHES_STORAGES: `${mainAddress}/storages/clear`,
 }
 
 export const BASIC_PRESET_NAMES = {
@@ -96,4 +97,5 @@ export const UPDATE_PERIODS = {
     ORDERS_TABLE_UPDATE_RATE: 300,
     STORAGE_ROWS: 200,
     STORAGE_BATCHES_ROWS: 200,
+    BATCHES_WHEELSTACK_ROWS: 200,
 }
