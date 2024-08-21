@@ -14,7 +14,8 @@ import OrdersTable from "./components/ordersTable/ordersTable.js";
 import ColumnResizer from "../../utility/columnsResize/resizer.js";
 import CellsContextMenu from "./components/cellsContextMenu/cellsContextMenu.js";
 import BatchesContextMenu from "./components/batchesContextMenu/batchesContextMenu.js";
-import StoragesManager from "./components/storages/storages.js";
+import StoragesManager from "./components/storages/storagesManager.js";
+import BatchesExpandedContainer from "./components/storages/batchesContainer.js";
 
 
 let platformManager = null;
@@ -35,6 +36,7 @@ let batchesContextMenu = new BatchesContextMenu(
 
 let cellsContextMenu = null;
 let storagesManager = null;
+let batchesExpandedElements = null;
 
 
 // TODO: Think about CLASS_NAMES, because if we change class name in CSS.
@@ -97,6 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // TABLE RESIZER ---
     ordersTable.startUpdating();
     storagesManager = new StoragesManager(extraElementsContainer);
+    batchesExpandedElements = new BatchesExpandedContainer();
 
     // const tableBody = document.querySelector('.orders-table-content tbody');
 
@@ -136,4 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 })
 
 
-export { platformManager, gridManager, ordersContextMenu, batchesContextMenu, cellsContextMenu }
+export {
+    platformManager, gridManager, ordersContextMenu,
+    batchesContextMenu, cellsContextMenu, batchesExpandedElements,
+}

@@ -1,4 +1,6 @@
 import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
+import getRequest from "../../../../utility/basicRequests.js";
+import { batchesExpandedElements } from "../../mainScript.js";
 
 
 export default class StoragesManager{
@@ -53,33 +55,23 @@ export default class StoragesManager{
     }
 
     // +++ STORAGE ROWS
-    async getRequest(url) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Error while getting data ${response.statusText}. URL = ${url}`);
-            }
-            const responseData = await response.json();
-            return responseData;
-        } catch (error) {
-            console.error(
-                `There was a problem with getting data: ${error}`
-            );
-            throw error;
-        }
-    }
-
+    
     async createStorageRow(rowData) {
         const storageRow = document.createElement('div');
         storageRow.classList.add('extra-element-dropdown-row');
         storageRow.id = `${rowData['_id']}`;
-        storageRow.innerText = `${rowData['name']}`;
+        const storageRowParag = document.createElement('p');
+        storageRowParag.innerHTML = `${rowData['name']}`;
+        storageRow.appendChild(storageRowParag);
+        storageRow.addEventListener('click', async (event) => {
+            batchesExpandedElements.showElement(event, storageRow, rowData['_id']);
+        })
         return storageRow;
     }
 
     async updateStorageRows() {
         this.getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES_NO_DATA}/?include_data=False`;
-        this.newStoragesNoData = await this.getRequest(this.getAllStoragesNoDataURL);
+        this.newStoragesNoData = await getRequest(this.getAllStoragesNoDataURL);
         // Create | Update already existing rows
         this.lastUpdateStorageIds = {};
         this.newStoragesNoData.forEach( async (storageData) => {
