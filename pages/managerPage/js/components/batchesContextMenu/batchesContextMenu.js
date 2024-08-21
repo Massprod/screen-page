@@ -64,7 +64,7 @@ export default class BatchesContextMenu{
                 }
             }
         }
-        const allBatchElements = document.querySelectorAll(`#${batchNumber}`);
+        const allBatchElements = document.querySelectorAll(`#${CSS.escape(batchNumber)}`);
         allBatchElements.forEach( (element) => {
             element.classList.add('batch-mark');
         })
