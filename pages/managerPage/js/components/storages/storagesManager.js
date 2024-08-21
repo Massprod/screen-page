@@ -1,5 +1,5 @@
 import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
-import getRequest from "../../../../utility/basicRequests.js";
+import { getRequest } from "../../../../utility/basicRequests.js";
 import { batchesExpandedElements } from "../../mainScript.js";
 
 
@@ -64,13 +64,13 @@ export default class StoragesManager{
         storageRowParag.innerHTML = `${rowData['name']}`;
         storageRow.appendChild(storageRowParag);
         storageRow.addEventListener('click', async (event) => {
-            batchesExpandedElements.showElement(event, storageRow, rowData['_id']);
+            batchesExpandedElements.showBatchesContainer(event, storageRow, rowData['_id']);
         })
         return storageRow;
     }
 
     async updateStorageRows() {
-        this.getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES_NO_DATA}/?include_data=False`;
+        this.getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES}/?include_data=False`;
         this.newStoragesNoData = await getRequest(this.getAllStoragesNoDataURL);
         // Create | Update already existing rows
         this.lastUpdateStorageIds = {};
