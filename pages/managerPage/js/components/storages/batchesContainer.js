@@ -1,8 +1,8 @@
 import { getRequest, patchRequest } from "../../../../utility/basicRequests.js";
-import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
+import { BACK_URLS, ELEMENT_TYPES, UPDATE_PERIODS } from "../../constants.js";
 import updateMenuPosition from "../../../../utility/adjustContainerPosition.js";
 import flashMessage from "../../../../utility/flashMessage.js";
-import { batchesContextMenu } from "../../mainScript.js";
+import { batchesContextMenu, wheelstackContextMenu } from "../../mainScript.js";
 
 
 export default class BatchesExpandedContainer{
@@ -12,7 +12,7 @@ export default class BatchesExpandedContainer{
     }
 
     // +++ WheelstacksContainer
-    async createWheelstackRows(wheelstackId) {
+    async createWheelstackRow(wheelstackId) {
         const wheelstackDataURL = `${BACK_URLS.GET_WHEELSTACK_DATA_BY_ID}/${wheelstackId}`;
         const wheelstackData = await getRequest(wheelstackDataURL)
         const topWheelObjectId = wheelstackData['wheels'][wheelstackData['wheels'].length - 1];
@@ -25,6 +25,9 @@ export default class BatchesExpandedContainer{
         const rowParag = document.createElement('p');
         rowParag.innerHTML = `ВХ: ${topWheelId}`;
         wheelstackRow.appendChild(rowParag);
+        wheelstackRow.addEventListener('click', event => {
+            wheelstackContextMenu.showMenu(event, wheelstackId, wheelstackRow);
+        })
         return wheelstackRow;
     }
 
@@ -51,7 +54,7 @@ export default class BatchesExpandedContainer{
             if (wheelstackId in this.createdWheelstackRows) {
                 return;
             }
-            const newWheelstackRow = await this.createWheelstackRows(wheelstackId);
+            const newWheelstackRow = await this.createWheelstackRow(wheelstackId);
             this.wheelstacksContainerElement.appendChild(newWheelstackRow);
             this.createdWheelstackRows[wheelstackId] = newWheelstackRow;
         })
@@ -68,11 +71,18 @@ export default class BatchesExpandedContainer{
     async createWheelstackContainer() {
         // Closer
         this.wheelstacksContainerCloser = async (event) => {
-            if (this.wheelstacksContainerElement.contains(event.target)) {
+            if (this.wheelstacksContainerElement && this.wheelstacksContainerElement.contains(event.target)) {
                 return;
             }
-            // CELL context menu later
-            // ----
+            if (wheelstackContextMenu.menuContainer && wheelstackContextMenu.menuContainer.contains(event.target)) {
+                return;
+            }
+            if (wheelstackContextMenu.extraMenuContainer && wheelstackContextMenu.extraMenuContainer.contains(event.target)) {
+                return;
+            }
+            if (wheelstackContextMenu.wheelsMenu && wheelstackContextMenu.wheelsMenu.contains(event.target)) {
+                return;
+            }
             this.hideWheelstackContainer();
         }
         this.wheelstacksContainerElement = document.createElement('div');
@@ -216,6 +226,15 @@ export default class BatchesExpandedContainer{
             if (this.wheelstacksContainerElement && this.wheelstacksContainerElement.contains(event.target)) {
                 return;
             }
+            if (wheelstackContextMenu.menuContainer && wheelstackContextMenu.menuContainer.contains(event.target)) {
+                return;
+            }
+            if (wheelstackContextMenu.extraMenuContainer && wheelstackContextMenu.extraMenuContainer.contains(event.target)) {
+                return;
+            }
+            if (wheelstackContextMenu.wheelsMenu && wheelstackContextMenu.wheelsMenu.contains(event.target)) {
+                return;
+            }
             this.hideBatchesContainer();
         }
         this.batchesContainerOpener = openerElement;
@@ -224,7 +243,7 @@ export default class BatchesExpandedContainer{
         this.batchesContainerElement.style.visibility = 'hidden';
         document.body.appendChild(this.batchesContainerElement);
         setTimeout( async () => {
-            document.body.addEventListener('click', this.batchesContainerCloser);
+            document.body.addEventListener('pointerdown', this.batchesContainerCloser);
         }, 2);
     }
 
@@ -248,7 +267,7 @@ export default class BatchesExpandedContainer{
             this.batchesContainerElement.remove();
         }
         this.batchesContainerElement = null;
-        document.body.removeEventListener('click', this.batchesContainerCloser);
+        document.body.removeEventListener('pointerdown', this.batchesContainerCloser);
         this.createdBatchRows = {};
         this.stopUpdatingBatchRows();
         this.storageId = null;

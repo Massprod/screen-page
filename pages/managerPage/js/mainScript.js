@@ -16,6 +16,7 @@ import CellsContextMenu from "./components/cellsContextMenu/cellsContextMenu.js"
 import BatchesContextMenu from "./components/batchesContextMenu/batchesContextMenu.js";
 import StoragesManager from "./components/storages/storagesManager.js";
 import BatchesExpandedContainer from "./components/storages/batchesContainer.js";
+import WheelstackContextMenu from "./components/wheelstackContextMenu/wheelstackContextMenu.js";
 
 
 let platformManager = null;
@@ -37,6 +38,7 @@ let batchesContextMenu = new BatchesContextMenu(
 let cellsContextMenu = null;
 let storagesManager = null;
 let batchesExpandedElements = null;
+let wheelstackContextMenu = null;
 
 
 // TODO: Think about CLASS_NAMES, because if we change class name in CSS.
@@ -89,57 +91,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         "cell",
         BACK_URLS.CREATE_MOVE_WHOLE_ORDER,
     );
-    // ORDERS TABLE ---
-    // TODO: MAYBE finish and apply it. But it was just an experiment and we don't need it.
-    // +++ TABLE RESIZER 
-    // const table = document.querySelector('.orders-table-content table');
-    // const tableHeaders = document.querySelectorAll('.orders-table-header th');
-
-    // const columnResizer = new ColumnResizer(table, tableHeaders, 80, 350);
-    // TABLE RESIZER ---
     ordersTable.startUpdating();
     storagesManager = new StoragesManager(extraElementsContainer);
     batchesExpandedElements = new BatchesExpandedContainer();
-
-    // const tableBody = document.querySelector('.orders-table-content tbody');
-
-    // for (let i = 1; i <= 500; i++) {
-    //     const row = document.createElement('tr');
-
-    //     const partyNumberCell = document.createElement('td');
-    //     partyNumberCell.textContent = `12345678901234567890123${i}`;
-    //     row.appendChild(partyNumberCell);
-
-    //     const orderNumberCell = document.createElement('td');
-    //     orderNumberCell.textContent = `12345678901234567890123`;
-    //     row.appendChild(orderNumberCell);
-
-    //     const orderTypeCell = document.createElement('td');
-    //     orderTypeCell.innerHTML = `<b>Тип</b> Перенос стопки в Приямок`;
-    //     row.appendChild(orderTypeCell);
-
-    //     const sourceCell = document.createElement('td');
-    //     sourceCell.innerHTML = `<b>ID</b>=12345678901234567890123<br><b>Ряд</b>:D  <b>Колонна</b>:58${i}`;
-    //     row.appendChild(sourceCell);
-
-    //     const destinationCell = document.createElement('td');
-    //     destinationCell.innerHTML = `<b>ID</b>=12345678901234567890123<br><b>Ряд</b>:D  <b>Колонна</b>:58${i}`;
-    //     row.appendChild(destinationCell);
-
-    //     const timeCell = document.createElement('td');
-    //     timeCell.textContent = new Date(new Date().setDate(new Date().getDate() - Math.floor(Math.random() * 30))).toLocaleString();
-    //     row.appendChild(timeCell);
-
-    //     // columnResizer.applyColumnSizesToNewRow(row);
-
-    //     tableBody.appendChild(row);
-
-    // }
-
+    wheelstackContextMenu = new WheelstackContextMenu();
 })
 
 
 export {
-    platformManager, gridManager, ordersContextMenu,
+    platformManager, gridManager, ordersContextMenu, wheelstackContextMenu,
     batchesContextMenu, cellsContextMenu, batchesExpandedElements,
 }
