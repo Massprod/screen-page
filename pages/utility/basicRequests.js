@@ -36,3 +36,25 @@ export async function patchRequest(url) {
         throw error;
     }
 }
+
+
+export async function postRequest(url, requestBody) {
+    try {
+        const response = await fetch(
+            url,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            }
+        );
+        return response;
+    } catch (error) {
+        console.error(
+            `There was a problem with POST request: ${error}`
+        );
+        throw error;
+    }
+}
