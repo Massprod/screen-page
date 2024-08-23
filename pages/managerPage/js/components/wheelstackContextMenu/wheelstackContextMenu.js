@@ -1,15 +1,18 @@
 import updateMenuPosition from "../../../../utility/adjustContainerPosition.js";
 import { getRequest } from "../../../../utility/basicRequests.js";
 import flashMessage from "../../../../utility/flashMessage.js";
-import { BACK_URLS, GRID_NAME, STORAGE_NAME, UPDATE_PERIODS, LABORATORY_NAME } from "../../constants.js";
-import { batchesContextMenu, gridManager } from "../../mainScript.js";
+import { BACK_URLS, GRID_NAME, STORAGE_NAME, UPDATE_PERIODS, LABORATORY_NAME, BASE_PLATFORM_NAME, SHIPPED } from "../../constants.js";
+import { batchesContextMenu, gridManager, ordersContextMenu } from "../../mainScript.js";
 import {
     createProRejOrderGrid,
     createProRejOrderStorage,
     createLaboratoryOrderStorage,
     createLaboratoryOrderGrid,
     createProRejOrderBulk,
-    createOrderMoveWholestackStorage,
+    createOrderMoveWholestackFromStorage,
+    createOrderMoveWholestackFromBaseGrid,
+    createOrderMoveWholestackToStorage,
+    createOrderMoveWholestackToStorageFromStorage,
 } from "../../../../utility/ordersCreation.js";
 
 
@@ -81,7 +84,7 @@ export default class WheelstackContextMenu{
     // WHEEL MENU ---
 
     // +++ EXTRA MENU
-    async openExtraMenu(event, processing) {
+    async openExtraMenu(event, processing, storage) {
         this.extraMenuCloser = (event, force = false) => {
             if (force) {
                 if (this.extraMenuContainer) {
@@ -100,48 +103,75 @@ export default class WheelstackContextMenu{
             this.extraMenuCloser(event, true);
             return;
         }
-        // ORDER CREATION
-
-        // ---
 
         document.body.addEventListener("pointerdown", this.extraMenuCloser);
         this.extraMenuContainer = document.createElement('div');
         this.extraMenuContainer.classList.add('wheelstack-extra-elements-menu-container');
         this.extraMenuContainer.id = "wheelstackExtraMenu";
-        const gridExtraElements = gridManager.extraElements;
-        for (let extraElement in gridExtraElements) {
-            if (extraElement === LABORATORY_NAME) {
-                continue;
-            }
-            const extraElementButton = document.createElement("button");
-            extraElementButton.classList.add('wheelstack-context-menu-button');
-            if (processing) {
-                extraElementButton.classList.add('extra-confirm');
-                extraElementButton.classList.add('processing');
-            } else {
-                extraElementButton.classList.add('extra-reject');
-                extraElementButton.classList.add('reject');
-            }
-            extraElementButton.id = extraElement;
-            extraElementButton.innerText = extraElement;
-            extraElementButton.addEventListener("click", async (event) => {
-                if (this.chosenBatch) {
-                    await createProRejOrderBulk(this.elementData, extraElement, processing, gridManager.gridId);
-                } else if (GRID_NAME === this.elementData['placement']['type']) {
-                    await createProRejOrderGrid(this.elementData, extraElement, processing, gridManager.gridId);
-                } else if ( STORAGE_NAME === this.elementData['placement']['type']) {
-                    await createProRejOrderStorage(this.elementData, extraElement, processing, gridManager.gridId);
+        if (!storage) {
+            const gridExtraElements = gridManager.extraElements;
+            for (let extraElement in gridExtraElements) {
+                if (extraElement === LABORATORY_NAME) {
+                    continue;
                 }
-                setTimeout( () => {
-                    this.extraMenuCloser(event, true);
-                }, 10);
+                const extraElementButton = document.createElement("button");
+                extraElementButton.classList.add('wheelstack-context-menu-button');
+                if (processing) {
+                    extraElementButton.classList.add('extra-confirm');
+                } else {
+                    extraElementButton.classList.add('extra-reject');
+                }
+                extraElementButton.id = extraElement;
+                extraElementButton.innerText = extraElement;
+                extraElementButton.addEventListener("click", async (event) => {
+                    if (this.chosenBatch) {
+                        await createProRejOrderBulk(this.elementData, extraElement, processing, gridManager.gridId);
+                    } else if (GRID_NAME === this.elementData['placement']['type']) {
+                        await createProRejOrderGrid(this.elementData, extraElement, processing, gridManager.gridId);
+                    } else if ( STORAGE_NAME === this.elementData['placement']['type']) {
+                        await createProRejOrderStorage(this.elementData, extraElement, processing, gridManager.gridId);
+                    }
+                    setTimeout( () => {
+                        this.extraMenuCloser(event, true);
+                    }, 10);
+                })
+                this.extraMenuContainer.appendChild(extraElementButton);
+            }
+        } else {
+            const getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES}/?include_data=false`; 
+            const allStorages = await getRequest(getAllStoragesNoDataURL);
+            if (0 === allStorages.length) {
+                flashMessage.show({
+                    message: 'Нет созданных хранилищ',
+                })
+                return;
+            }
+            allStorages.forEach( async element => {
+                if (this.elementData['placement']['placementId'] === element['_id']) {
+                    return;
+                }
+                const storageElementButton = document.createElement('button');
+                storageElementButton.classList.add('wheelstack-context-menu-button', 'extra-storage');
+                storageElementButton.id = element['_id'];
+                storageElementButton.innerText = element['name'];
+                storageElementButton.addEventListener('click', async event => {
+                    if (STORAGE_NAME === this.elementData['placement']['type']) {
+                        await createOrderMoveWholestackToStorageFromStorage(this.elementData, element['_id']);
+                    } else  if (GRID_NAME === this.elementData['placement']['type']) {
+                        await createOrderMoveWholestackToStorage(this.elementData, element['_id']);
+                    }
+                    setTimeout( () => {
+                        this.extraMenuCloser(event, true);
+                    }, 10);
+                })
+                this.extraMenuContainer.appendChild(storageElementButton);
             })
-            this.extraMenuContainer.appendChild(extraElementButton);
-        }
+        }        
         document.body.appendChild(this.extraMenuContainer);
         updateMenuPosition(event, this.extraMenuContainer);
     }
     // EXTRA MENU ---
+
     // UPDATE ELEMENT
     async updateElementData() {
         const getElementDataURL = `${BACK_URLS.GET_WHEELSTACK_DATA_BY_ID}/${this.elementId}`;
@@ -169,6 +199,8 @@ export default class WheelstackContextMenu{
             } else if (
                 this.elementData['colPlacement'] !== this.openedColPlacement
             ) {
+                close = true;
+            } else if (SHIPPED === this.elementData['status']) {
                 close = true;
             }
             if (close) {
@@ -198,6 +230,8 @@ export default class WheelstackContextMenu{
             parag.style.visibility = 'visible';
         })
         // ---
+        this.batchRow.style.visibility = 'visible';
+        this.buttonsContainer.style.visibility = 'visible';
         // Batch
         const batchParag = this.batchRow.childNodes[0];
         batchParag.id = this.elementData['batchNumber'];
@@ -219,6 +253,10 @@ export default class WheelstackContextMenu{
                 if (this.blockedByRow !== element) {
                     element.style.display = 'none';
                 }
+            })
+            this.blockedByRow.addEventListener('contextmenu', event => {
+                event.preventDefault();
+                ordersContextMenu.showMenu(this.elementData['lastOrder'], event);
             })
             this.blockedByRow.style.display = 'block';
             const blockedParag = this.blockedByRow.childNodes[0];
@@ -246,6 +284,41 @@ export default class WheelstackContextMenu{
     }
 
 
+    // +++ MARKING
+    async sourceMarking(storageId, batchNumber, wheelstackId) {
+        const elements = document.body.querySelectorAll(
+            `.storage-element-dropdown-row#${CSS.escape(storageId)},
+             .storage-element-dropdown-row#${CSS.escape(batchNumber)},
+             .storage-element-expanded-row#${CSS.escape(wheelstackId)}`
+        );
+        elements.forEach(element => {
+            element.classList.add('mark-source');
+        });
+    }
+
+    async startMarking(storageId, batchNumber, wheelstackId) {
+        if (this.markingUpdateInterval) {
+            return;
+        }
+        this.markingUpdateInterval = setInterval( () => {
+            this.sourceMarking(storageId, batchNumber, wheelstackId);
+        }, UPDATE_PERIODS.SOURCE_MARKING);
+    }
+    
+    async stopMarking() {
+        if (!this.markingUpdateInterval) {
+            return;
+        }
+        clearInterval(this.markingUpdateInterval);
+        const allMarked = document.body.querySelectorAll('.mark-source');
+        allMarked.forEach( element => {
+            element.classList.remove('mark-source');
+        })
+        this.markingUpdateInterval = null;
+    }
+    // MARKING ---
+
+
     // +++ BUILD 
     async buildTemplate() {
         // MainContainer
@@ -267,6 +340,18 @@ export default class WheelstackContextMenu{
             this.wheelsContainer.appendChild(wheelElement);
             this.wheelElements.push(wheelElement);
             wheelElement.addEventListener('click', async event => {
+                if (this.activeOrderMarking) {
+                    flashMessage.show({
+                        message: "Закончите | Отмените перемещение"
+                    })
+                    return;
+                }
+                if (BASE_PLATFORM_NAME === this.elementData['placement']['type']) {
+                    flashMessage.show({
+                        message: 'Сначало перенеместите стопу с платформы',
+                    })
+                    return;
+                }
                 this.buildWheelMenu(event, wheelElement);
             });
         }
@@ -274,6 +359,7 @@ export default class WheelstackContextMenu{
         // Batch
         this.batchRow = document.createElement('div');
         this.batchRow.classList.add('wheelstack-context-menu-row');
+        this.batchRow.style.visibility = 'hidden';
         const batchParag = document.createElement('p');
         batchParag.innerText = '';
         this.batchRow.appendChild(batchParag);
@@ -281,9 +367,11 @@ export default class WheelstackContextMenu{
             if (!this.chosenBatch) {
                 this.chosenBatch = true;
                 batchesContextMenu.markBatch(this.elementData['batchNumber']);
-                this.openerElement.parentElement.childNodes.forEach( element => {
-                    element.classList.add('batch-mark');
-                })
+                if (STORAGE_NAME === this.elementData['placement']['type']) {
+                    this.openerElement.parentElement.childNodes.forEach( element => {
+                        element.classList.add('batch-mark');
+                    })
+                }
             } else {
                 this.chosenBatch = false;
                 batchesContextMenu.unmarkBatch();
@@ -295,6 +383,7 @@ export default class WheelstackContextMenu{
         this.buttonsContainer = document.createElement('div');
         this.buttonsContainer.classList.add('wheelstack-context-menu-buttons-row');
         this.buttonsContainer.id = 'wheelstackButtons';
+        this.buttonsContainer.style.visibility = 'hidden';
         this.menuContainer.appendChild(this.buttonsContainer);
 
         this.moveButton = document.createElement('button');
@@ -308,7 +397,10 @@ export default class WheelstackContextMenu{
                 return;
             }
             this.activeOrderMarking = true;
-            this.openerElement.classList.add('mark-source');
+            const storageId = this.elementData['placement']['placementId'];
+            const batchNumber = this.elementData['batchNumber'];
+            const wheelstackId = this.elementData['_id'];
+            this.startMarking(storageId, batchNumber, wheelstackId);
             const gridEmptyCells = document.querySelectorAll('.cell-grid.cell-empty');
             gridEmptyCells.forEach( (element) => {
                 element.classList.add('mark-available');
@@ -320,7 +412,11 @@ export default class WheelstackContextMenu{
                         'destinationRow': destinationRow,
                         'destinationCol': destinationCol,
                     }
-                    await createOrderMoveWholestackStorage(this.elementData, destinationData);
+                    if (STORAGE_NAME === this.elementData['placement']['type']) {
+                        await createOrderMoveWholestackFromStorage(this.elementData, destinationData);
+                    } else {
+                        await createOrderMoveWholestackFromBaseGrid(this.elementData, destinationData);
+                    } 
                     await this.clearHandleMoveExecute();
                 }
                 element.addEventListener('contextmenu', handleOrderCreation);
@@ -336,9 +432,11 @@ export default class WheelstackContextMenu{
             this.cancelOrderCreation = async () => {
                 await this.clearHandleMoveExecute();
             }
+
+            
+
             document.addEventListener('dblclick', this.cancelOrderCreation);
         })
-
         this.buttonsContainer.appendChild(this.moveButton);
 
 
@@ -347,30 +445,33 @@ export default class WheelstackContextMenu{
         this.moveStorageButton.classList.add('storage');
         this.moveStorageButton.id = 'moveStorageButton';
         this.moveStorageButton.innerText = 'Хранилище';
+        this.moveStorageButton.addEventListener('click', (event) => {
+            this.openExtraMenu(event, false, true);
+        })
         this.buttonsContainer.appendChild(this.moveStorageButton);
 
-        this.moveProcessingButton = document.createElement('button');
-        this.moveProcessingButton.classList.add('wheelstack-context-menu-button');
-        this.moveProcessingButton.classList.add('processing');
-        this.moveProcessingButton.id = 'moveProcessingButton';
-        this.moveProcessingButton.innerText = 'Обработка';
-        this.moveProcessingButton.addEventListener('click', event => {
-            this.openExtraMenu(event, true);
+        if (BASE_PLATFORM_NAME !== this.elementData['placement']['type']) {
+            this.moveProcessingButton = document.createElement('button');
+            this.moveProcessingButton.classList.add('wheelstack-context-menu-button');
+            this.moveProcessingButton.classList.add('processing');
+            this.moveProcessingButton.id = 'moveProcessingButton';
+            this.moveProcessingButton.innerText = 'Обработка';
+            this.moveProcessingButton.addEventListener('click', event => {
+                this.openExtraMenu(event, true, false);
 
-        })
-        this.buttonsContainer.appendChild(this.moveProcessingButton);
-        
-        this.moveRejectedButton = document.createElement('button');
-        this.moveRejectedButton.classList.add('wheelstack-context-menu-button');
-        this.moveRejectedButton.classList.add('reject');
-        this.moveRejectedButton.id = 'moveRejectedButton';
-        this.moveRejectedButton.innerText = 'Отказ';
-        this.moveRejectedButton.addEventListener('click', event => {
-            this.openExtraMenu(event, false);
-        })
-        this.buttonsContainer.appendChild(this.moveRejectedButton);
-        
-        
+            })
+            this.buttonsContainer.appendChild(this.moveProcessingButton);
+            
+            this.moveRejectedButton = document.createElement('button');
+            this.moveRejectedButton.classList.add('wheelstack-context-menu-button');
+            this.moveRejectedButton.classList.add('reject');
+            this.moveRejectedButton.id = 'moveRejectedButton';
+            this.moveRejectedButton.innerText = 'Отказ';
+            this.moveRejectedButton.addEventListener('click', event => {
+                this.openExtraMenu(event, false, false);
+            })
+            this.buttonsContainer.appendChild(this.moveRejectedButton);
+        }
 
         this.blockedByRow = document.createElement('div');
         this.blockedByRow.classList.add('wheelstack-context-menu-row');
@@ -395,7 +496,7 @@ export default class WheelstackContextMenu{
             }
         }
         )
-        this.openerElement.classList.remove('mark-source');
+        this.stopMarking();
         const markedCells = document.querySelectorAll('.cell-grid.mark-available');
         markedCells.forEach((element) => {
             element.classList.remove('mark-available');
@@ -425,13 +526,16 @@ export default class WheelstackContextMenu{
             if (this.menuContainer && this.menuContainer.contains(event.target)) {
                 return;
             }
-            if (this.openerElement === event.target || this.openerElement.contains(event.target)) {
-                return;
-            }
+            // if (this.openerElement === event.target || this.openerElement.contains(event.target)) {
+            //     return;
+            // }
             if (this.extraMenuContainer && this.extraMenuContainer.contains(event.target)) {
                 return;
             }
             if (this.wheelsMenu && this.wheelsMenu.contains(event.target)) {
+                return;
+            }
+            if (ordersContextMenu.element && ordersContextMenu.element.contains(event.target)) {
                 return;
             }
             this.hideMenu();
@@ -452,28 +556,28 @@ export default class WheelstackContextMenu{
 
     async hideMenu() {
         if (this.menuContainer) {
-            if (!this.activeOrderMarking) {
-                this.elementData = {}
-            }
-            this.wheelElements = [];
             this.menuContainer.remove();
-            this.menuContainer = null;
-            this.openedLastChange = null;
-            this.openedPlacementId = null;
-            this.openedPlacementType = null;
-            this.openedRowPlacement = null;
-            this.openedColPlacement = null;
-            this.lastChange = null;
-            document.body.removeEventListener('pointerdown', this.menuCloser);
-            this.stopUpdatingMenuData();
-            this.chosenBatch = null
-            batchesContextMenu.removeMenu();
-            if (this.extraMenuContainer) {
-                this.extraMenuCloser(null, true);
-            }
-            if (this.wheelsMenu) {
-                this.wheelsMenuCloser(null, true);
-            }
+        }
+        if (!this.activeOrderMarking) {
+            this.elementData = {}
+        }
+        this.lastChange = null;
+        this.wheelElements = [];
+        this.menuContainer = null;
+        this.openedLastChange = null;
+        this.openedPlacementId = null;
+        this.openedPlacementType = null;
+        this.openedRowPlacement = null;
+        this.openedColPlacement = null;
+        document.body.removeEventListener('pointerdown', this.menuCloser);
+        this.stopUpdatingMenuData();
+        this.chosenBatch = null
+        batchesContextMenu.removeMenu();
+        if (this.extraMenuContainer) {
+            this.extraMenuCloser(null, true);
+        }
+        if (this.wheelsMenu) {
+            this.wheelsMenuCloser(null, true);
         }
     }
 

@@ -183,7 +183,7 @@
     flex-direction: column;
     min-width: 200px;
     max-width: 400px;
-    max-height: 700px;
+    max-height: 300px;
     overflow-y: auto;
     border-radius: 8px;   
 }
@@ -248,4 +248,17 @@
 }
 
 
+.wheelstack-context-menu-button.extra-storage {
+    background-color: #6a939f;
+    align-self: center;
+    margin: 5% 10% 5% 10%;
+    width: 70%;
+    font-size: 1.3em;
+    max-height: 50px;
+    padding: 0px;
+}
 
+.wheelstack-context-menu-button.extra-storage:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+}
