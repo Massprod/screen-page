@@ -28,9 +28,8 @@ export default async function updateMenuPosition(event, menuElement) {
         positionY = 10; // Provide a small offset from the top
     }
 
-    // Final adjustment to ensure the menu stays within the viewport vertically
-    if (positionY + elementHeight > viewportHeight) {
-        positionY = viewportHeight - elementHeight - 500;
+    if (positionY + elementHeight > viewportHeight- 200) {
+        positionY = viewportHeight - elementHeight - 100;
     }
 
     menuElement.style.top = `${positionY}px`;
