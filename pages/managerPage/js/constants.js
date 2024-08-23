@@ -33,6 +33,7 @@ export const BACK_URLS = {
     // STORAGES
     GET_ALL_STORAGES: `${mainAddress}/storages/all`,
     GET_STORAGE: `${mainAddress}/storages`,
+    POST_STORAGE_MOVE_TO: `${mainAddress}/orders/create/storage/move_to`,
     POST_STORAGE_MOVE_FROM: `${mainAddress}/orders/create/storage/move_from`,
     PATCH_CLEAR_EMPTY_BATCHES_STORAGES: `${mainAddress}/storages/clear`,
     
@@ -58,6 +59,7 @@ export const LABORATORY_NAME = "laboratory";
 export const GRID_NAME = 'grid';
 export const BASE_PLATFORM_NAME = 'basePlatform';
 export const STORAGE_NAME = 'storage';
+export const SHIPPED = 'shipped';
 
 export const TESTS_NOT_DONE = "TESTS_NOT_DONE";
 export const TESTS_FAILED = "TESTS_FAILED";
@@ -65,6 +67,8 @@ export const TESTS_FAILED = "TESTS_FAILED";
 export const ORDER_MOVE_TO_PROCESSING = "moveToProcessing";
 export const ORDER_MOVE_TO_REJECTED = "moveToRejected";
 export const ORDER_MOVE_TO_LABORATORY = 'moveToLaboratory';
+export const ORDER_MOVE_WHOLE_STACK = 'moveWholeStack';
+export const ORDER_MOVE_TO_STORAGE = 'moveToStorage';
 
 export const PLACEMENT_TYPES = {
     "grid": "Приямок",
@@ -107,4 +111,5 @@ export const UPDATE_PERIODS = {
     STORAGE_BATCHES_ROWS: 200,
     BATCHES_WHEELSTACK_ROWS: 200,
     ELEMENT_MENU: 100,
+    SOURCE_MARKING: 50,
 }
