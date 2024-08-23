@@ -9,10 +9,7 @@ import {
 } from "./constants.js";
 import GridManager from "./components/grid/grid.js";
 import OrdersContextMenu from "./components/ordersContextMenu/ordersContextMenu.js";
-import flashMessage from "../../utility/flashMessage.js";
 import OrdersTable from "./components/ordersTable/ordersTable.js";
-import ColumnResizer from "../../utility/columnsResize/resizer.js";
-import CellsContextMenu from "./components/cellsContextMenu/cellsContextMenu.js";
 import BatchesContextMenu from "./components/batchesContextMenu/batchesContextMenu.js";
 import StoragesManager from "./components/storages/storagesManager.js";
 import BatchesExpandedContainer from "./components/storages/batchesContainer.js";
@@ -35,10 +32,10 @@ let batchesContextMenu = new BatchesContextMenu(
     BACK_URLS.GET_BATCH_NUMBER_DATA_BY_ID,
 )
 
-let cellsContextMenu = null;
+// let cellsContextMenu = null;
 let storagesManager = null;
 let batchesExpandedElements = null;
-let wheelstackContextMenu = null;
+let wheelstackContextMenu = new WheelstackContextMenu();;
 
 
 // TODO: Think about CLASS_NAMES, because if we change class name in CSS.
@@ -87,18 +84,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         ["batchNumber", "orderId", "orderType", "source", "destination", "createdAt"],
     )
 
-    cellsContextMenu = new CellsContextMenu(
-        "cell",
-        BACK_URLS.CREATE_MOVE_WHOLE_ORDER,
-    );
+    // cellsContextMenu = new CellsContextMenu(
+    //     "cell",
+    //     BACK_URLS.CREATE_MOVE_WHOLE_ORDER,
+    // );
     ordersTable.startUpdating();
     storagesManager = new StoragesManager(extraElementsContainer);
     batchesExpandedElements = new BatchesExpandedContainer();
-    wheelstackContextMenu = new WheelstackContextMenu();
 })
 
 
 export {
     platformManager, gridManager, ordersContextMenu, wheelstackContextMenu,
-    batchesContextMenu, cellsContextMenu, batchesExpandedElements,
+    batchesContextMenu, batchesExpandedElements,
 }
