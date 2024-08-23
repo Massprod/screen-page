@@ -11,6 +11,7 @@
 @import url("./js/components/batchesContextMenu/css/basicStyle.css");
 @import url("./js/components/batchElement/css/basicStyle.css");
 @import url("./js/components/wheelstackContextMenu//css//basicStyle.css");
+@import url("./js/components/storages/css/basicStyle.css");
 
 
 /* +++ CORRECT */
@@ -173,4 +174,13 @@ html, body {
 .mark-chosen:hover {
   background-color: #2ba72b;
 }
+
+.mark-source {
+  background-color: #3b3bcb;
+}
+
+.mark-source:hover {
+  background-color: #6868df;
+}
+
 /* CORRECT ---*/
