@@ -1,7 +1,8 @@
 import flashMessage from "../../../../utility/flashMessage.js";
 import { BASE_PLATFORM_NAME, FLASH_MESSAGES, GRID_NAME, LABORATORY_NAME, PLACEMENT_TYPES } from "../../constants.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
-import { cellsContextMenu, gridManager, platformManager } from "../../mainScript.js";
+import { gridManager, platformManager } from "../../mainScript.js";
+import { createProRejOrderBulk } from "../../../../utility/ordersCreation.js";
 
 
 export default class BatchesContextMenu{
@@ -149,11 +150,14 @@ export default class BatchesContextMenu{
         }
         this.executeCreation = async (processing, extraElement) => {
             const elementData = {
-                'placementId': gridManager.gridId,
-                'type': GRID_NAME,
+                'placement': {
+                    'placementId': gridManager.gridId,
+                    'type': GRID_NAME,
+                },
+                'batchNumber': this.batchNumber,
             }
-            cellsContextMenu.createProRejBulkOrders(
-                elementData, extraElement, this.batchNumber, processing
+            createProRejOrderBulk(
+                elementData, extraElement, processing, gridManager.gridId
             );
             this.extraMenuCloser(event, true);
         }

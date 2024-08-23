@@ -1,5 +1,6 @@
-import { batchesContextMenu, cellsContextMenu, gridManager } from "../../mainScript.js";
+import { batchesContextMenu, wheelstackContextMenu, gridManager } from "../../mainScript.js";
 import { BACK_URLS } from "../../constants.js";
+import { getRequest } from "../../../../utility/basicRequests.js";
 
 
 export default class BatchElement{
@@ -44,11 +45,11 @@ export default class BatchElement{
         const allWheels = wheelstackData['wheels'];
         const lastWheelObjectId = allWheels[allWheels.length - 1]
         const wheelDataURL = `${BACK_URLS.GET_WHEEL_DATA_BY_OBJECT_ID}/${lastWheelObjectId}`;
-        const lastWheelData = await cellsContextMenu.getWheelData(wheelDataURL);
+        const wheelData = await getRequest(wheelDataURL);
         const wheelstackRow = document.createElement('div');
         wheelstackRow.classList.add('extra-element-expanded-row');
         const parag = document.createElement('p');
-        parag.innerHTML = `В.К: ${lastWheelData['wheelId']}`;
+        parag.innerHTML = `В.К: ${wheelData['wheelId']}`;
         parag.id = lastWheelObjectId;
         wheelstackRow.appendChild(parag);
         wheelstackRow.id = wheelstackData['_id'];
@@ -76,7 +77,7 @@ export default class BatchElement{
             let wheelstackRow = await this.createWheelstackRow(element.elementData);
             wheelstackRow.addEventListener('contextmenu', (event) => {
                 event.preventDefault();
-                cellsContextMenu.buildMenu(event, element);
+                wheelstackContextMenu.showMenu(event, element.elementData['_id'], wheelstackRow);
             })
             wheelstackRow.addEventListener('click', async (event) => {
                 if (gridManager.markChosen) {
@@ -115,12 +116,14 @@ export default class BatchElement{
             wheelstackElement.childNodes[0].id = wheelstackData['lastOrder'];
         } else {
             wheelstackElement.classList.remove('wheelstack-row-element-blocked');
-            if (!this.batchStatusData['laboratoryTestDate']) {
-                wheelstackElement.classList.add('not-tested');
-            } else if (this.batchStatusData['laboratoryPassed']) {
-                wheelstackElement.classList.add('passed');
-            } else {
-                wheelstackElement.classList.add('not-passed');
+            if (this.batchStatusData) {
+                if (!this.batchStatusData['laboratoryTestDate']) {
+                    wheelstackElement.classList.add('not-tested');
+                } else if (this.batchStatusData['laboratoryPassed']) {
+                    wheelstackElement.classList.add('passed');
+                } else {
+                    wheelstackElement.classList.add('not-passed');
+                }
             }
         }
         wheelstackElement.id = wheelstackData['_id'];
@@ -141,7 +144,7 @@ export default class BatchElement{
             let wheelstackRow = await this.createWheelstackRow(element.elementData);
             wheelstackRow.addEventListener('contextmenu', (event) => {
                 event.preventDefault();
-                cellsContextMenu.buildMenu(event, element);
+                wheelstackContextMenu.showMenu(event, wheelstackObjectId, wheelstackRow);
             })
             gridManager.wheelstacksContainer.appendChild(wheelstackRow);
         })
