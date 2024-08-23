@@ -170,11 +170,11 @@ export default class OrdersContextMenu{
             if (this.element && !this.element.contains(event.target)) {
                 this.removeMenu(true);
                 this.stopUpdating();
-                document.removeEventListener('click', this.menuCloser);
+                document.removeEventListener('pointerdown', this.menuCloser);
                 this.menuCloser = null;
             }
         } 
-        document.addEventListener("click", this.menuCloser);
+        document.addEventListener("pointerdown", this.menuCloser);
         this.updateMenuPosition(event)
     }
 
