@@ -1,6 +1,7 @@
 import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
 import { getRequest } from "../../../../utility/basicRequests.js";
 import { batchesExpandedElements } from "../../mainScript.js";
+import flashMessage from "../../../../utility/flashMessage.js";
 
 
 export default class StoragesManager{
@@ -37,34 +38,42 @@ export default class StoragesManager{
         // Open|Close Action
         this.storagesHeader.addEventListener('click', () => {
             if (this.contentOpened) {
-                this.storagesContent.style.maxHeight = '0px';
-                const storageExpanded = document.querySelector('storage-element-expanded-container');
-                if (storageExpanded) {
-                    storageExpanded.remove();
-                }
-                this.contentOpened = false;
-                this.stopUpdatingStorages();
+                this.closeContent();
             } else {
-                this.contentOpened = true;
-                this.storagesContent.style.maxHeight = '250px';
-                this.startUpdatingStorages();
+                this.openContent();
             }
         });
 
         this.container.appendChild(this.storagesContainer);
     }
 
+    async closeContent() {
+        this.storagesContent.style.maxHeight = '0px';
+        const storageExpanded = document.querySelector('storage-element-expanded-container');
+        if (storageExpanded) {
+            storageExpanded.remove();
+        }
+        this.contentOpened = false;
+        this.stopUpdatingStorages();
+    }
+
+    async openContent() {
+        this.contentOpened = true;
+        this.storagesContent.style.maxHeight = '250px';
+        this.startUpdatingStorages();
+    }
+
     // +++ STORAGE ROWS
     
     async createStorageRow(rowData) {
         const storageRow = document.createElement('div');
-        storageRow.classList.add('extra-element-dropdown-row');
+        storageRow.classList.add('storage-element-dropdown-row');
         storageRow.id = `${rowData['_id']}`;
         const storageRowParag = document.createElement('p');
         storageRowParag.innerHTML = `${rowData['name']}`;
         storageRow.appendChild(storageRowParag);
         storageRow.addEventListener('click', async (event) => {
-            batchesExpandedElements.showBatchesContainer(event, storageRow, rowData['_id']);
+            batchesExpandedElements.showBatchesContainer(event, storageRow, rowData['_id'], rowData['name']);
         })
         return storageRow;
     }
@@ -72,6 +81,13 @@ export default class StoragesManager{
     async updateStorageRows() {
         this.getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES}/?include_data=False`;
         this.newStoragesNoData = await getRequest(this.getAllStoragesNoDataURL);
+        if (0 === this.newStoragesNoData.length) {
+            flashMessage.show({
+                message: 'Нет созданных хранилищ',
+            })
+            this.closeContent();
+            return;
+        }
         // Create | Update already existing rows
         this.lastUpdateStorageIds = {};
         this.newStoragesNoData.forEach( async (storageData) => {
