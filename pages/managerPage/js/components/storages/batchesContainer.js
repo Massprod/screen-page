@@ -20,12 +20,13 @@ export default class BatchesExpandedContainer{
         const topWheelData = await getRequest(topWheelDataURL);
         const topWheelId = topWheelData['wheelId'];
         const wheelstackRow = document.createElement('div');
-        wheelstackRow.classList.add('extra-element-expanded-row');
+        wheelstackRow.classList.add('storage-element-expanded-row');
         wheelstackRow.id = wheelstackId;
         const rowParag = document.createElement('p');
         rowParag.innerHTML = `ВХ: ${topWheelId}`;
         wheelstackRow.appendChild(rowParag);
-        wheelstackRow.addEventListener('click', event => {
+        wheelstackRow.addEventListener('contextmenu', event => {
+            event.preventDefault();
             wheelstackContextMenu.showMenu(event, wheelstackId, wheelstackRow);
         })
         return wheelstackRow;
@@ -74,19 +75,13 @@ export default class BatchesExpandedContainer{
             if (this.wheelstacksContainerElement && this.wheelstacksContainerElement.contains(event.target)) {
                 return;
             }
-            if (wheelstackContextMenu.menuContainer && wheelstackContextMenu.menuContainer.contains(event.target)) {
-                return;
-            }
-            if (wheelstackContextMenu.extraMenuContainer && wheelstackContextMenu.extraMenuContainer.contains(event.target)) {
-                return;
-            }
-            if (wheelstackContextMenu.wheelsMenu && wheelstackContextMenu.wheelsMenu.contains(event.target)) {
+            if (wheelstackContextMenu.menuContainer) {
                 return;
             }
             this.hideWheelstackContainer();
         }
         this.wheelstacksContainerElement = document.createElement('div');
-        this.wheelstacksContainerElement.classList.add('extra-element-expanded-container');
+        this.wheelstacksContainerElement.classList.add('storage-element-expanded-container');
         this.wheelstacksContainerElement.style.visibility = 'hidden';
         document.body.appendChild(this.wheelstacksContainerElement);
         setTimeout( async () => {
@@ -141,7 +136,7 @@ export default class BatchesExpandedContainer{
     // +++ BatchRowsCreation
     async createBatchRow(batchNumber) {
         const batchRow = document.createElement('div');
-        batchRow.classList.add('extra-element-dropdown-row');
+        batchRow.classList.add('storage-element-dropdown-row');
         batchRow.classList.add('batch-row');
         batchRow.id = batchNumber;
         const batchParag = document.createElement('p');
@@ -171,14 +166,14 @@ export default class BatchesExpandedContainer{
         const newBatches = Object.keys(this.newBatchesInStorageData['elements']);
         // TODO: Delete empty records from DB. We need extra endpoint for this.
         if (0 === newBatches.length) {
-            this.hideBatchesContainer();
             flashMessage.show({
-                message: 'В хранилище отсутствуют элементы',
+                message: `В хранилище <b>${this.storageName}</b> отсутствуют элементы`,
                 color: 'white',
                 backgroundColor: 'black',
                 position: 'top-center',
                 duration: 2000,
             })
+            this.hideBatchesContainer();
             return;
         }
         this.batchesContainerElement.style.display = 'block';
@@ -226,20 +221,14 @@ export default class BatchesExpandedContainer{
             if (this.wheelstacksContainerElement && this.wheelstacksContainerElement.contains(event.target)) {
                 return;
             }
-            if (wheelstackContextMenu.menuContainer && wheelstackContextMenu.menuContainer.contains(event.target)) {
-                return;
-            }
-            if (wheelstackContextMenu.extraMenuContainer && wheelstackContextMenu.extraMenuContainer.contains(event.target)) {
-                return;
-            }
-            if (wheelstackContextMenu.wheelsMenu && wheelstackContextMenu.wheelsMenu.contains(event.target)) {
+            if (wheelstackContextMenu.menuContainer) {
                 return;
             }
             this.hideBatchesContainer();
         }
         this.batchesContainerOpener = openerElement;
         this.batchesContainerElement = document.createElement('div');
-        this.batchesContainerElement.classList.add('extra-element-expanded-container');
+        this.batchesContainerElement.classList.add('storage-element-expanded-container');
         this.batchesContainerElement.style.visibility = 'hidden';
         document.body.appendChild(this.batchesContainerElement);
         setTimeout( async () => {
@@ -247,7 +236,7 @@ export default class BatchesExpandedContainer{
         }, 2);
     }
 
-    async showBatchesContainer(event, openerElement, storageId) {
+    async showBatchesContainer(event, openerElement, storageId, storageName) {
         if (this.batchesContainerElement) {
             this.hideBatchesContainer();
             if (openerElement === this.batchesContainerOpener) {
@@ -256,6 +245,7 @@ export default class BatchesExpandedContainer{
             }
         }
         this.storageId = storageId;
+        this.storageName = storageName;
         await this.createContainer(openerElement);
         updateMenuPosition(event, this.batchesContainerElement);
         this.startUpdatingBatchRows();
@@ -271,6 +261,7 @@ export default class BatchesExpandedContainer{
         this.createdBatchRows = {};
         this.stopUpdatingBatchRows();
         this.storageId = null;
+        this.storageName = null;
         if (this.wheelstacksContainerElement) {
             this.hideWheelstackContainer();
         }

@@ -1,5 +1,9 @@
 import { BACK_URLS } from "../../constants.js";
-import { batchesContextMenu } from "../../mainScript.js";
+import { 
+    batchesContextMenu,
+    ordersContextMenu,
+    wheelstackContextMenu,
+} from "../../mainScript.js";
 
 
 export default class Cell{
@@ -57,6 +61,20 @@ export default class Cell{
         this.element.className = "cell";
         this.element.id = `${this.cellRowId}|${this.cellColId}`;
         this.container.appendChild(this.element);
+        this.element.addEventListener('contextmenu', async event => {
+            event.preventDefault();
+            if (!this.elementData && this.data['blocked']) {
+                ordersContextMenu.showMenu(this.data['blockedBy'], event);
+                return;
+            }
+            if (!this.elementData) {
+                return;
+            }
+            wheelstackContextMenu.showMenu(
+                event, this.elementData['_id'], this.element
+            );
+        }
+        )
     }
 
     setAsWhitespace() {
