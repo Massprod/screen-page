@@ -70,7 +70,7 @@ class FlashMessage {
     flashMessage.style.backgroundColor = backgroundColor;
     flashMessage.style.fontSize = fontSize;
     flashMessage.style.fontFamily = fontFamily;
-    flashMessage.textContent = message;
+    flashMessage.innerHTML = message;
 
     this.flashMessagesContainer.appendChild(flashMessage);
 
