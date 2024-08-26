@@ -49,7 +49,7 @@ export default class BatchElement{
         const wheelstackRow = document.createElement('div');
         wheelstackRow.classList.add('extra-element-expanded-row');
         const parag = document.createElement('p');
-        parag.innerHTML = `В.К: ${wheelData['wheelId']}`;
+        parag.innerHTML = `Верхнее колесо:<br> <b>${wheelData['wheelId']}</b>`;
         parag.id = lastWheelObjectId;
         wheelstackRow.appendChild(parag);
         wheelstackRow.id = wheelstackData['_id'];

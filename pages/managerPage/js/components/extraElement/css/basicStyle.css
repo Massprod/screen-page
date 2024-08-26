@@ -49,8 +49,6 @@
     color: #444; /* Darker text color */
     margin-bottom: 5px; /* Space between rows */
     border-radius: 10px;
-    height: 50px;
-    max-height: 50px;
     cursor: pointer;
     /* align-items: center; */
 }

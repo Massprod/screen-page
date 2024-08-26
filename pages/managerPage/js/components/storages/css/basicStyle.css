@@ -49,10 +49,8 @@
     color: #444; /* Darker text color */
     margin-bottom: 5px; /* Space between rows */
     border-radius: 10px;
-    height: 50px;
-    max-height: 50px;
     cursor: pointer;
-    /* align-items: center; */
+    align-items: center;
 }
 
 .storage-element-expanded-row:hover {
@@ -67,7 +65,6 @@
     font-size: 1.5em;
     margin: 0px;
     padding: 0px;
-    margin-top: 5px;
     text-align: center;
 }
 

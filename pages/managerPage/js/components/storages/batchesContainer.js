@@ -23,7 +23,7 @@ export default class BatchesExpandedContainer{
         wheelstackRow.classList.add('storage-element-expanded-row');
         wheelstackRow.id = wheelstackId;
         const rowParag = document.createElement('p');
-        rowParag.innerHTML = `ВХ: ${topWheelId}`;
+        rowParag.innerHTML = `Верхнее колесо: <br> <b>${topWheelId}</b>`;
         wheelstackRow.appendChild(rowParag);
         wheelstackRow.addEventListener('contextmenu', event => {
             event.preventDefault();
@@ -140,7 +140,7 @@ export default class BatchesExpandedContainer{
         batchRow.classList.add('batch-row');
         batchRow.id = batchNumber;
         const batchParag = document.createElement('p');
-        batchParag.innerText = `П: ${batchNumber}`;
+        batchParag.innerHTML = `Партия: <br> <b>${batchNumber}</b>`;
         batchRow.appendChild(batchParag);
         // Batch ContextMenu
         batchRow.addEventListener('contextmenu', (event) => {
