@@ -157,7 +157,7 @@ export default class WheelstackContextMenu{
                 storageElementButton.addEventListener('click', async event => {
                     if (STORAGE_NAME === this.elementData['placement']['type']) {
                         await createOrderMoveWholestackToStorageFromStorage(this.elementData, element['_id']);
-                    } else  if (GRID_NAME === this.elementData['placement']['type']) {
+                    } else {
                         await createOrderMoveWholestackToStorage(this.elementData, element['_id']);
                     }
                     setTimeout( () => {
