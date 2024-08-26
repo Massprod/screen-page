@@ -90,10 +90,13 @@ export default class OrdersContextMenu{
         orderIdRowParag.innerHTML = `ID: <b>${this.orderData['_id']}</b>`;
         orderIdRow.appendChild(orderIdRowParag);
         this.element.appendChild(orderIdRow);
-        orderIdRow.addEventListener('click', (event) => {
+        orderIdRow.addEventListener('click', async (event) => {
+            let correct = false;
             if (!this.cellsMarked) {
-                this.markCells(this.orderData['_id']);
-                this.highlightInterval(this.orderData['_id']);
+                correct = await this.markCells(this.orderData['_id']);
+                if (correct) {
+                    this.highlightInterval(this.orderData['_id']);
+                }
             } else {
                 this.unmarkHiglighted();
                 if (this.highlightTimeout) {
@@ -102,9 +105,11 @@ export default class OrdersContextMenu{
                 // console.log('CURRENTORDER', this.orderData['_id'])
                 // console.log("CLICKEDBEFORE", this.clickedOrderId);
                 if (this.clickedOrderId !== this.orderData['_id']) {   
-                    this.markCells(this.orderData['_id']);
+                    correct = await this.markCells(this.orderData['_id']);
                     this.clearHighlightInterval();
-                    this.highlightInterval(this.orderData['_id']);
+                    if (correct) {
+                        this.highlightInterval(this.orderData['_id']);       
+                    }
                 } else {
                     this.clearHighlightInterval();
                     this.cellsMarked = false;
@@ -178,7 +183,7 @@ export default class OrdersContextMenu{
         this.updateMenuPosition(event)
     }
 
-    markCells(clickedOrderId) {
+    async markCells(clickedOrderId) {
         this.clickedOrderId = clickedOrderId;
         // TODO: Adjust when we add pages for a platforms and grids.
         //       Additionally highlight order in OrdersTable.
@@ -190,13 +195,13 @@ export default class OrdersContextMenu{
         this.sourceCell = null;
         if (gridManager.gridId !== sourceId && platformManager.platformId !== sourceId) {
             flashMessage.show({
-                message: 'Исходная клетка не находится в активных окнах',
+                message: 'Исходная клетка не находится в активном окне <b>Приямка</b>',
                 color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
                 backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
                 position: 'top-center',
                 duration: FLASH_MESSAGES.FETCH_NOT_FOUND_DURATION,
             });
-            return;
+            return false;
         }
         if (sourceType === 'grid') {
             this.sourceCell = gridManager['gridRows'][sourceRow].columns[sourceCol];
@@ -210,13 +215,13 @@ export default class OrdersContextMenu{
         this.destinationCell = null;
         if (gridManager.gridId !== destinationId) {
             flashMessage.show({
-                message: 'Конечная клетка не находится в активных окнах',
+                message: 'Конечная клетка не находится в активном окне <b>Приямка</b>',
                 color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
                 backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
                 position: 'top-center',
                 duration: FLASH_MESSAGES.FETCH_NOT_FOUND_DURATION,
             });
-            return;
+            return false;
         }
         if ('extra' == destinationRow) {
             this.destinationCell = gridManager.extraElements[destinationCol];
@@ -229,12 +234,13 @@ export default class OrdersContextMenu{
         this.destinationCell.element.classList.add('highlight');
         this.cellsMarked = true;
         flashMessage.show({
-            message: 'Выделены объекты относящиеся к выбранному Заказу',
+            message: 'Выделены объекты относящиеся к выбранному <b>Заказу</b>',
             color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
             backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
             position: 'top-center',
             duration: 3000,
         });
+        return true;
         // TODO: ADD same mark for a row in the ORDERS table.
     }
 
