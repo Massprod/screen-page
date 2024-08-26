@@ -103,7 +103,7 @@
     animation: orderCellFlashlight 3s infinite ease-in-out;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1370px) {
     .orders-table-content td:nth-child(1),
     .orders-table-content td:nth-child(2),
     .orders-table-header th:nth-child(1),
