@@ -73,6 +73,8 @@ export const ORDER_MOVE_TO_STORAGE = 'moveToStorage';
 export const PLACEMENT_TYPES = {
     "grid": "Приямок",
     "basePlatform": "Челнок",
+    'storage': "Хранилище",
+    'laboratory': "Лаборатория",
 }
 
 export const FLASH_MESSAGES = {
@@ -85,12 +87,13 @@ export const FLASH_MESSAGES = {
 }
 
 export const ORDER_TYPES_TRANSLATE = {
-    "moveWholeStack": "Перенос стопки",
+    "moveWholeStack": "Перенос стопы",
     "moveTopWheel": "Перенос верхнего колеса",
-    "moveToLaboratory": "Перенос в лабораторию",
+    "moveToLaboratory": "В лабораторию",
     "mergeWheelStacks": "Объединение стопок",
-    "moveToProcessing": "Перенос в обработку",
-    "moveToRejected": "Перенос в брак",   
+    "moveToProcessing": "В обработку",
+    "moveToRejected": "В Отказ",
+    "moveToStorage": "В хранилище",
 }
 
 export const ORDERS_TABLE_COLUMNS_TRANSLATE = {

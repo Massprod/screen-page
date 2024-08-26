@@ -5,10 +5,13 @@ import {
      BACK_URLS,
      ORDER_TYPES_TRANSLATE,
      PLACEMENT_TYPES,
+     STORAGE_NAME,
+     LABORATORY_NAME,
 } from "../../constants.js";
 import flashMessage from "../../../../utility/flashMessage.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
 import { ordersContextMenu } from "../../mainScript.js";
+import { getRequest } from "../../../../utility/basicRequests.js";
 
 
 export default class OrdersTable{
@@ -87,6 +90,26 @@ export default class OrdersTable{
         this.container.appendChild(contentContainer);
     }
 
+    async #createPlacementRecord(placementData) {
+        const placementType = placementData['placementType'];
+        const placementId = placementData['placementId'];
+        const placementRow = placementData['rowPlacement'];
+        const placementCol = placementData['columnPlacement'];
+        let placementRecord = "";
+        if (placementCol === LABORATORY_NAME) {
+            placementRecord = `<b>${PLACEMENT_TYPES[placementCol]}</b>`;
+        } else if (placementType !== STORAGE_NAME) {
+            placementRecord = `<b>${PLACEMENT_TYPES[placementType]}</b> <br> Р: <b>${placementRow}</b> | К: <b>${placementCol}</b>`;
+        } else {
+            const storageGetNoDataURL = `${BACK_URLS.GET_STORAGE}/?storage_id=${placementId}&include_data=false`;
+            const storageData = await getRequest(storageGetNoDataURL);
+            const storageName = storageData['name'];
+            placementRecord = `${PLACEMENT_TYPES[placementType]} <br> <b>${storageName}</b>`;
+        }
+        return placementRecord;
+    }
+
+
     async createNewRow(orderId) {
         const orderData = this.activeOrders[orderId];
         // No matter the order, we always going to have same batchNumber for source and dest.
@@ -107,34 +130,32 @@ export default class OrdersTable{
         row.id = orderData['_id'];
         // TODO: Adjust creation of a class and rows, so we could loop and create by set COLUMNS.
         let column = document.createElement('td');
-        column.innerHTML = `${wheelstackData['batchNumber']}`;
+        // BATCH
+        column.innerHTML = `<b>${wheelstackData['batchNumber']}</b>`;
         column.id = orderData['_id'];
         row.appendChild(column);
+        // ORDER `ObjectId`
         column = document.createElement('td');
         column.innerHTML = `${orderData['_id']}`;
         column.id = orderData['_id'];
         row.appendChild(column);
+        // ORDER Type
         column = document.createElement('td');
         column.innerHTML = `${ORDER_TYPES_TRANSLATE[orderData['orderType']]}`;
         column.id = orderData['_id'];
         row.appendChild(column);
+        // SOURCE data
         column = document.createElement('td');
-        const sourceType = orderData['source']['placementType'];
-        const sourceId = orderData['source']['placementId'];
-        const sourceRow = orderData['source']['rowPlacement'];
-        const sourceCol = orderData['source']['columnPlacement'];
-        column.innerHTML = `<b>${PLACEMENT_TYPES[sourceType]}</b> - ${sourceId}<br>
-                            <b>Ряд</b>: ${sourceRow} | <b>Колонна</b> ${sourceCol}`;
+        let placementData = orderData['source'];
+        column.innerHTML = await this.#createPlacementRecord(placementData);
         column.id = orderData['_id'];
         row.appendChild(column);
+        // DESTINATION data
         column = document.createElement('td');
-        const destinationType = orderData['destination']['placementType'];
-        const destinationId = orderData['destination']['placementId'];
-        const destinationRow = orderData['destination']['rowPlacement'];
-        const destinationCol = orderData['destination']['columnPlacement'];
-        column.innerHTML = `<b>${PLACEMENT_TYPES[destinationType]}</b> - ${destinationId}<br>
-                            <b>Ряд</b>: ${destinationRow} | <b>Колонна</b> ${destinationCol}`;
+        placementData = orderData['destination'];
+        column.innerHTML = await this.#createPlacementRecord(placementData);
         column.id = orderData['_id'];
+        // RECEIPT DATE
         row.appendChild(column);
         column = document.createElement('td');
         const creationTime = convertISOToCustomFormat(orderData['createdAt'], true, true);
@@ -169,9 +190,9 @@ export default class OrdersTable{
 
     async updateActiveOrders() {
         const activeOrdersUrl = `${this.getOrdersDataUrl}?active_orders=true&completed_orders=false&canceled_orders=false`;
-        const activeOrders = await this.#getData(activeOrdersUrl);
-        // TODO:REfactor this monstrosity later.
-        if (null === activeOrders) {
+        let activeOrders = await this.#getData(activeOrdersUrl);
+        activeOrders = activeOrders['activeOrders'];
+        if (0 === Object.keys(activeOrders).length) {
             if (!this.emptyOrdersInterval) {
                 flashMessage.show({
                     message: 'В данный момент нет активных заказов',
@@ -190,27 +211,36 @@ export default class OrdersTable{
                     });
                 }, 10000);
             }
+            this.activeOrders = null;
             return;
         };
-        if (this.emptyOrdersInterval) {
-            clearInterval(this.emptyOrdersInterval);
-            flashMessage.show({
-                message: 'Поступили новые заказы',
-                color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
-                backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
-                position: 'top-center',
-                duration: 3000,
-            })
-        }
-        let initialFill = false;
-        if (!this.activeOrders) {
+    if (this.emptyOrdersInterval) {
+        clearInterval(this.emptyOrdersInterval);
+        this.emptyOrdersInterval = null;
+        flashMessage.show({
+            message: 'Поступили новые заказы',
+            color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
+            backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
+            position: 'top-center',
+            duration: 3000,
+        })
+    }
+    let initialFill = false;
+    if (!this.activeOrders) {
             initialFill = true;
         }
-        this.activeOrders = activeOrders['activeOrders'];
+        this.activeOrders = activeOrders;
         this.updateOrderRows(initialFill);
     }
 
     cullExpired() {
+        if (!this.activeOrders) {
+            Object.keys(this.createdRows).forEach( key => {
+                this.createdRows[key].remove();
+                delete this.createdRows[key]
+            })
+            return;
+        }
         for (let createdOrderId in this.createdRows) {
             if (!(createdOrderId in this.activeOrders)) {
                 this.createdRows[createdOrderId].remove();
