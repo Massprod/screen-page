@@ -180,11 +180,7 @@ export async function createProRejOrderBulk(elementData, extraElement, processin
         createOrderBody['orderType'] = ORDER_MOVE_TO_REJECTED;
     }
     const resp = await postRequest(createOrderURL, createOrderBody);
-    if (!resp.ok) {
-        flashMessage.show({
-            message: `Ошибка при создании булк переноса: ${resp.status}`
-        });
-    }
+    await checkProRejOrderResponse(resp);
 }
 
 
