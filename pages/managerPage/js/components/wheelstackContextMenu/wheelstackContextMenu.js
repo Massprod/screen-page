@@ -1,7 +1,16 @@
 import updateMenuPosition from "../../../../utility/adjustContainerPosition.js";
 import { getRequest } from "../../../../utility/basicRequests.js";
 import flashMessage from "../../../../utility/flashMessage.js";
-import { BACK_URLS, GRID_NAME, STORAGE_NAME, UPDATE_PERIODS, LABORATORY_NAME, BASE_PLATFORM_NAME, SHIPPED } from "../../constants.js";
+import {
+    BACK_URLS,
+    GRID_NAME,
+    STORAGE_NAME,
+    UPDATE_PERIODS,
+    LABORATORY_NAME,
+    BASE_PLATFORM_NAME,
+    SHIPPED,
+    OPERATOR_ROLE_NAME,
+} from "../../constants.js";
 import { batchesContextMenu, gridManager, ordersContextMenu } from "../../mainScript.js";
 import {
     createProRejOrderGrid,
@@ -14,6 +23,7 @@ import {
     createOrderMoveWholestackToStorage,
     createOrderMoveWholestackToStorageFromStorage,
 } from "../../../../utility/ordersCreation.js";
+import { getCookie } from "../../../../utility/roleCookies.js";
 
 
 // Idea is to open elementContextMenu only by given ID of the element.
@@ -321,6 +331,7 @@ export default class WheelstackContextMenu{
 
     // +++ BUILD 
     async buildTemplate() {
+        const role = await getCookie('role');
         // MainContainer
         this.menuContainer = document.createElement('div');
         this.menuContainer.classList.add('wheelstack-context-menu-container');
@@ -339,21 +350,23 @@ export default class WheelstackContextMenu{
             wheelElement.appendChild(parag);
             this.wheelsContainer.appendChild(wheelElement);
             this.wheelElements.push(wheelElement);
-            wheelElement.addEventListener('click', async event => {
-                if (this.activeOrderMarking) {
-                    flashMessage.show({
-                        message: "Закончите | Отмените перемещение"
-                    })
-                    return;
-                }
-                if (BASE_PLATFORM_NAME === this.elementData['placement']['type']) {
-                    flashMessage.show({
-                        message: 'Сначало перенеместите стопу с платформы',
-                    })
-                    return;
-                }
-                this.buildWheelMenu(event, wheelElement);
-            });
+            if (OPERATOR_ROLE_NAME !== role) {
+                wheelElement.addEventListener('click', async event => {
+                    if (this.activeOrderMarking) {
+                        flashMessage.show({
+                            message: "Закончите | Отмените перемещение"
+                        })
+                        return;
+                    }
+                    if (BASE_PLATFORM_NAME === this.elementData['placement']['type']) {
+                        flashMessage.show({
+                            message: 'Сначало перенеместите стопу с платформы',
+                        })
+                        return;
+                    }
+                    this.buildWheelMenu(event, wheelElement);
+                });
+            }
         }
         this.menuContainer.appendChild(this.wheelsContainer)
         // Batch
@@ -377,14 +390,32 @@ export default class WheelstackContextMenu{
                 batchesContextMenu.unmarkBatch();
             }
         })
-
+        if (OPERATOR_ROLE_NAME !== role) {
+            this.batchRow.addEventListener('contextmenu', async event => {
+                event.preventDefault();
+                batchesContextMenu.buildMenu(event, this.elementData['batchNumber']);
+            });
+        }
         this.menuContainer.appendChild(this.batchRow);
+
         // Buttons
         this.buttonsContainer = document.createElement('div');
         this.buttonsContainer.classList.add('wheelstack-context-menu-buttons-row');
         this.buttonsContainer.id = 'wheelstackButtons';
         this.buttonsContainer.style.visibility = 'hidden';
         this.menuContainer.appendChild(this.buttonsContainer);
+
+        this.blockedByRow = document.createElement('div');
+        this.blockedByRow.classList.add('wheelstack-context-menu-row');
+        this.blockedByRow.classList.add('blocked-by');
+        const blockedByParag = document.createElement('p');
+        this.blockedByRow.appendChild(blockedByParag);
+        this.blockedByRow.style.display = 'none';
+        this.buttonsContainer.appendChild(this.blockedByRow);
+        
+        if (OPERATOR_ROLE_NAME === role) {
+            return this.menuContainer;
+        }
 
         this.moveButton = document.createElement('button');
         this.moveButton.classList.add('wheelstack-context-menu-button');
@@ -473,14 +504,7 @@ export default class WheelstackContextMenu{
             this.buttonsContainer.appendChild(this.moveRejectedButton);
         }
 
-        this.blockedByRow = document.createElement('div');
-        this.blockedByRow.classList.add('wheelstack-context-menu-row');
-        this.blockedByRow.classList.add('blocked-by');
-        const blockedByParag = document.createElement('p');
-        this.blockedByRow.appendChild(blockedByParag);
-        this.blockedByRow.style.display = 'none';
-        this.buttonsContainer.appendChild(this.blockedByRow);
-        return this.menuContainer;
+        return this.menuContainer;    
     }
 
     // BUILD ---
@@ -538,6 +562,12 @@ export default class WheelstackContextMenu{
             if (ordersContextMenu.element && ordersContextMenu.element.contains(event.target)) {
                 return;
             }
+            if (batchesContextMenu.element && batchesContextMenu.element.contains(event.target)) {
+                return;
+            }
+            if (batchesContextMenu.element && batchesContextMenu.extraMenuContainer && batchesContextMenu.extraMenuContainer.contains(event.target)) {
+                return;
+            }
             this.hideMenu();
         }
         this.openerElement = openerElement;
@@ -571,7 +601,7 @@ export default class WheelstackContextMenu{
         this.openedColPlacement = null;
         document.body.removeEventListener('pointerdown', this.menuCloser);
         this.stopUpdatingMenuData();
-        this.chosenBatch = null
+        this.chosenBatch = null;
         batchesContextMenu.removeMenu();
         if (this.extraMenuContainer) {
             this.extraMenuCloser(null, true);

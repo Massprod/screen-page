@@ -5,7 +5,8 @@ import {
     BASIC_PRESET_NAMES,
     TEST_GRID_NAME,
     TEST_PLATFORM_NAME,
-    BACK_URLS
+    BACK_URLS,
+    OPERATOR_ROLE_NAME
 } from "./constants.js";
 import GridManager from "./components/grid/grid.js";
 import OrdersContextMenu from "./components/ordersContextMenu/ordersContextMenu.js";
@@ -14,6 +15,11 @@ import BatchesContextMenu from "./components/batchesContextMenu/batchesContextMe
 import StoragesManager from "./components/storages/storagesManager.js";
 import BatchesExpandedContainer from "./components/storages/batchesContainer.js";
 import WheelstackContextMenu from "./components/wheelstackContextMenu/wheelstackContextMenu.js";
+import {setCookie, getCookie} from "../../utility/roleCookies.js";
+
+// TODO: completely failed with correct classes, all of them depends on each other...
+//       Needs to be rebuild and made isolated.
+await setCookie('role', OPERATOR_ROLE_NAME);
 
 
 let platformManager = null;

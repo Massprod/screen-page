@@ -1,8 +1,9 @@
 import flashMessage from "../../../../utility/flashMessage.js";
-import { BASE_PLATFORM_NAME, FLASH_MESSAGES, GRID_NAME, LABORATORY_NAME, PLACEMENT_TYPES } from "../../constants.js";
+import { BASE_PLATFORM_NAME, FLASH_MESSAGES, GRID_NAME, LABORATORY_NAME, OPERATOR_ROLE_NAME, PLACEMENT_TYPES } from "../../constants.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
 import { gridManager, platformManager } from "../../mainScript.js";
 import { createProRejOrderBulk } from "../../../../utility/ordersCreation.js";
+import { getCookie } from "../../../../utility/roleCookies.js";
 
 
 export default class BatchesContextMenu{
@@ -149,12 +150,13 @@ export default class BatchesContextMenu{
             }
         }
         this.executeCreation = async (processing, extraElement) => {
+            const batchNumber = this.batchNumber;
             const elementData = {
                 'placement': {
                     'placementId': gridManager.gridId,
                     'type': GRID_NAME,
                 },
-                'batchNumber': this.batchNumber,
+                'batchNumber': batchNumber,
             }
             createProRejOrderBulk(
                 elementData, extraElement, processing, gridManager.gridId
@@ -273,6 +275,10 @@ export default class BatchesContextMenu{
     }
 
     async buildMenu(event, batchNumber) {
+        const role = await getCookie('role');
+        if (role === OPERATOR_ROLE_NAME) {
+            return;
+        }
         if (!this.menuCloser) {
             this.menuCloser = (event) => {
                 if (this.extraMenuContainer && this.extraMenuContainer.contains(event.target)) {
