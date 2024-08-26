@@ -7,6 +7,7 @@ import {
      PLACEMENT_TYPES,
      STORAGE_NAME,
      LABORATORY_NAME,
+     EXTRA_ELEMENT_NAME,
 } from "../../constants.js";
 import flashMessage from "../../../../utility/flashMessage.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
@@ -98,13 +99,15 @@ export default class OrdersTable{
         let placementRecord = "";
         if (placementCol === LABORATORY_NAME) {
             placementRecord = `<b>${PLACEMENT_TYPES[placementCol]}</b>`;
+        } else if (placementRow === EXTRA_ELEMENT_NAME) {
+            placementRecord = `<b>${PLACEMENT_TYPES[placementType]}</b><br><b>${placementCol}</b>`;
         } else if (placementType !== STORAGE_NAME) {
-            placementRecord = `<b>${PLACEMENT_TYPES[placementType]}</b> <br> Р: <b>${placementRow}</b> | К: <b>${placementCol}</b>`;
+            placementRecord = `<b>${PLACEMENT_TYPES[placementType]}</b><br>Р: <b>${placementRow}</b> | К: <b>${placementCol}</b>`;
         } else {
             const storageGetNoDataURL = `${BACK_URLS.GET_STORAGE}/?storage_id=${placementId}&include_data=false`;
             const storageData = await getRequest(storageGetNoDataURL);
             const storageName = storageData['name'];
-            placementRecord = `${PLACEMENT_TYPES[placementType]} <br> <b>${storageName}</b>`;
+            placementRecord = `${PLACEMENT_TYPES[placementType]}<br><b>${storageName}</b>`;
         }
         return placementRecord;
     }

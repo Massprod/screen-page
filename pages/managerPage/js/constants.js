@@ -60,6 +60,7 @@ export const GRID_NAME = 'grid';
 export const BASE_PLATFORM_NAME = 'basePlatform';
 export const STORAGE_NAME = 'storage';
 export const SHIPPED = 'shipped';
+export const EXTRA_ELEMENT_NAME = 'extra';
 
 export const TESTS_NOT_DONE = "TESTS_NOT_DONE";
 export const TESTS_FAILED = "TESTS_FAILED";
@@ -87,13 +88,13 @@ export const FLASH_MESSAGES = {
 }
 
 export const ORDER_TYPES_TRANSLATE = {
-    "moveWholeStack": "Перенос стопы",
+    "moveWholeStack": "Перемещение<br>в приямке",
     "moveTopWheel": "Перенос верхнего колеса",
-    "moveToLaboratory": "В лабораторию",
+    "moveToLaboratory": "Лаборатория",
     "mergeWheelStacks": "Объединение стопок",
-    "moveToProcessing": "В обработку",
-    "moveToRejected": "В Отказ",
-    "moveToStorage": "В хранилище",
+    "moveToProcessing": "Обработка",
+    "moveToRejected": "Отказ",
+    "moveToStorage": "Хранилище",
 }
 
 export const ORDERS_TABLE_COLUMNS_TRANSLATE = {
