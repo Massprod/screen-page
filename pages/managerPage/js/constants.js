@@ -78,6 +78,10 @@ export const PLACEMENT_TYPES = {
     'laboratory': "Лаборатория",
 }
 
+export const MANAGER_ROLE_NAME = 'MANAGER';
+export const OPERATOR_ROLE_NAME = 'OPERATOR';
+
+
 export const FLASH_MESSAGES = {
     FETCH_ERROR_BG_COLOR: 'white',
     FETCH_ERROR_FONT_COLOR: 'red',
@@ -87,8 +91,18 @@ export const FLASH_MESSAGES = {
     FETCH_NOT_FOUND_DURATION: 1000,
 }
 
-export const ORDER_TYPES_TRANSLATE = {
+export const ORDER_TYPES_TRANSLATE_TABLE = {
     "moveWholeStack": "Перемещение<br>в приямке",
+    "moveTopWheel": "Перенос верхнего колеса",
+    "moveToLaboratory": "Лаборатория",
+    "mergeWheelStacks": "Объединение стопок",
+    "moveToProcessing": "Обработка",
+    "moveToRejected": "Отказ",
+    "moveToStorage": "Хранилище",
+}
+
+export const ORDER_TYPES_TRANSLATE = {
+    "moveWholeStack": "Перемещение в приямке",
     "moveTopWheel": "Перенос верхнего колеса",
     "moveToLaboratory": "Лаборатория",
     "mergeWheelStacks": "Объединение стопок",

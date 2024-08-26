@@ -3,7 +3,7 @@ import {
      UPDATE_PERIODS,
      FLASH_MESSAGES,
      BACK_URLS,
-     ORDER_TYPES_TRANSLATE,
+     ORDER_TYPES_TRANSLATE_TABLE,
      PLACEMENT_TYPES,
      STORAGE_NAME,
      LABORATORY_NAME,
@@ -144,7 +144,7 @@ export default class OrdersTable{
         row.appendChild(column);
         // ORDER Type
         column = document.createElement('td');
-        column.innerHTML = `${ORDER_TYPES_TRANSLATE[orderData['orderType']]}`;
+        column.innerHTML = `${ORDER_TYPES_TRANSLATE_TABLE[orderData['orderType']]}`;
         column.id = orderData['_id'];
         row.appendChild(column);
         // SOURCE data
