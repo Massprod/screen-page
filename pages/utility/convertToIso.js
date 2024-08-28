@@ -1,4 +1,9 @@
-export default function convertISOToCustomFormat(isoDate, withBreaker = false, convertToLocalTimezone = false) {
+export default function convertISOToCustomFormat(
+    isoDate,
+    withBreaker = false,
+    convertToLocalTimezone = false,
+    includeTimezone = false,
+) {
     // Parse the ISO date string
     let date = new Date(isoDate);
 
@@ -14,7 +19,9 @@ export default function convertISOToCustomFormat(isoDate, withBreaker = false, c
         // Get the user's local timezone offset in minutes (negative values mean ahead of UTC)
         const timezoneOffsetInMinutes = date.getTimezoneOffset();
         // console.log('Timezone offset in minutes:', timezoneOffsetInMinutes);
-
+        if (includeTimezone) {
+            var timezoneShift = timezoneOffsetInMinutes / 60; 
+        }
         // Convert the offset to milliseconds and adjust the date
         date = new Date(date.getTime() - (timezoneOffsetInMinutes * 60 * 1000));
         // console.log('Adjusted Date object:', date);
@@ -36,5 +43,8 @@ export default function convertISOToCustomFormat(isoDate, withBreaker = false, c
         formattedDate = `${hours}:${minutes}:${secs} - ${day}.${month}.${year}`;
     }
 
+    if (convertToLocalTimezone && includeTimezone) {
+        formattedDate = `${formattedDate} | UTC ${timezoneShift}:00`;
+    }
     return formattedDate;
 }
