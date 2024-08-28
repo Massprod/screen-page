@@ -12,6 +12,8 @@
 @import url("./js/components/batchElement/css/basicStyle.css");
 @import url("./js/components/wheelstackContextMenu//css//basicStyle.css");
 @import url("./js/components/storages/css/basicStyle.css");
+@import url("../utility/navButton/navStyle.css");
+@import url("../bootstrap/bootstrap.min.css");
 
 
 /* +++ CORRECT */
