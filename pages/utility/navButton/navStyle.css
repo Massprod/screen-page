@@ -1,6 +1,5 @@
-
 .nav-button {
-    background-color: #214265;
+    background-color: #202327;
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -13,23 +12,25 @@
 }
 
 .nav-button:hover {
-    background-color: #406ea0;
+    background-color: #54606c;
 }
 
 .nav-container {
     display: none;
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(3, 4, 5, 0.4);
     padding: 10px;
-    z-index: 1000;
-    width: auto; /* Auto width so that it doesn't take full width */
+    z-index: 1000000000; /* there's was no order while creating managerPage, so we need some absurd z-index :) */
+    width: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .nav-container .btn {
-    display: block;
-    margin-bottom: 10px;
     width: 100%;
+    display: block;
+    margin-bottom: 20px;
 }
 
 .nav-container .btn:last-child {
