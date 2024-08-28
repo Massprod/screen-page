@@ -2,11 +2,23 @@ import {
     getRequest,
     patchRequest,
 } from "../utility/basicRequests.js";
-import {  getShiftedFromCurrent} from "../utility/timeConvert.js";
+import { getShiftedFromCurrent} from "../utility/timeConvert.js";
 import convertISOToCustomFormat from "../utility/convertToIso.js";
-import { BACK_URL } from "../uniConstants.js";
+import { BACK_URL, NAV_BUTTONS } from "../uniConstants.js";
+import NavigationButton from "../utility/navButton/navButton.js";
 
 
+// NAV BUTTON
+const navPosition = {
+    top: '50px',
+    left: 'auto',
+    right: '30px',
+    bottom: 'auto',
+}
+const navButton = new NavigationButton(
+    navPosition, NAV_BUTTONS,
+)
+// ---
 const statusChangeRequest = async (batchNumber, result) => {
     const statusUpdateURL = `${BACK_URL.POST_BATCH_STATUS_UPDATE}/${batchNumber}?laboratory_passed=${result}`;
     const resp = await patchRequest(statusUpdateURL);
@@ -232,7 +244,6 @@ datesColumn.addEventListener('click', async event => {
         })
         datesSorted = false;
     }
-    console.log(newOrder);
     let orderedData = [];
     for (let record of newOrder) {
         const batchNumber = record['batchNumber'];
@@ -357,6 +368,10 @@ const updateCreatedRows = async () => {
             'mainRow': newBatchRow,
             'detailsRow': newBatchRowDetails,
         }
+        newBatchRow.addEventListener('click', () => {
+            const batchDetails = newBatchRowDetails.childNodes[0].childNodes[0]; 
+            batchDetails.style.display = batchDetails.style.display === 'none' || batchDetails.style.display === '' ? 'block': 'none';
+        })
     }
 }
 

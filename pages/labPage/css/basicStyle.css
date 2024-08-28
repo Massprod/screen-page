@@ -1,3 +1,4 @@
+@import url("../../utility/navButton/navStyle.css");
 
 h2 {
     margin-bottom: 30px;
@@ -29,4 +30,26 @@ h2 {
 .result-image {
     width: 35px;
     height: 35px;
+}
+
+/* Full height container */
+.container {
+    height: calc(100vh - 100px); /* Adjust height based on your needs */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Table container with scrolling */
+.table-container {
+    flex-grow: 1;
+    overflow-y: auto; /* Scrollable area */
+    margin-top: 20px; /* Space between the date range and table */
+}
+
+/* Keep the table header fixed at the top of the table-container */
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #fff; /* Ensure header background covers scrolling content */
+    z-index: 1; /* Ensure header stays on top of the content */
 }
