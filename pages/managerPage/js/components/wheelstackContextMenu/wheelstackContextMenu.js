@@ -10,6 +10,7 @@ import {
     BASE_PLATFORM_NAME,
     SHIPPED,
     OPERATOR_ROLE_NAME,
+    ORDER_MOVE_TO_LABORATORY,
 } from "../../constants.js";
 import { batchesContextMenu, gridManager, ordersContextMenu } from "../../mainScript.js";
 import {
@@ -274,9 +275,11 @@ export default class WheelstackContextMenu{
             blockedParag.innerHTML = `<b>Ожидает выполнения:</b><br>${this.elementData['lastOrder']}`;
             const getOrderDataURL = `${BACK_URLS.GET_ORDER_DATA_BY_ID}/${this.elementData['lastOrder']}`;
             const currentOrderData = await getRequest(getOrderDataURL);
-            this.blockedWheel = currentOrderData['affectedWheels']['source'][0];
-            const blockedWheelElement = this.wheelsContainer.querySelector(`#${CSS.escape(this.blockedWheel)}`);
-            blockedWheelElement.classList.add('blocked-by');
+            if (ORDER_MOVE_TO_LABORATORY === currentOrderData['orderType']) {
+                this.blockedWheel = currentOrderData['affectedWheels']['source'][0];
+                const blockedWheelElement = this.wheelsContainer.querySelector(`#${CSS.escape(this.blockedWheel)}`);
+                blockedWheelElement.classList.add('blocked-by');
+            }
         } else {
             this.blockedWheel = null;
             this.buttonsContainer.childNodes.forEach(async element => {
