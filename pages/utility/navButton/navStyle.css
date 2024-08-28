@@ -1,0 +1,37 @@
+
+.nav-button {
+    background-color: #214265;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.nav-button:hover {
+    background-color: #406ea0;
+}
+
+.nav-container {
+    display: none;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 1000;
+    width: auto; /* Auto width so that it doesn't take full width */
+}
+
+.nav-container .btn {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.nav-container .btn:last-child {
+    margin-bottom: 0;
+}
