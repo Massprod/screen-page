@@ -40,15 +40,18 @@ export async function patchRequest(url) {
 
 export async function postRequest(url, requestBody) {
     try {
+        const args = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+        if (requestBody) {
+            args['body'] = JSON.stringify(requestBody)
+        }
         const response = await fetch(
             url,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody)
-            }
+            args,
         );
         return response;
     } catch (error) {
