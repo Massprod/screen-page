@@ -1,3 +1,5 @@
+import { AUTH_COOKIE_NAME, BACK_URL, COOKIE_UPDATE_INTERVAL, AUTH_COOKIE_BASIC_EXPIRE, loginPage } from "../uniConstants.js";
+import { postRequest } from "./basicRequests.js";
 
 
 export async function setCookie(name, value, seconds = 0, path = "/", secure = false) {
@@ -47,4 +49,32 @@ export async function deleteCookie(name, path = "/") {
     
     // Set the cookie to delete it
     document.cookie = cookieString;
+}
+
+
+export async function updateCookie(cookieName) {
+    const cookie = await getCookie(cookieName);
+    if (!cookie) {
+        return false;
+    }
+    const refreshURL = `${BACK_URL.POST_AUTH_REFRESH_TOKEN}?token=${cookie}`;
+    const response = await postRequest(refreshURL);
+    if (!response.ok) {
+        await deleteCookie(cookieName);
+        if (window.location.href !== loginPage) {
+            window.location.href = `${loginPage}?message=session-expired`; 
+        };
+        return false;
+    }
+    const respData = await response.json();
+    await setCookie(cookieName, respData['access_token'], AUTH_COOKIE_BASIC_EXPIRE);
+    return true;
+}
+
+
+export async function keepCookieFresh(name) {
+    await updateCookie(name);
+    setInterval( async () => {
+        await updateCookie(name);
+    }, COOKIE_UPDATE_INTERVAL)
 }
