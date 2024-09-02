@@ -1,4 +1,7 @@
+import { AUTH_COOKIE_NAME, loginPage } from '../../uniConstants.js';
 import updateMenuPosition from '../adjustContainerPosition.js';
+import { deleteCookie } from '../roleCookies.js';
+
 
 export default class NavigationButton {
     constructor(
@@ -43,6 +46,9 @@ export default class NavigationButton {
             button.textContent = btnInfo.text;
             button.onclick = () => {
                 if (window.location.href !== btnInfo.href) {
+                    if (btnInfo.href === loginPage) {
+                        deleteCookie(AUTH_COOKIE_NAME);
+                    }
                     window.location.href = btnInfo.href;
                 }
             };

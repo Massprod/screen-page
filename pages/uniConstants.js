@@ -2,7 +2,7 @@ const mainAddress = "http://localhost:8000";
 const authMainAddress = "http://localhost:8080";
 const labPage = 'http://localhost:5500/screen/pages/labPage/laboratoryPage.html';
 export const gridPage = 'http://localhost:5500/screen/pages/managerPage/managerPage.html';
-const loginPage = 'http://localhost:5500/screen/pages/managerPage/loginPage.html'
+export const loginPage = 'http://localhost:5500/screen/pages/loginPage/mainLogin.html';
 
 export const BACK_URL  = {
     POST_BATCH_STATUS_UPDATE: `${mainAddress}/batch_number/update_laboratory_status`,
