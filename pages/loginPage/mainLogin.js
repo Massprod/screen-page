@@ -1,7 +1,28 @@
-import { BACK_URL, AUTH_COOKIE_NAME, gridPage } from "../uniConstants.js";
+import { BACK_URL, AUTH_COOKIE_NAME, gridPage, AUTH_COOKIE_BASIC_EXPIRE } from "../uniConstants.js";
 import { FLASH_MESSAGES } from "../managerPage/js/constants.js";
-import { setCookie } from "../utility/roleCookies.js";
+import { setCookie, updateCookie } from "../utility/roleCookies.js";
 import flashMessage from "../utility/flashMessage/flashMessage.js";
+
+
+window.onload = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    if (message === 'session-expired') {
+        flashMessage.show({
+            message: `Токен доступа больше не действителен. Перезайдите в систему.`,
+            color: FLASH_MESSAGES.BASIC_TEXT_COLOR,
+            backgroundColor: FLASH_MESSAGES.BASIC_BG_COLOR,
+            position: FLASH_MESSAGES.BASIC_POSITION,
+            duration: FLASH_MESSAGES.BASIC_SHOW_TIME,
+        });
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState(null, '', newUrl);
+    }
+    if (await updateCookie(AUTH_COOKIE_NAME)) {
+        window.location.href = gridPage;
+    }
+};
+
 
 
 document.getElementById('userData').addEventListener('submit', async (event) => {
@@ -57,6 +78,6 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
         return;
     }
     const authToken = respData['access_token'];
-    await setCookie(AUTH_COOKIE_NAME, authToken);
+    await setCookie(AUTH_COOKIE_NAME, authToken, AUTH_COOKIE_BASIC_EXPIRE);
     window.location.href = gridPage;
 })
