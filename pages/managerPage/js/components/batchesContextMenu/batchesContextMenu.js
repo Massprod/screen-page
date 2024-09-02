@@ -1,4 +1,4 @@
-import flashMessage from "../../../../utility/flashMessage.js";
+import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 import { BASE_PLATFORM_NAME, FLASH_MESSAGES, GRID_NAME, LABORATORY_NAME, OPERATOR_ROLE_NAME, PLACEMENT_TYPES } from "../../constants.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
 import { gridManager, platformManager } from "../../mainScript.js";

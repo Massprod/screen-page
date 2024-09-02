@@ -49,6 +49,7 @@ export async function postRequest(url, requestBody) {
         if (requestBody) {
             args['body'] = JSON.stringify(requestBody)
         }
+        console.log(args);
         const response = await fetch(
             url,
             args,

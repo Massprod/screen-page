@@ -1,5 +1,5 @@
 import { UPDATE_PERIODS } from "../../constants.js";
-import flashMessage from "../../../../utility/flashMessage.js";
+import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 import { ordersContextMenu } from "../../mainScript.js";
 
 

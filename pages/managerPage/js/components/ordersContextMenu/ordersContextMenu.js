@@ -1,4 +1,4 @@
-import flashMessage from "../../../../utility/flashMessage.js";
+import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 import {
     FLASH_MESSAGES,
     ORDER_TYPES_TRANSLATE,

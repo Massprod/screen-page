@@ -1,7 +1,7 @@
 import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
 import { getRequest } from "../../../../utility/basicRequests.js";
 import { batchesExpandedElements } from "../../mainScript.js";
-import flashMessage from "../../../../utility/flashMessage.js";
+import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 
 
 export default class StoragesManager{

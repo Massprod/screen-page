@@ -1,6 +1,6 @@
 import updateMenuPosition from "../../../../utility/adjustContainerPosition.js";
 import { getRequest } from "../../../../utility/basicRequests.js";
-import flashMessage from "../../../../utility/flashMessage.js";
+import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 import {
     BACK_URLS,
     GRID_NAME,

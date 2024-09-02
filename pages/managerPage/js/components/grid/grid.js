@@ -2,7 +2,7 @@ import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js";
 import CellsRow from "../cellsRow/cellsRow.js";
 import ExtraElement from "../extraElement/extraElement.js";
 import BatchElement from "../batchElement/batchElement.js";
-import flashMessage from "../../../../utility/flashMessage.js";
+import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 
 
 // TODO: Merge GridManager AND BasePlatformManager

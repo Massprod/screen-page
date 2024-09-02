@@ -1,7 +1,7 @@
 import { getRequest, patchRequest } from "../../../../utility/basicRequests.js";
 import { BACK_URLS, ELEMENT_TYPES, UPDATE_PERIODS } from "../../constants.js";
 import updateMenuPosition from "../../../../utility/adjustContainerPosition.js";
-import flashMessage from "../../../../utility/flashMessage.js";
+import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 import { batchesContextMenu, wheelstackContextMenu } from "../../mainScript.js";
 
 

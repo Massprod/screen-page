@@ -8,7 +8,7 @@ import {
      ORDER_MOVE_TO_STORAGE,
 } from "../managerPage/js/constants.js";
 import { postRequest } from "../utility/basicRequests.js";
-import flashMessage from "./flashMessage.js";
+import flashMessage from "./flashMessage/flashMessage.js";
 
 
 async function checkProRejOrderResponse(response) {
@@ -63,7 +63,6 @@ export async function createOrderMoveWholestackToStorageFromStorage(elementData,
         },
         'orderType': ORDER_MOVE_TO_STORAGE,
     };
-    console.log(createOrderBody);
     const resp = await postRequest(createOrderURL, createOrderBody);
     if (!resp.ok) {
         flashMessage.show({

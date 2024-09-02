@@ -1,0 +1,27 @@
+
+
+.flash-messages-container {
+    position: fixed;
+    z-index: 1999000;
+    max-width: 800px;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+.flash-message {
+    position: relative;
+    margin: 10px 0; /* Margin to space out messages */
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    background-color: whitesmoke;
+    color: midnightblue;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    opacity: 0; /* Initially hidden */
+    transition: opacity 1s ease-out; /* Smooth transition for appearing and fading out */
+    pointer-events: auto; /* Allow interaction with the message */
+    word-break: break-word; /* Ensure text breaks within the width */
+}

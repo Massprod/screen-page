@@ -9,7 +9,7 @@ import {
      LABORATORY_NAME,
      EXTRA_ELEMENT_NAME,
 } from "../../constants.js";
-import flashMessage from "../../../../utility/flashMessage.js";
+import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
 import { ordersContextMenu } from "../../mainScript.js";
 import { getRequest } from "../../../../utility/basicRequests.js";
