@@ -9,6 +9,7 @@ export const BACK_URL  = {
     GET_BATCHES_DATA_PERIOD: `${mainAddress}/batch_number/period`,
     GET_BATCH_DATA: `${mainAddress}/batch_number/batch_number`,
     POST_AUTH_CREDENTIALS: `${authMainAddress}/users/login`,
+    POST_AUTH_REFRESH_TOKEN: `${authMainAddress}/users/token_refresh`,
 };
 
 export const NAV_BUTTONS = [
@@ -30,3 +31,6 @@ export const NAV_BUTTONS = [
 ];
 
 export const AUTH_COOKIE_NAME = 'auth-token';
+export const AUTH_COOKIE_BASIC_EXPIRE = 3 * 60;
+
+export const COOKIE_UPDATE_INTERVAL = 1 * 30 * 1000;
