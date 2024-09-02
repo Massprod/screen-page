@@ -1,12 +1,13 @@
 
-export async function setCookie(name, value, days = 0, path = "/", secure = false) {
+
+export async function setCookie(name, value, seconds = 0, path = "/", secure = false) {
     // Construct the cookie string
     let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=${path};`;
 
     // Set the expiration date if specified
-    if (days) {
+    if (seconds) {
         const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));  // Convert days to milliseconds
+        date.setTime(date.getTime() + (seconds * 1000));  // Convert seconds to milliseconds
         cookieString += ` expires=${date.toUTCString()};`;
     }
 
@@ -18,7 +19,6 @@ export async function setCookie(name, value, days = 0, path = "/", secure = fals
     // Set the cookie
     document.cookie = cookieString;
 }
-
 
 export async function getCookie(name) {
     const cookieString = document.cookie;
