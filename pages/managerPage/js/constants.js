@@ -89,6 +89,10 @@ export const FLASH_MESSAGES = {
     FETCH_NOT_FOUND_BG_COLOR: 'black',
     FETCH_NOT_FOUND_FONT_COLOR: 'white',
     FETCH_NOT_FOUND_DURATION: 1000,
+    BASIC_TEXT_COLOR: 'midnight',
+    BASIC_BG_COLOR: 'white',
+    BASIC_SHOW_TIME: 3000,
+    BASIC_POSITION: 'top-center',
 }
 
 export const ORDER_TYPES_TRANSLATE_TABLE = {
