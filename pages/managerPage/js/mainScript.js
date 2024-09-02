@@ -6,7 +6,6 @@ import {
     TEST_GRID_NAME,
     TEST_PLATFORM_NAME,
     BACK_URLS,
-    OPERATOR_ROLE_NAME
 } from "./constants.js";
 import GridManager from "./components/grid/grid.js";
 import OrdersContextMenu from "./components/ordersContextMenu/ordersContextMenu.js";
@@ -17,12 +16,13 @@ import BatchesExpandedContainer from "./components/storages/batchesContainer.js"
 import WheelstackContextMenu from "./components/wheelstackContextMenu/wheelstackContextMenu.js";
 import { NAV_BUTTONS } from "../../uniConstants.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
+import { AUTH_COOKIE_NAME } from "../../uniConstants.js";
+import { keepCookieFresh } from "../../utility/roleCookies.js";
 
-// import {setCookie, getCookie} from "../../utility/roleCookies.js";
-// TODO: completely failed with correct classes, all of them depends on each other...
-//       Needs to be rebuild and made isolated.
-// await setCookie('role', OPERATOR_ROLE_NAME);
 
+// COOKIE CHECK
+keepCookieFresh(AUTH_COOKIE_NAME);
+// ---
 // NAV BUTTON
 const navPosition = {
     top: '410px',
