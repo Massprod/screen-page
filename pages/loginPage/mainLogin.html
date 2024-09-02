@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
+    <link href="../bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../utility/flashMessage/css/basicStyle.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container text-center">
+        <form id="userData" method="POST">
+            <div class="col-lg-5 col-md-8 col-sm-12 mx-auto mt-5 pt-5 fs-1 fw-bold">
+                <label for="username">Имя</label>
+                <input name="username" type="text" class="form-control fs-5" id="username" 
+                       placeholder="Имя" 
+                       pattern="^[\-._a-zA-Z0-9]{3,20}$"  
+                       title="Username should be 3-20 characters long and can include letters, numbers, dots, hyphens, and underscores."
+                       required>
+            </div>
+            <div class="col-lg-5 col-md-8 col-sm-12 mx-auto mt-2 fs-1 fw-bold">
+                <label for="password">Пароль</label>
+                <input name="password" type="password" class="form-control fs-5" id="password" 
+                       placeholder="Пароль" 
+                       pattern="^[A-Za-z\d@$!%*#?&]{8,50}$" 
+                       title="Password should be 8-50 characters long and can include letters, numbers, and special symbols: @$!%*#?&."
+                       required>
+            </div>
+    
+            <div class="col-lg-5 col-md-5 col-sm-10 mx-auto mt-3 ">
+                <button class="btn btn-primary text-uppercase btn-light w-50 fs-5 fw-bold" id="signIn" type="submit">Войти</button>
+            </div>
+        </form>
+    </div>
+    <script type="module" src="./mainLogin.js"></script>
+</body>
+</html>
