@@ -20,6 +20,7 @@ export async function setCookie(name, value, seconds = 0, path = "/", secure = f
     document.cookie = cookieString;
 }
 
+
 export async function getCookie(name) {
     const cookieString = document.cookie;
     const cookies = cookieString.split(';');
@@ -34,4 +35,16 @@ export async function getCookie(name) {
     }
     
     return null;  // Return null if the cookie isn't found
+}
+
+
+export async function deleteCookie(name, path = "/") {
+    // Set the cookie's expiration date to a time in the past to delete it
+    const date = new Date();
+    date.setTime(date.getTime() - 1000);  // Set to one second in the past
+    
+    let cookieString = `${encodeURIComponent(name)}=; expires=${date.toUTCString()}; path=${path};`;
+    
+    // Set the cookie to delete it
+    document.cookie = cookieString;
 }
