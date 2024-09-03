@@ -1,4 +1,4 @@
-import { AUTH_COOKIE_NAME, BACK_URL, COOKIE_UPDATE_INTERVAL, AUTH_COOKIE_BASIC_EXPIRE, loginPage } from "../uniConstants.js";
+import { AUTH_COOKIE_NAME, BACK_URL, COOKIE_UPDATE_INTERVAL, AUTH_COOKIE_BASIC_EXPIRE, loginPage, AUTH_COOKIE_SESSION_EXPIRED, AUTH_COOKIE_NOT_FOUND, USER_ROLE_COOKIE_NAME, USER_ROLE_COOKIE_BASIC_EXPIRE, BASIC_COOKIES } from "../uniConstants.js";
 import { postRequest } from "./basicRequests.js";
 
 
@@ -52,29 +52,52 @@ export async function deleteCookie(name, path = "/") {
 }
 
 
-export async function updateCookie(cookieName) {
+export async function updateAuthCookie(cookieName) {
     const cookie = await getCookie(cookieName);
     if (!cookie) {
-        return false;
+        return null;
     }
     const refreshURL = `${BACK_URL.POST_AUTH_REFRESH_TOKEN}?token=${cookie}`;
     const response = await postRequest(refreshURL);
     if (!response.ok) {
         await deleteCookie(cookieName);
         if (window.location.href !== loginPage) {
-            window.location.href = `${loginPage}?message=session-expired`; 
+            window.location.href = `${loginPage}?message=${AUTH_COOKIE_SESSION_EXPIRED}`; 
         };
         return false;
     }
     const respData = await response.json();
     await setCookie(cookieName, respData['access_token'], AUTH_COOKIE_BASIC_EXPIRE);
+    await setCookie(USER_ROLE_COOKIE_NAME, respData['user_role'], USER_ROLE_COOKIE_BASIC_EXPIRE);
     return true;
 }
 
 
-export async function keepCookieFresh(name) {
-    await updateCookie(name);
+export async function keepAuthCookieFresh(name) {
+    if (null === await updateAuthCookie(name)) {
+        window.location.href = `${loginPage}?message=${AUTH_COOKIE_NOT_FOUND}`;
+        return;
+    }
     setInterval( async () => {
-        await updateCookie(name);
+        if (null === await updateAuthCookie(name)) {
+            window.location.href = `${loginPage}?message=${AUTH_COOKIE_NOT_FOUND}`;
+            return;
+        }
     }, COOKIE_UPDATE_INTERVAL)
+}
+
+
+export async function clearRedirect(cookieNames, pageUrl) {
+    cookieNames.forEach( cookieName => {
+        deleteCookie(cookieName);
+    });
+    window.location.href = pageUrl;
+}
+
+
+export async function validateRoleCookie(cookieName, validRoles, redirectUrl) {
+    const role = await getCookie(cookieName);
+    if (!(role in validRoles)) {
+        clearRedirect(BASIC_COOKIES, redirectUrl);
+    }
 }
