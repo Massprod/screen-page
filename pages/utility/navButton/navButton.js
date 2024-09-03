@@ -1,4 +1,4 @@
-import { AUTH_COOKIE_NAME, loginPage } from '../../uniConstants.js';
+import { AUTH_COOKIE_NAME, loginPage, USER_ROLE_COOKIE_NAME } from '../../uniConstants.js';
 import updateMenuPosition from '../adjustContainerPosition.js';
 import { deleteCookie } from '../roleCookies.js';
 
@@ -12,10 +12,12 @@ export default class NavigationButton {
             left: 'auto'
         },
         buttonsData,
+        clearCookies,
     ) {
         this.navContainer = null;
         this.position = position;
         this.buttonsData = buttonsData;
+        this.clearCookies = clearCookies;
         this.init();
     }
 
@@ -40,20 +42,22 @@ export default class NavigationButton {
         this.navContainer = navContainer;
 
         // Create navigation buttons from buttonsData
-        this.buttonsData.forEach(btnInfo => {
+        for ( let btnInfo of this.buttonsData) {
             const button = document.createElement('button');
             button.className = btnInfo.class;
             button.textContent = btnInfo.text;
             button.onclick = () => {
                 if (window.location.href !== btnInfo.href) {
                     if (btnInfo.href === loginPage) {
-                        deleteCookie(AUTH_COOKIE_NAME);
+                        this.clearCookies.forEach( (cookieName) => {
+                            deleteCookie(cookieName);
+                        })
                     }
                     window.location.href = btnInfo.href;
                 }
             };
             navContainer.appendChild(button);
-        });
+        }
 
         // Append navButton and navContainer to the body
         document.body.appendChild(navButton);
