@@ -1,9 +1,14 @@
 import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
-import { BASE_PLATFORM_NAME, FLASH_MESSAGES, GRID_NAME, LABORATORY_NAME, OPERATOR_ROLE_NAME, PLACEMENT_TYPES } from "../../constants.js";
+import {
+    FLASH_MESSAGES,
+    GRID_NAME,
+    LABORATORY_NAME,
+} from "../../constants.js";
 import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
 import { gridManager, platformManager } from "../../mainScript.js";
 import { createProRejOrderBulk } from "../../../../utility/ordersCreation.js";
 import { getCookie } from "../../../../utility/roleCookies.js";
+import { OPERATOR_ROLE } from "../../../../uniConstants.js";
 
 
 export default class BatchesContextMenu{
@@ -275,8 +280,8 @@ export default class BatchesContextMenu{
     }
 
     async buildMenu(event, batchNumber) {
-        const role = await getCookie('role');
-        if (role === OPERATOR_ROLE_NAME) {
+        const role = await getCookie('user-role');
+        if (role === OPERATOR_ROLE) {
             return;
         }
         if (!this.menuCloser) {

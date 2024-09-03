@@ -1,6 +1,7 @@
 import updateMenuPosition from "../../../../utility/adjustContainerPosition.js";
 import { getRequest } from "../../../../utility/basicRequests.js";
 import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
+import { OPERATOR_ROLE } from "../../../../uniConstants.js";
 import {
     BACK_URLS,
     GRID_NAME,
@@ -9,7 +10,6 @@ import {
     LABORATORY_NAME,
     BASE_PLATFORM_NAME,
     SHIPPED,
-    OPERATOR_ROLE_NAME,
     ORDER_MOVE_TO_LABORATORY,
 } from "../../constants.js";
 import { batchesContextMenu, gridManager, ordersContextMenu } from "../../mainScript.js";
@@ -334,7 +334,7 @@ export default class WheelstackContextMenu{
 
     // +++ BUILD 
     async buildTemplate() {
-        const role = await getCookie('role');
+        const role = await getCookie('user-role');
         // MainContainer
         this.menuContainer = document.createElement('div');
         this.menuContainer.classList.add('wheelstack-context-menu-container');
@@ -353,7 +353,7 @@ export default class WheelstackContextMenu{
             wheelElement.appendChild(parag);
             this.wheelsContainer.appendChild(wheelElement);
             this.wheelElements.push(wheelElement);
-            if (OPERATOR_ROLE_NAME !== role) {
+            if (OPERATOR_ROLE !== role) {
                 wheelElement.addEventListener('click', async event => {
                     if (this.activeOrderMarking) {
                         flashMessage.show({
@@ -393,7 +393,7 @@ export default class WheelstackContextMenu{
                 batchesContextMenu.unmarkBatch();
             }
         })
-        if (OPERATOR_ROLE_NAME !== role) {
+        if (OPERATOR_ROLE !== role) {
             this.batchRow.addEventListener('contextmenu', async event => {
                 event.preventDefault();
                 batchesContextMenu.buildMenu(event, this.elementData['batchNumber']);
@@ -416,7 +416,7 @@ export default class WheelstackContextMenu{
         this.blockedByRow.style.display = 'none';
         this.buttonsContainer.appendChild(this.blockedByRow);
         
-        if (OPERATOR_ROLE_NAME === role) {
+        if (OPERATOR_ROLE === role) {
             return this.menuContainer;
         }
 
