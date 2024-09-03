@@ -4,19 +4,49 @@ import {
 } from "../utility/basicRequests.js";
 import { getShiftedFromCurrent} from "../utility/timeConvert.js";
 import convertISOToCustomFormat from "../utility/convertToIso.js";
-import { BACK_URL, NAV_BUTTONS } from "../uniConstants.js";
+import {
+    AUTH_COOKIE_NAME,
+    BACK_URL,
+    LAB_PAGE_ROLES,
+    LAB_PERSONAL_ROLE,
+    loginPage,
+    NAV_BUTTONS,
+    RESTRICTED_TO_THIS_ROLE,
+    USER_ROLE_COOKIE_NAME,
+    USER_ROLE_COOKIE_UPDATE_INTERVAL,
+    BASIC_COOKIES,
+} from "../uniConstants.js";
 import NavigationButton from "../utility/navButton/navButton.js";
+import {
+    keepAuthCookieFresh,
+    getCookie,
+    clearRedirect,
+    validateRoleCookie,
+} from "../utility/roleCookies.js";
 
 
+// COOKIE CHECK
+keepAuthCookieFresh(AUTH_COOKIE_NAME);
+const redirectUrl = `${loginPage}?message=${RESTRICTED_TO_THIS_ROLE}`
+const userRole = await getCookie(USER_ROLE_COOKIE_NAME);
+if (!userRole) {
+    clearRedirect(BASIC_COOKIES, redirectUrl);
+}
+setInterval( async () => {
+    validateRoleCookie(USER_ROLE_COOKIE_NAME, LAB_PAGE_ROLES, redirectUrl);    
+}, USER_ROLE_COOKIE_UPDATE_INTERVAL);
+// ---
 // NAV BUTTON
 const navPosition = {
-    top: '50px',
+    top: '2%',
     left: 'auto',
-    right: '30px',
+    right: '2%',
     bottom: 'auto',
 }
+const roleNavButtons = NAV_BUTTONS[userRole]
+const clearCookies = [USER_ROLE_COOKIE_NAME, AUTH_COOKIE_NAME];
 const navButton = new NavigationButton(
-    navPosition, NAV_BUTTONS,
+    navPosition, roleNavButtons, clearCookies,
 )
 // ---
 const statusChangeRequest = async (batchNumber, result) => {
@@ -24,7 +54,6 @@ const statusChangeRequest = async (batchNumber, result) => {
     const resp = await patchRequest(statusUpdateURL);
     return resp;
 }
-
 const batchNumberDataRequest = async (batchNumber) => {
     const getDataURL = `${BACK_URL.GET_BATCH_DATA}/${batchNumber}`;
     const resp = await getRequest(getDataURL);
@@ -87,26 +116,28 @@ const createBatchDetails = async (batchData) => {
     const corDate = convertISOToCustomFormat(batchData['createdAt'], false, true, true);
     creationDate.innerHTML = `Дата поступления партии: <b>${corDate}</b>`;
     detailsContainer.appendChild(creationDate);
-    if (!batchData['laboratoryPassed']) {
-        const changeToPassedButton = document.createElement('button');
-        changeToPassedButton.className = 'btn btn-success me-2';
-        changeToPassedButton.textContent = 'Пройдено';
-        changeToPassedButton.onclick = async () => {
-            const response = await statusChangeRequest(batchData['batchNumber'], true);
+    if (LAB_PERSONAL_ROLE === userRole) {
+        if (!batchData['laboratoryPassed']) {
+            const changeToPassedButton = document.createElement('button');
+            changeToPassedButton.className = 'btn btn-success me-2';
+            changeToPassedButton.textContent = 'Пройдено';
+            changeToPassedButton.onclick = async () => {
+                const response = await statusChangeRequest(batchData['batchNumber'], true);
+                const recordNewData = await batchNumberDataRequest(batchData['batchNumber']);
+                updateCreatedRecord(batchData['batchNumber'], recordNewData);
+            }
+            detailsContainer.appendChild(changeToPassedButton);
+        }
+        const changeToFailedButton = document.createElement('button');
+        changeToFailedButton.className = 'btn btn-danger';
+        changeToFailedButton.textContent = 'Не пройдено';
+        changeToFailedButton.onclick = async () => {
+            const response = await statusChangeRequest(batchData['batchNumber'], false);
             const recordNewData = await batchNumberDataRequest(batchData['batchNumber']);
             updateCreatedRecord(batchData['batchNumber'], recordNewData);
         }
-        detailsContainer.appendChild(changeToPassedButton);
+        detailsContainer.appendChild(changeToFailedButton);    
     }
-    const changeToFailedButton = document.createElement('button');
-    changeToFailedButton.className = 'btn btn-danger';
-    changeToFailedButton.textContent = 'Не пройдено';
-    changeToFailedButton.onclick = async () => {
-        const response = await statusChangeRequest(batchData['batchNumber'], false);
-        const recordNewData = await batchNumberDataRequest(batchData['batchNumber']);
-        updateCreatedRecord(batchData['batchNumber'], recordNewData);
-    }
-    detailsContainer.appendChild(changeToFailedButton);
     detailsCell.appendChild(detailsContainer);
     detailsRow.appendChild(detailsCell);
     return detailsRow;
@@ -114,7 +145,6 @@ const createBatchDetails = async (batchData) => {
 
 
 const generateBatchRows = async (batchesData) =>  {
-    // console.log(batchesData);
     createdRows = {};
     const tableBody = document.getElementById('batchesTableBody');
     tableBody.innerHTML = "";
@@ -319,26 +349,28 @@ const updateCreatedRecord = async (batchNumber, newData)  => {
     buttons.forEach( element => {
         element.remove();
     })
-    if (!newData['laboratoryPassed']) {
-        const changeToPassedButton = document.createElement('button');
-        changeToPassedButton.className = 'btn btn-success me-2';
-        changeToPassedButton.textContent = 'Пройдено';
-        changeToPassedButton.onclick = async () => {
-            const response = await statusChangeRequest(newData['batchNumber'], true);
+    if (LAB_PERSONAL_ROLE === userRole) {
+        if (!newData['laboratoryPassed']) {
+            const changeToPassedButton = document.createElement('button');
+            changeToPassedButton.className = 'btn btn-success me-2';
+            changeToPassedButton.textContent = 'Пройдено';
+            changeToPassedButton.onclick = async () => {
+                const response = await statusChangeRequest(newData['batchNumber'], true);
+                const recordNewData = await batchNumberDataRequest(newData['batchNumber']);
+                updateCreatedRecord(newData['batchNumber'], recordNewData);
+            }
+            detailsElement.appendChild(changeToPassedButton);
+        }
+        const changeToFailedButton = document.createElement('button');
+        changeToFailedButton.className = 'btn btn-danger';
+        changeToFailedButton.textContent = 'Не пройдено';
+        changeToFailedButton.onclick = async () => {
+            const response = await statusChangeRequest(newData['batchNumber'], false);
             const recordNewData = await batchNumberDataRequest(newData['batchNumber']);
             updateCreatedRecord(newData['batchNumber'], recordNewData);
         }
-        detailsElement.appendChild(changeToPassedButton);
+        detailsElement.appendChild(changeToFailedButton);
     }
-    const changeToFailedButton = document.createElement('button');
-    changeToFailedButton.className = 'btn btn-danger';
-    changeToFailedButton.textContent = 'Не пройдено';
-    changeToFailedButton.onclick = async () => {
-        const response = await statusChangeRequest(newData['batchNumber'], false);
-        const recordNewData = await batchNumberDataRequest(newData['batchNumber']);
-        updateCreatedRecord(newData['batchNumber'], recordNewData);
-    }
-    detailsElement.appendChild(changeToFailedButton);
 }
 
 

@@ -14,24 +14,47 @@ import BatchesContextMenu from "./components/batchesContextMenu/batchesContextMe
 import StoragesManager from "./components/storages/storagesManager.js";
 import BatchesExpandedContainer from "./components/storages/batchesContainer.js";
 import WheelstackContextMenu from "./components/wheelstackContextMenu/wheelstackContextMenu.js";
-import { NAV_BUTTONS } from "../../uniConstants.js";
+import {
+    BASIC_COOKIES,
+    GRID_PAGE_ROLES,
+    loginPage,
+    NAV_BUTTONS,
+    USER_ROLE_COOKIE_NAME,
+    RESTRICTED_TO_THIS_ROLE,
+    USER_ROLE_COOKIE_UPDATE_INTERVAL
+} from "../../uniConstants.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import { AUTH_COOKIE_NAME } from "../../uniConstants.js";
-import { keepCookieFresh } from "../../utility/roleCookies.js";
+import {
+    keepAuthCookieFresh,
+    getCookie,
+    clearRedirect,
+    validateRoleCookie,
+} from "../../utility/roleCookies.js";
 
 
 // COOKIE CHECK
-keepCookieFresh(AUTH_COOKIE_NAME);
+keepAuthCookieFresh(AUTH_COOKIE_NAME);
+const redirectUrl = `${loginPage}?message=${RESTRICTED_TO_THIS_ROLE}`
+const userRole = await getCookie(USER_ROLE_COOKIE_NAME);
+if (!userRole) {
+    clearRedirect(BASIC_COOKIES, redirectUrl);
+}
+setInterval( async () => {
+    validateRoleCookie(USER_ROLE_COOKIE_NAME, GRID_PAGE_ROLES, redirectUrl);    
+}, USER_ROLE_COOKIE_UPDATE_INTERVAL);
 // ---
 // NAV BUTTON
 const navPosition = {
-    top: '410px',
+    top: '92%',
     left: 'auto',
-    right: '10px',
+    right: '3%',
     bottom: 'auto',
 }
+const roleNavButtons = NAV_BUTTONS[userRole];
+const clearCookies = [USER_ROLE_COOKIE_NAME, AUTH_COOKIE_NAME];
 const navButton = new NavigationButton(
-    navPosition, NAV_BUTTONS,
+    navPosition, roleNavButtons, clearCookies,
 )
 // ---
 
