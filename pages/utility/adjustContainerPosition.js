@@ -1,6 +1,6 @@
 
 
-export default async function updateMenuPosition(event, menuElement) {
+export default async function updateMenuPosition(event, menuElement, navigation = false) {
     if (!menuElement) {
         return;
     }
@@ -29,7 +29,11 @@ export default async function updateMenuPosition(event, menuElement) {
     }
 
     if (positionY + elementHeight > viewportHeight- 200) {
-        positionY = viewportHeight - elementHeight - 100;
+        if (!navigation) {
+            positionY = viewportHeight - elementHeight - 125;
+        } else {
+            positionY = viewportHeight - elementHeight - 50;
+        }
     }
 
     menuElement.style.top = `${positionY}px`;
