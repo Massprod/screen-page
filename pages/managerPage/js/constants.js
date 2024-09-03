@@ -78,10 +78,6 @@ export const PLACEMENT_TYPES = {
     'laboratory': "Лаборатория",
 }
 
-export const MANAGER_ROLE_NAME = 'MANAGER';
-export const OPERATOR_ROLE_NAME = 'OPERATOR';
-
-
 export const FLASH_MESSAGES = {
     FETCH_ERROR_BG_COLOR: 'white',
     FETCH_ERROR_FONT_COLOR: 'red',
