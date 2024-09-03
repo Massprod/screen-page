@@ -82,7 +82,7 @@ export default class NavigationButton {
             this.hideNavContainer();
         } else {
             this.navContainer.style.display = 'block';
-            updateMenuPosition(event, this.navContainer);
+            updateMenuPosition(event, this.navContainer, true);
         }
     }
 
