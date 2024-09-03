@@ -27,9 +27,9 @@ import {
 
 // COOKIE CHECK
 keepAuthCookieFresh(AUTH_COOKIE_NAME);
-const redirectUrl = `${loginPage}?message=${RESTRICTED_TO_THIS_ROLE}`
+const redirectUrl = `${loginPage}?message=${RESTRICTED_TO_THIS_ROLE}`;
 const userRole = await getCookie(USER_ROLE_COOKIE_NAME);
-if (!userRole) {
+if (!userRole || !(userRole in LAB_PAGE_ROLES)) {
     clearRedirect(BASIC_COOKIES, redirectUrl);
 }
 setInterval( async () => {
@@ -43,7 +43,7 @@ const navPosition = {
     right: '2%',
     bottom: 'auto',
 }
-const roleNavButtons = NAV_BUTTONS[userRole]
+const roleNavButtons = NAV_BUTTONS[userRole];
 const clearCookies = [USER_ROLE_COOKIE_NAME, AUTH_COOKIE_NAME];
 const navButton = new NavigationButton(
     navPosition, roleNavButtons, clearCookies,

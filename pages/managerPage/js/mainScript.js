@@ -21,7 +21,7 @@ import {
     NAV_BUTTONS,
     USER_ROLE_COOKIE_NAME,
     RESTRICTED_TO_THIS_ROLE,
-    USER_ROLE_COOKIE_UPDATE_INTERVAL
+    USER_ROLE_COOKIE_UPDATE_INTERVAL,
 } from "../../uniConstants.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import { AUTH_COOKIE_NAME } from "../../uniConstants.js";
@@ -37,7 +37,7 @@ import {
 keepAuthCookieFresh(AUTH_COOKIE_NAME);
 const redirectUrl = `${loginPage}?message=${RESTRICTED_TO_THIS_ROLE}`
 const userRole = await getCookie(USER_ROLE_COOKIE_NAME);
-if (!userRole) {
+if (!userRole || !(userRole in GRID_PAGE_ROLES)) {
     clearRedirect(BASIC_COOKIES, redirectUrl);
 }
 setInterval( async () => {
