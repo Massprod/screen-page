@@ -9,7 +9,7 @@
     flex-direction: column;
     min-width: 400px;
     max-width: 500px;
-    max-height: 650px;
+    max-height: 660px;
     overflow-y: auto;
     border-radius: 8px;
 }
