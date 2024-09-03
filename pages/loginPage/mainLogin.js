@@ -1,25 +1,41 @@
-import { BACK_URL, AUTH_COOKIE_NAME, gridPage, AUTH_COOKIE_BASIC_EXPIRE } from "../uniConstants.js";
+import {
+    BACK_URL,
+    AUTH_COOKIE_NAME,
+    gridPage,
+    AUTH_COOKIE_BASIC_EXPIRE,
+    COOKIE_MESSAGES,
+    USER_ROLE_COOKIE_NAME,
+    USER_ROLE_COOKIE_BASIC_EXPIRE,
+    LAB_PAGE_ROLES,
+    labPage,
+    GRID_PAGE_ROLES,
+    COOKIE_MESSAGES_POSITION,
+    COOKIE_MESSAGES_SHOW_TIME,
+    COOKIE_MESSAGES_TEXT_COLOR,
+    COOKIE_MESSAGES_BG_COLOR,
+} from "../uniConstants.js";
 import { FLASH_MESSAGES } from "../managerPage/js/constants.js";
-import { setCookie, updateCookie } from "../utility/roleCookies.js";
+import { setCookie, updateAuthCookie } from "../utility/roleCookies.js";
 import flashMessage from "../utility/flashMessage/flashMessage.js";
 
 
 window.onload = async () => {
+    if (await updateAuthCookie(AUTH_COOKIE_NAME)) {
+        window.location.href = gridPage;
+    }
     const urlParams = new URLSearchParams(window.location.search);
     const message = urlParams.get('message');
-    if (message === 'session-expired') {
+    if (message) {
+        const flashText = COOKIE_MESSAGES[message];
         flashMessage.show({
-            message: `Токен доступа больше не действителен. Перезайдите в систему.`,
-            color: FLASH_MESSAGES.BASIC_TEXT_COLOR,
-            backgroundColor: FLASH_MESSAGES.BASIC_BG_COLOR,
-            position: FLASH_MESSAGES.BASIC_POSITION,
-            duration: FLASH_MESSAGES.BASIC_SHOW_TIME,
+            message: flashText,
+            color: COOKIE_MESSAGES_TEXT_COLOR,
+            backgroundColor: COOKIE_MESSAGES_BG_COLOR,
+            position: COOKIE_MESSAGES_POSITION,
+            duration: COOKIE_MESSAGES_SHOW_TIME,
         });
         const newUrl = window.location.origin + window.location.pathname;
         window.history.replaceState(null, '', newUrl);
-    }
-    if (await updateCookie(AUTH_COOKIE_NAME)) {
-        window.location.href = gridPage;
     }
 };
 
@@ -48,7 +64,6 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
     const respData = await response.json();
     if (!response.ok) {
         if (404 === response.status) {
-            // alert('Пользователь с таким именем не существует.')
             flashMessage.show({
                 message: `Пользователь с таким именем не существует.`,
                 color: FLASH_MESSAGES.BASIC_TEXT_COLOR,
@@ -78,6 +93,12 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
         return;
     }
     const authToken = respData['access_token'];
+    const userRole = respData['user_role'];
     await setCookie(AUTH_COOKIE_NAME, authToken, AUTH_COOKIE_BASIC_EXPIRE);
-    window.location.href = gridPage;
+    await setCookie(USER_ROLE_COOKIE_NAME, userRole, USER_ROLE_COOKIE_BASIC_EXPIRE)
+    if (userRole in GRID_PAGE_ROLES) {
+        window.location.href = gridPage;
+    } else if (userRole in LAB_PAGE_ROLES) {
+        window.location.href = labPage;
+    }
 })
