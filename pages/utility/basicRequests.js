@@ -1,8 +1,8 @@
 
 
-export async function getRequest(url) {
+export async function getRequest(url, args = {}) {
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, args)
         if (!response.ok) {
             throw new Error(`Error while getting data ${response.statusText}. URL = ${url}`);
         }
@@ -17,16 +17,13 @@ export async function getRequest(url) {
 }
 
 
-export async function patchRequest(url) {
+export async function patchRequest(url, args={method: 'PATCH'}, catchErrors = true) {
     try {
         const response = await fetch(
-            url,
-            {
-                method: 'PATCH',
-            }
+            url, args
         );
-        if (!response.ok) {
-            throw new Error(`Error while makint PATCH request = ${response.statusText}. URL = ${url}`);
+        if (catchErrors &&  !response.ok) {
+            throw new Error(`Error while making PATCH request = ${response.statusText}. URL = ${url}`);
         }
         return response;
     } catch (error) {
@@ -49,7 +46,6 @@ export async function postRequest(url, requestBody) {
         if (requestBody) {
             args['body'] = JSON.stringify(requestBody)
         }
-        console.log(args);
         const response = await fetch(
             url,
             args,
