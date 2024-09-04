@@ -153,7 +153,7 @@ const generateBatchRows = async (batchesData) =>  {
         const noDataCell = document.createElement('td');
         noDataCell.setAttribute('colspan', '3');
         noDataCell.classList.add('text-center');
-        noDataCell.textContent = 'Нет найдено ни одной партии за указанный период';
+        noDataCell.textContent = 'Не найдено ни одной партии за указанный период';
         noDataRow.appendChild(noDataCell);
         tableBody.appendChild(noDataRow);
         return;
