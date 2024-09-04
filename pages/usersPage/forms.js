@@ -199,12 +199,12 @@ export const createPasswordChangeForm = async (
         const result = await changePassAction(passData);
         if (result) {
             document.getElementById('blurOverlay').style.display = 'none';
-            changeButton.disabled = false;
-            changeButton.textContent = 'Сменить пароль';
-        } else {
-            changeButton.disabled = false;
-            changeButton.textContent = 'Сменить пароль';
+            oldPasswordInput.value = '';
+            newPasswordInput.value = '';
+            confirmPasswordInput.value = '';
         }
+        changeButton.disabled = false;
+        changeButton.textContent = 'Сменить пароль';
     };
     const cancelButton = document.createElement('button');
     cancelButton.className = 'btn btn-secondary';
@@ -222,7 +222,7 @@ export const createPasswordChangeForm = async (
 
 
 
-export const resetPasswordForm = async (
+export const createResetPasswordForm = async (
     username,
     resetPassAction,
     regex = '^[A-Za-z\\d@$!%*#?&]+$',
@@ -289,7 +289,9 @@ export const resetPasswordForm = async (
         resetButton.textContent = 'Выполняется...';
         const newPass = newPasswordInput.value;
         const repeatPass = confirmPasswordInput.value;
-        if (newPass && repeatPass) {
+        console.log(newPass);
+        console.log(repeatPass);
+        if (newPass || repeatPass) {
             if (newPass !== repeatPass) {
                 alert('Новый пароль не совпадает с подтверждением');
                 newPasswordInput.value = '';
@@ -311,12 +313,11 @@ export const resetPasswordForm = async (
         const result = await resetPassAction(passData);
         if (result) {
             document.getElementById('blurOverlay').style.display = 'none';
-            resetButton.disabled = false;
-            resetButton.textContent = 'Сбросить пароль';
-        } else {
-            resetButton.disabled = false;
-            resetButton.textContent = 'Сбросить пароль';
+            newPasswordInput.value = '';
+            confirmPasswordInput.value = '';
         }
+        resetButton.disabled = false;
+        resetButton.textContent = 'Сбросить пароль';
     };
     const cancelButton = document.createElement('button');
     cancelButton.className = 'btn btn-secondary';
@@ -329,5 +330,87 @@ export const resetPasswordForm = async (
     buttonGroup.appendChild(cancelButton);
     formContainer.appendChild(buttonGroup);
 
+    return formContainer;
+}
+
+
+export const createChangeRoleForm = async(
+    username,
+    availableRoles,
+    changeRoleAction,
+) => {
+    const formContainer = document.createElement('div');
+    formContainer.classList.add('form-container');
+
+    const formTitle = document.createElement('h4');
+    formTitle.classList.add('text-center');
+    formTitle.textContent = 'Изменить роль';
+    formContainer.appendChild(formTitle);
+
+    const roleContainer = document.createElement('div');
+    roleContainer.classList.add('mb-3');
+    const roleLabel = document.createElement('label');
+    roleLabel.classList.add('form-label');
+    roleLabel.setAttribute('for', 'roleSelect');
+    roleLabel.textContent = 'Выберите новую роль';
+    const roleSelect = document.createElement('select');
+    roleSelect.id = 'roleSelect';
+    roleSelect.classList.add('form-control');
+    roleSelect.required = true;
+
+    availableRoles.forEach(role => {
+        const option = document.createElement('option');
+        option.value = role;
+        option.textContent = role;
+        roleSelect.appendChild(option);
+    });
+
+    roleContainer.appendChild(roleLabel);
+    roleContainer.appendChild(roleSelect);
+    formContainer.appendChild(roleContainer);
+
+    const buttonGroup = document.createElement('div');
+    buttonGroup.classList.add('d-flex', 'justify-content-between');
+
+    const changeButton = document.createElement('button');
+    changeButton.type = 'submit';
+    changeButton.className = 'btn btn-warning';
+    changeButton.textContent = 'Изменить роль';
+    changeButton.onclick = async (event) => {
+        event.preventDefault();
+        changeButton.disabled = true;
+        changeButton.textContent = 'Выполняется...';
+
+        const selectedRole = roleSelect.value;
+        if (!selectedRole) {
+            alert('Пожалуйста, выберите новую роль');
+            changeButton.disabled = false;
+            changeButton.textContent = 'Изменить роль';
+            return;
+        }
+
+        const roleData = {
+            'username': username,
+            'newRole': selectedRole,
+        }
+        const result = await changeRoleAction(roleData);
+        if (result) {
+            document.getElementById('blurOverlay').style.display = 'none';
+        }
+        changeButton.disabled = false;
+        changeButton.textContent = 'Изменить роль';
+    }
+
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'btn btn-secondary';
+    cancelButton.textContent = 'Отмена';
+    cancelButton.onclick = (event) => {
+        event.preventDefault();
+        document.getElementById('blurOverlay').style.display = 'none';
+    };
+
+    buttonGroup.appendChild(changeButton);
+    buttonGroup.appendChild(cancelButton);
+    formContainer.appendChild(buttonGroup);
     return formContainer;
 }

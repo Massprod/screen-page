@@ -10,6 +10,7 @@ import {
     USERS_PAGE_ROLES,
     ADMIN_ROLE,
     ROLE_TRANSLATION,
+    REVERSE_ROLE_TRANSLATION,
 } from "../uniConstants.js";
 import {
     clearRedirect,
@@ -21,7 +22,7 @@ import NavigationButton from "../utility/navButton/navButton.js";
 import { getRequest, patchRequest } from "../utility/basicRequests.js";
 import convertISOToCustomFormat from "../utility/convertToIso.js";
 import flashMessage from "../utility/flashMessage/flashMessage.js";
-import { createPasswordChangeForm, resetPasswordForm } from "./forms.js";
+import { createChangeRoleForm, createPasswordChangeForm, createResetPasswordForm } from "./forms.js";
 
 
 // TODO: combine all of them in 1 function,
@@ -138,7 +139,7 @@ const createBlockInput = async (userData) => {
     inputGroup.classList.add('input-group');
     const inputField = document.createElement('input');
     inputField.type = 'number';
-    inputField.classList.add('form-control-sm', 'me-4');
+    inputField.className = 'form-control-sm mh-25 mt-2 me-2 pe-2 fs-6';
     inputField.placeholder = 'Введите секунды';
     inputField.min = 30;
     inputField.defaultValue = 30;
@@ -147,7 +148,7 @@ const createBlockInput = async (userData) => {
     inputContainer.appendChild(inputGroup);
     // BLOCK BUTTOM
     const blockButton = document.createElement('button');
-    blockButton.className = 'btn btn-danger me-2';
+    blockButton.className = 'btn btn-danger mt-2 me-5 fs-6';
     blockButton.textContent = 'Заблокировать';
     blockButton.onclick = async (event) => {
         event.preventDefault();
@@ -175,7 +176,7 @@ const createBlockInput = async (userData) => {
 
 const createUnblockButton = async (userData) => {
     const unblockButton = document.createElement('button');
-    unblockButton.className = 'btn btn-success me-2';
+    unblockButton.className = 'btn btn-success mt-2 me-2 fs-6';
     unblockButton.textContent = 'Разблокировать';
     unblockButton.onclick = async () => {
         const _authToken = await getCookie(AUTH_COOKIE_NAME);
@@ -206,7 +207,7 @@ const showForm = (form) => {
     overlay.style.display = 'flex'; // Show the overlay
 }
 
-// PASS ACTIONS
+// BUTTON ACTIONS
 const changePasswordAction = async (passwordData) => {
     const token = await getCookie(AUTH_COOKIE_NAME);
     const changePassURL = `${BACK_URL.PATCH_AUTH_CHANGE_PASS}`;
@@ -232,7 +233,6 @@ const changePasswordAction = async (passwordData) => {
         })
         return true;
     }
-    const responseData = response.json();
     if (302 === response.status) {
         alert('Новый пароль не может быть равен старому');
     } else if (400 === response.status) {
@@ -242,7 +242,7 @@ const changePasswordAction = async (passwordData) => {
     } else if (403 === response.status) {
         alert('Только аутентифицированный администратор может изменить собственный пароль');
     } else {
-        alert(`Неизвестная ошибка. Сообщите администратору ${responseData}`);
+        alert(`Неизвестная ошибка. Сообщите администратору ${response.status}`);
     }
     return false
 }
@@ -254,7 +254,7 @@ const resetPasswordAction = async (passwordData) => {
         'username': passwordData['username'],
     }
     if (passwordData['newPassword']) {
-        bodyData['newPassword'] = passwordData['newPassword'];
+        bodyData['new_password'] = passwordData['newPassword'];
     }
     const args = {
         'headers': {
@@ -280,22 +280,51 @@ const resetPasswordAction = async (passwordData) => {
         }
         return true;
     }
-    const responseData = response.json();
     if (404 === response.status) {
         alert('Выбранный пользователь не найден. Обновите страницу');
     } else if (403 === response.status) {
         alert('Только аутентифицированный администратор может изменить собственный пароль');
     } else {
-        alert(`Неизвестная ошибка. Сообщите администратору ${responseData}`);
+        alert(`Неизвестная ошибка. Сообщите администратору ${response.status}`);
     }
     return false;
 }
 
+const changeRoleAction = async (roleData) => {
+    const token = await getCookie(AUTH_COOKIE_NAME);
+    const username = roleData['username'];
+    const newRole = REVERSE_ROLE_TRANSLATION[roleData['newRole']];
+    const roleChangeURL = `${BACK_URL.PATCH_AUTH_CHANGE_ROLE}?username=${username}&new_role=${newRole}`;
+    const args = {
+        'headers': {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Content-type': 'application/json',
+        },
+        'method': 'PATCH',
+    }
+    const response = await patchRequest(roleChangeURL, args, false);
+    if (response.ok) {
+        flashMessage.show({
+            message: `Роль для пользователя <b>${roleData['username']}</b> успешно изменена на <b>${newRole}</b>`,
+            duration: 7000,
+        })
+        return true;
+    }
+    if (404 == response.status) {
+        alert('Выбранный пользователь не найден. Обновите страницу');
+    } else if (403 === response.status) {
+        alert('Роль `Администратор` не может быть изменена');
+    } else {
+        alert(`Неизвестная ошибка. Сообщите администратору ${response.status}`)
+    }
+    return false;
+}
 // ---
 
 const passwordChangeButton = async (userData) => {
     const changeButton = document.createElement('button');
-    changeButton.className = 'btn btn-secondary me-2';
+    changeButton.className = 'btn btn-secondary mt-2 me-2 fs-6';
     changeButton.textContent = 'Сменить пароль';
     const passChangeForm = await createPasswordChangeForm(userData['username'], changePasswordAction);
     changeButton.onclick = async () => {
@@ -306,13 +335,28 @@ const passwordChangeButton = async (userData) => {
 
 const passwordResetButton = async (userData) => {
     const resetButton = document.createElement('button');
-    resetButton.className = `btn btn-secondary me-2`;
+    resetButton.className = `btn btn-secondary mt-2 me-2 fs-6`;
     resetButton.textContent = 'Сбросить пароль';
-    const passResetForm = await resetPasswordForm(userData['username'], resetPasswordAction);
+    const passResetForm = await createResetPasswordForm(userData['username'], resetPasswordAction);
     resetButton.onclick = async () => {
         showForm(passResetForm);
     }
     return resetButton;
+}
+
+const roleChangeButton = async (userData) => {
+    const roleChangeButton = document.createElement('button');
+    roleChangeButton.className = 'btn btn-secondary mt-2 me-2 fs-6';
+    roleChangeButton.textContent = 'Сменить роль';
+    const availableRoles = [];
+    for (let roleName of Object.values(ROLE_TRANSLATION)) {
+        availableRoles.push(roleName);
+    }
+    const roleChangeForm = await createChangeRoleForm(userData['username'], availableRoles, changeRoleAction);
+    roleChangeButton.onclick = async () => {
+        showForm(roleChangeForm);
+    }
+    return roleChangeButton;
 }
 // ---
 
@@ -325,40 +369,45 @@ const createUserDetails = async (userData) => {
     detailsContainer.classList.add('user-details');
     // REGISTRATION DATE
     const userRegParag = document.createElement('p');
-    const registrationDate = convertISOToCustomFormat(userData['registrationDate'], false, true);
-    userRegParag.textContent = `Дата регистрации: ${registrationDate}`;
+    userRegParag.classList.add('fs-5');
+    const registrationDate = convertISOToCustomFormat(userData['registrationDate'], false, true, true);
+    userRegParag.innerHTML = `Дата регистрации: <b>${registrationDate}</b>`;
     detailsContainer.appendChild(userRegParag);
     userDetailsCell.appendChild(detailsContainer);
     userDetailsRow.appendChild(userDetailsCell);
     // BUTTONS
+    if (ADMIN_ROLE !== userData['userRole']) {
+        if (!userData['isBlocked']) {
+            const blockInputGroup = await createBlockInput(userData);
+            detailsContainer.appendChild(blockInputGroup);
+        } else {
+            const unblockDateParag = document.createElement('p');
+            unblockDateParag.classList.add('fs-5');
+            const unblockDate = convertISOToCustomFormat(userData['blockEndDate'], false, true, true);
+            unblockDateParag.innerHTML = `Дата окончания блокировки: <b>${unblockDate}</b>`;
+            detailsContainer.appendChild(unblockDateParag);
+            const unblockButton = await createUnblockButton(userData);
+            detailsContainer.appendChild(unblockButton);
+        }
+        const roleChangeBut = await roleChangeButton(userData);
+        detailsContainer.appendChild(roleChangeBut);
+    }
     const passChangeBut = await passwordChangeButton(userData);
     detailsContainer.appendChild(passChangeBut);
     const resetPassBut = await passwordResetButton(userData);
     detailsContainer.appendChild(resetPassBut);
-    if (ADMIN_ROLE === userData['userRole']) {
-        return userDetailsRow;
-    }
-    if (!userData['isBlocked']) {
-        const blockInputGroup = await createBlockInput(userData);
-        // blockInputGroup.appendChild(passChangeBut);
-        detailsContainer.appendChild(blockInputGroup);
-    } else {
-        const unblockButton = await createUnblockButton(userData);
-        detailsContainer.appendChild(unblockButton);
-    }
     
     return userDetailsRow;
 }
 
 
 const generateUserRows = async (usersData, tableBody) => {
-    console.log(usersData);
     tableBody.innerHTML = "";
     if (0 === usersData.length) {
         const noDataRow = document.createElement('tr');
         const noDataCell = document.createElement('td');
         noDataCell.setAttribute('colspan', '3');
-        noDataCell.classList.add('text-center');
+        noDataCell.classList.add('text-center fs-2');
         noDataCell.textContent = 'Не найдено ни одного зарегистрированного пользователя';
         noDataRow.appendChild(noDataCell);
         tableBody.appendChild(noDataRow);
@@ -384,6 +433,7 @@ const generateUserRows = async (usersData, tableBody) => {
             details.style.display = details.style.display === 'none' || details.style.display === '' ? 'block': 'none';
         })
     }
+    console.log(createdRows);
 }
 
 
