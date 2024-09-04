@@ -12,7 +12,15 @@ export const BACK_URL  = {
     GET_BATCH_DATA: `${mainAddress}/batch_number/batch_number`,
     POST_AUTH_CREDENTIALS: `${authMainAddress}/users/login`,
     POST_AUTH_REFRESH_TOKEN: `${authMainAddress}/users/token_refresh`,
+    GET_AUTH_USERS_DATA: `${authMainAddress}/users/all`,
+    PATCH_AUTH_BLOCK_USER: `${authMainAddress}/users/block`,
+    PATCH_AUTH_UNBLOCK_USER: `${authMainAddress}/users/unblock`,
+    PATCH_AUTH_CHANGE_PASS: `${authMainAddress}/users/change_password`,
+    PATCH_AUTH_RESET_PASS: `${authMainAddress}/users/reset_password`,
 };
+// REGEX
+export const BASIC_USERNAME_REGEX = '^[\-._a-zA-Z0-9]{3,20}$';
+export const BASIC_PASSWORD_REGEX = '^[A-Za-z\d@$!%*#?&]{8,50}$';
 
 // auth-token cookie
 export const AUTH_COOKIE_NAME = 'auth-token';
@@ -33,6 +41,13 @@ export const ADMIN_ROLE = 'admin';
 export const OPERATOR_ROLE = 'operator'
 export const LAB_PERSONAL_ROLE = 'labPersonal';
 
+export const ROLE_TRANSLATION = {
+    'manager': 'Менеджер',
+    'admin': 'Администратор',
+    'operator': 'Оператор',
+    'labPersonal': 'Лаборант',
+}
+
 export const LAB_PAGE_ROLES = {
     [ADMIN_ROLE]: true,
     [LAB_PERSONAL_ROLE]: true,
@@ -47,7 +62,6 @@ export const GRID_PAGE_ROLES = {
 
 export const USERS_PAGE_ROLES = {
     [ADMIN_ROLE]: true,
-    [MANAGER_ROLE]: true,
 }
 
 export const COOKIE_MESSAGES = {
