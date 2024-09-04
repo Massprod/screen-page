@@ -17,6 +17,7 @@ export const BACK_URL  = {
     PATCH_AUTH_UNBLOCK_USER: `${authMainAddress}/users/unblock`,
     PATCH_AUTH_CHANGE_PASS: `${authMainAddress}/users/change_password`,
     PATCH_AUTH_RESET_PASS: `${authMainAddress}/users/reset_password`,
+    PATCH_AUTH_CHANGE_ROLE: `${authMainAddress}/users/change_role`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\-._a-zA-Z0-9]{3,20}$';
@@ -46,6 +47,11 @@ export const ROLE_TRANSLATION = {
     'admin': 'Администратор',
     'operator': 'Оператор',
     'labPersonal': 'Лаборант',
+}
+
+export const REVERSE_ROLE_TRANSLATION = {}
+for (let [key, value] of Object.entries(ROLE_TRANSLATION)) {
+    REVERSE_ROLE_TRANSLATION[value] = key;
 }
 
 export const LAB_PAGE_ROLES = {
