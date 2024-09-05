@@ -137,9 +137,10 @@ const createBlockInput = async (userData) => {
     inputContainer.classList.add('mb-6');
     const inputGroup = document.createElement('div');
     inputGroup.classList.add('input-group');
+    inputGroup.id = 'blockInput';
     const inputField = document.createElement('input');
     inputField.type = 'number';
-    inputField.className = 'form-control-sm mh-25 mt-2 me-2 pe-2 fs-6';
+    inputField.className = 'form-control-sm mt-2 me-2 pe-2 fs-6';
     inputField.placeholder = 'Введите секунды';
     inputField.min = 30;
     inputField.defaultValue = 30;
@@ -148,7 +149,7 @@ const createBlockInput = async (userData) => {
     inputContainer.appendChild(inputGroup);
     // BLOCK BUTTOM
     const blockButton = document.createElement('button');
-    blockButton.className = 'btn btn-danger mt-2 me-5 fs-6';
+    blockButton.className = 'btn btn-danger mt-2 me-2 fs-6';
     blockButton.textContent = 'Заблокировать';
     blockButton.onclick = async (event) => {
         event.preventDefault();
@@ -377,32 +378,56 @@ const createUserDetails = async (userData) => {
     userDetailsRow.appendChild(userDetailsCell);
     // BUTTONS
     if (ADMIN_ROLE !== userData['userRole']) {
-        if (!userData['isBlocked']) {
-            const blockInputGroup = await createBlockInput(userData);
-            detailsContainer.appendChild(blockInputGroup);
+        // BLOCK
+        const blockInputGroup = await createBlockInput(userData);    
+        detailsContainer.appendChild(blockInputGroup);
+        // UNBLOCK
+        const unblockDateParag = document.createElement('p');
+        unblockDateParag.classList.add('fs-5');
+        const unblockDate = convertISOToCustomFormat(userData['blockEndDate'], false, true, true);
+        unblockDateParag.innerHTML = `Дата окончания блокировки: <b>${unblockDate}</b>`;
+        detailsContainer.appendChild(unblockDateParag);
+        const unblockButton = await createUnblockButton(userData);
+        detailsContainer.appendChild(unblockButton);
+        if (userData['isBlocked']) {
+            blockInputGroup.style.display = 'none';
         } else {
-            const unblockDateParag = document.createElement('p');
-            unblockDateParag.classList.add('fs-5');
-            const unblockDate = convertISOToCustomFormat(userData['blockEndDate'], false, true, true);
-            unblockDateParag.innerHTML = `Дата окончания блокировки: <b>${unblockDate}</b>`;
-            detailsContainer.appendChild(unblockDateParag);
-            const unblockButton = await createUnblockButton(userData);
-            detailsContainer.appendChild(unblockButton);
+            unblockDateParag.style.display = 'none';
+            unblockButton.style.display = 'none';
         }
-        const roleChangeBut = await roleChangeButton(userData);
-        detailsContainer.appendChild(roleChangeBut);
     }
+    const roleChangeBut = await roleChangeButton(userData);
+    detailsContainer.appendChild(roleChangeBut);
     const passChangeBut = await passwordChangeButton(userData);
     detailsContainer.appendChild(passChangeBut);
     const resetPassBut = await passwordResetButton(userData);
     detailsContainer.appendChild(resetPassBut);
-    
     return userDetailsRow;
+}
+
+
+const createRecord = async (userData, tableBody) => {
+    const rowData = {
+        'userData': userData,
+    };
+    const userRow = await createUserRow(userData);
+    rowData['mainRow'] = userRow;
+    tableBody.appendChild(userRow);
+    // USER DETAILS
+    const detailsRow = await createUserDetails(userData);
+    rowData['detailsRow'] = detailsRow;
+    tableBody.appendChild(detailsRow);
+    userRow.addEventListener('click', () => {
+        const details = detailsRow.childNodes[0].childNodes[0];
+        details.style.display = details.style.display === 'none' || details.style.display === '' ? 'block': 'none';
+    })
+    return rowData;
 }
 
 
 const generateUserRows = async (usersData, tableBody) => {
     tableBody.innerHTML = "";
+    const userRows = {};
     if (0 === usersData.length) {
         const noDataRow = document.createElement('tr');
         const noDataCell = document.createElement('td');
@@ -415,30 +440,83 @@ const generateUserRows = async (usersData, tableBody) => {
     }
     for (let userData of usersData) {
         const username = userData['username'];
-        if (!(username in createdRows)) {
-            createdRows[username] = {
-                'currentData': userData,
-            };
-        }
-        // USER ROW
-        const userRow = await createUserRow(userData);
-        createdRows[username]['mainRow'] = userRow;
-        tableBody.appendChild(userRow);
-        // USER DETAILS
-        const detailsRow = await createUserDetails(userData);
-        createdRows[username]['detailsRow'] = detailsRow;
-        tableBody.appendChild(detailsRow);
-        userRow.addEventListener('click', () => {
-            const details = detailsRow.childNodes[0].childNodes[0];
-            details.style.display = details.style.display === 'none' || details.style.display === '' ? 'block': 'none';
-        })
+        const newRowData = await createRecord(userData, tableBody);
+        userRows[username] = newRowData;
     }
-    console.log(createdRows);
+    return userRows;
 }
 
 
-var createdRows = {};
+const updateRowData = async (currenRowData, newUserData) => {
+    const curBlockStatus = currenRowData['userData']['isBlocked'];
+    const newBlockStatus = newUserData['isBlocked'];
+    const curUserRole = currenRowData['userData']['userRole'];
+    const newUserRole = newUserData['userRole'];
+    if (curBlockStatus !== newBlockStatus) {
+        const detailsCell = currenRowData['detailsRow'].childNodes[0].childNodes[0];
+        const blockInput = detailsCell.childNodes[1];
+        const unblockParag = detailsCell.childNodes[2];
+        const unblockButton = detailsCell.childNodes[3];
+        const imageIcon = currenRowData['mainRow'].childNodes[2].childNodes[0];
+        if (newBlockStatus) {
+            const newUnblockData = convertISOToCustomFormat(newUserData['blockEndDate'], false, true, true);
+            unblockParag.style.display = 'block';
+            unblockParag.innerHTML = `Дата окончания блокировки: <b>${newUnblockData}</b>`;
+            unblockButton.style.display = 'block';
+            blockInput.style.display = 'none';
+            imageIcon.src = "../images/blocked.png";
+            imageIcon.alt = "Blocked";
+        } else {
+            unblockParag.style.display = 'none';
+            unblockButton.style.display = 'none';
+            blockInput.style.display = 'flex';
+            imageIcon.src = "../images/active.png";
+            imageIcon.alt = "Active";
+        }
+    }
+    const roleElement = currenRowData['mainRow'].childNodes[1];
+    if (curUserRole !== newUserRole) {
+        roleElement.textContent = ROLE_TRANSLATION[newUserRole];
+    }
+}
+
+
+const updateCreatedRows = async (curRows, tableBody) => {
+    const newUsersData = await getUsersData();
+    for (let newUserData of newUsersData) {
+        const username = newUserData['username'];
+        if (username in curRows) {
+            const rowData = curRows[username];
+            await updateRowData(rowData, newUserData);
+            curRows[username]['userData'] = newUserData;
+        } else {
+            const newRowData = await createRecord(newUserData, tableBody); 
+            curRows[username] = newRowData;
+        }
+    }
+} 
+
+
+const startUpdating = async (curRows, tableBody) => {
+    if (usersUpdatingInterval) {
+        return;
+    }
+    usersUpdatingInterval = setInterval( async () => {
+        await updateCreatedRows(curRows, tableBody);
+    }, 500);
+}
+
+const stopUpdating = async () => {
+    if (!usersUpdatingInterval) {
+        return;
+    }
+    clearInterval(usersUpdatingInterval);
+    usersUpdatingInterval = null;
+}
+
+
+var usersUpdatingInterval = null;
 const usersTable = document.getElementById('usersTableBody');
 const newData = await getUsersData();
-console.log(newData);
-await generateUserRows(newData, usersTable);
+const createdRows = await generateUserRows(newData, usersTable);
+startUpdating(createdRows, usersTable);
