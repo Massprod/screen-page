@@ -58,7 +58,14 @@ export async function updateAuthCookie(cookieName) {
         return null;
     }
     const refreshURL = `${BACK_URL.POST_AUTH_REFRESH_TOKEN}?token=${cookie}`;
-    const response = await postRequest(refreshURL);
+    const args = {
+        'method': 'POST',
+        'headers': {
+            'Content-Type': 'application/json',
+            'accept': 'application/json',
+        }
+    }
+    const response = await postRequest(refreshURL, args, false);
     if (!response.ok) {
         await deleteCookie(cookieName);
         if (window.location.href !== loginPage) {

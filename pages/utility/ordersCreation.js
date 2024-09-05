@@ -63,7 +63,10 @@ export async function createOrderMoveWholestackToStorageFromStorage(elementData,
         },
         'orderType': ORDER_MOVE_TO_STORAGE,
     };
-    const resp = await postRequest(createOrderURL, createOrderBody);
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     if (!resp.ok) {
         flashMessage.show({
             message: `Ошибка при создании переноса стопы в хранилище: ${resp.status}`
@@ -87,7 +90,10 @@ export async function createOrderMoveWholestackToStorage(elementData, storageId)
         },
         'storage': storageId,
     };
-    const resp = await postRequest(createOrderURL, createOrderBody);
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     if (!resp.ok) {
         flashMessage.show({
             message: `Ошибка при создании переноса стопы в хранилище: ${resp.status}`
@@ -117,7 +123,10 @@ export async function createOrderMoveWholestackFromBaseGrid(elementData, destina
         },
         'orderType': ORDER_MOVE_WHOLE_STACK,
     }
-    const resp = await postRequest(createOrderURL, createOrderBody)
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     if (!resp.ok) {
         flashMessage.show({
             message: `Ошибка при создании переноса стопы: ${resp.status}`
@@ -145,7 +154,10 @@ export async function createOrderMoveWholestackFromStorage(elementData, destinat
         },
         'orderType': ORDER_MOVE_WHOLE_STACK,
     };
-    const resp = await postRequest(createOrderURL, createOrderBody);
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     if (!resp.ok) {
         flashMessage.show({
             message: `Ошибка при создании переноса стопы: ${resp.status}`
@@ -178,7 +190,10 @@ export async function createProRejOrderBulk(elementData, extraElement, processin
     if (!processing) {
         createOrderBody['orderType'] = ORDER_MOVE_TO_REJECTED;
     }
-    const resp = await postRequest(createOrderURL, createOrderBody);
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     await checkProRejOrderResponse(resp);
 }
 
@@ -207,7 +222,10 @@ export async function createProRejOrderGrid(elementData, extraElement, processin
             "elementName": extraElement,
         },
     }
-    const resp = await postRequest(createOrderURL, createOrderBody);
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     await checkProRejOrderResponse(resp);
 }
 
@@ -238,7 +256,10 @@ export async function createProRejOrderStorage(elementData, extraElement, proces
     if (!processing) {
         createOrderBody['orderType'] = ORDER_MOVE_TO_REJECTED;
     }
-    const resp = await postRequest(createOrderURL, createOrderBody);
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     await checkProRejOrderResponse(resp);
 }
 
@@ -262,7 +283,10 @@ export async function createLaboratoryOrderGrid(elementData, chosenWheel, destin
         },
         'chosenWheel': chosenWheel,
     };
-    const resp = await postRequest(createOrderURL, createOrderBody);
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     if (!resp.ok) {
         flashMessage.show({
             message: `Ошибка при создании заказа: ${resp.status}`
@@ -290,7 +314,10 @@ export async function createLaboratoryOrderStorage(elementData, chosenWheel, des
         'orderType': ORDER_MOVE_TO_LABORATORY,
         'chosenWheel': chosenWheel,
     }
-    const resp = await postRequest(createOrderURL, createOrderBody);
+    const args = {
+        'body': createOrderBody,
+    }
+    const resp = await postRequest(createOrderURL, args, false);
     if (!resp.ok) {
         flashMessage.show({
             message: `Ошибка при создании заказа: ${resp.status}`
