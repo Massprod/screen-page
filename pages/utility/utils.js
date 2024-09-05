@@ -58,3 +58,22 @@ export function validatePassword(
 
     return true; // If all checks pass
 }
+
+
+export function validateUsername(
+    username,
+    regexPattern,
+    minLength,
+    maxLength
+) {
+    const regex = new RegExp(regexPattern);
+    if (username.length < minLength || username.length > maxLength) {
+        alert(`Имя пользователя должно быть длиной от ${minLength} до ${maxLength} символов.`);
+        return false;
+    }
+    if (!regex.test(username)) {
+        alert('Имя пользователя не соответствует требованиям безопасности');
+        return false
+    }
+    return true;
+}
