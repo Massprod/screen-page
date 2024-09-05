@@ -1,16 +1,27 @@
-import flashMessage from "../utility/flashMessage/flashMessage.js";
 import {
     validatePassword,
+    validateUsername,
 } from "../utility/utils.js";
 
 
-export const createRegistrationForm = async () => {
+export const createRegistrationForm = async (
+    availableRoles,
+    registerNewUserAction,
+    usernameRegex = '^[\-._a-zA-Z0-9]+$',
+    usernameMinLength = 3,
+    usernameMaxLength = 20,
+    regex = '^[A-Za-z\\d@$!%*#?&]+$',
+    minLength = 8,
+    maxLength = 50,
+) => {
+    const registerText = 'Зарегистрировать';
+
     const formContainer = document.createElement('div');
     formContainer.classList.add('form-container');
 
     const formTitle = document.createElement('h4');
     formTitle.classList.add('text-center');
-    formTitle.textContent = 'Register';
+    formTitle.textContent = 'Регистрация';
     formContainer.appendChild(formTitle);
 
     const usernameContainer = document.createElement('div');
@@ -18,12 +29,13 @@ export const createRegistrationForm = async () => {
     const usernameLabel = document.createElement('label');
     usernameLabel.classList.add('form-label');
     usernameLabel.setAttribute('for', 'username');
-    usernameLabel.textContent = 'Username';
+    usernameLabel.textContent = 'Имя';
     const usernameInput = document.createElement('input');
     usernameInput.type = 'text';
     usernameInput.id = 'username';
     usernameInput.classList.add('form-control');
     usernameInput.required = true;
+    usernameInput.minLength = 3;
     usernameContainer.appendChild(usernameLabel);
     usernameContainer.appendChild(usernameInput);
     formContainer.appendChild(usernameContainer);
@@ -33,12 +45,13 @@ export const createRegistrationForm = async () => {
     const passwordLabel = document.createElement('label');
     passwordLabel.classList.add('form-label');
     passwordLabel.setAttribute('for', 'password');
-    passwordLabel.textContent = 'Password';
+    passwordLabel.textContent = 'Пароль';
     const passwordInput = document.createElement('input');
     passwordInput.type = 'password';
     passwordInput.id = 'password';
     passwordInput.classList.add('form-control');
     passwordInput.required = true;
+    passwordInput.minLength = 8;
     passwordContainer.appendChild(passwordLabel);
     passwordContainer.appendChild(passwordInput);
     formContainer.appendChild(passwordContainer);
@@ -48,7 +61,7 @@ export const createRegistrationForm = async () => {
     const confirmPasswordLabel = document.createElement('label');
     confirmPasswordLabel.classList.add('form-label');
     confirmPasswordLabel.setAttribute('for', 'confirmPassword');
-    confirmPasswordLabel.textContent = 'Confirm Password';
+    confirmPasswordLabel.textContent = 'Подтвердите пароль';
     const confirmPasswordInput = document.createElement('input');
     confirmPasswordInput.type = 'password';
     confirmPasswordInput.id = 'confirmPassword';
@@ -58,25 +71,89 @@ export const createRegistrationForm = async () => {
     confirmPasswordContainer.appendChild(confirmPasswordInput);
     formContainer.appendChild(confirmPasswordContainer);
 
+    const roleContainer = document.createElement('div');
+    roleContainer.classList.add('mb-3');
+    const roleLabel = document.createElement('label');
+    roleLabel.classList.add('form-label');
+    roleLabel.setAttribute('for', 'roleSelect');
+    roleLabel.textContent = 'Роль пользователя';
+    const roleSelect = document.createElement('select');
+    roleSelect.id = 'roleSelect';
+    roleSelect.classList.add('form-control');
+    roleSelect.required = true;
+    availableRoles.forEach(role => {
+        const option = document.createElement('option');
+        option.value = role;
+        option.textContent = role;
+        roleSelect.appendChild(option);
+    });
+    roleContainer.appendChild(roleLabel);
+    roleContainer.appendChild(roleSelect);
+    formContainer.appendChild(roleContainer);
+
     const buttonGroup = document.createElement('div');
-    buttonGroup.classList.add('d-flex', 'justify-content-between');
+    buttonGroup.classList.add('d-flex', 'justify-content-between', 'gap-2');
 
     const registerButton = document.createElement('button');
     registerButton.type = 'submit';
-    registerButton.className = 'btn btn-primary';
-    registerButton.textContent = 'Register';
-    registerButton.onclick = (event) => {
+    registerButton.className = 'btn btn-warning';
+    registerButton.textContent = registerText;
+    registerButton.onclick = async (event) => {
         event.preventDefault();
-        alert('Registration successful!');
-        document.getElementById('blurOverlay').style.display = 'none';
+        registerButton.disabled = true;
+        registerButton.textContent = 'Выполняется...';
+        const username = usernameInput.value;
+        if (!validateUsername(username, usernameRegex, usernameMinLength, usernameMaxLength)) {
+            usernameInput.value = '';
+            registerButton.textContent = registerText;
+            registerButton.disabled = false;
+            return;
+        }
+        const selectedRole = roleSelect.value;
+        if (!selectedRole) {
+            alert('Пожалуйста, выберите роль');
+            registerButton.disabled = false;
+            registerButton.textContent = registerText;
+            return;
+        }
+        const newPass = passwordInput.value;
+        const repeatPass = confirmPasswordInput.value;
+        if (newPass !== repeatPass) {
+            alert('Новый пароль не совпадает с подтверждением');
+            passwordInput.value = '';
+            confirmPasswordInput.value = '';
+            registerButton.disabled = false;
+            registerButton.textContent = registerText;
+            return;
+        }
+        if (!validatePassword(newPass, regex, minLength, maxLength)
+             || !validatePassword(repeatPass, regex, minLength, maxLength)) {
+            registerButton.disabled = false;
+            registerButton.textContent = registerText;
+            return;
+        }
+        const newUserData = {
+            'password': newPass,
+            'userRole': selectedRole,
+            'username': username,
+        }
+        const result = await registerNewUserAction(newUserData);
+        if (result) {
+            document.getElementById('blurOverlay').remove();
+            usernameInput.value = '';
+            passwordInput.value = '';
+            confirmPasswordInput.value = '';
+        }
+        registerButton.disabled = false;
+        registerButton.textContent = registerText;
     };
 
     const cancelButton = document.createElement('button');
     cancelButton.className = 'btn btn-secondary';
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = 'Отменить';
     cancelButton.onclick = (event) => {
         event.preventDefault();
-        document.getElementById('blurOverlay').style.display = 'none';
+        document.getElementById('blurOverlay').remove();
     };
 
     buttonGroup.appendChild(registerButton);
@@ -181,12 +258,8 @@ export const createPasswordChangeForm = async (
             changeButton.textContent = 'Сменить пароль';
             return;
         }
-        if (!validatePassword(oldPass, regex, minLength, maxLength)) {
-            changeButton.disabled = false;
-            changeButton.textContent = 'Сменить пароль';
-            return;
-        }
-        if (!validatePassword(newPass, regex, minLength, maxLength)) {
+        if (!validatePassword(oldPass, regex, minLength, maxLength)
+             || !validatePassword(newPass, regex, minLength, maxLength)) {
             changeButton.disabled = false;
             changeButton.textContent = 'Сменить пароль';
             return;
@@ -198,8 +271,7 @@ export const createPasswordChangeForm = async (
         }
         const result = await changePassAction(passData);
         if (result) {
-            document.getElementById('blurOverlay').style.display = 'none';
-            oldPasswordInput.value = '';
+            document.getElementById('blurOverlay').remove();
             newPasswordInput.value = '';
             confirmPasswordInput.value = '';
         }
@@ -211,7 +283,7 @@ export const createPasswordChangeForm = async (
     cancelButton.textContent = 'Отменить';
     cancelButton.onclick = (event) => {
         event.preventDefault();
-        document.getElementById('blurOverlay').style.display = 'none';
+        document.getElementById('blurOverlay').remove();
     };
     buttonGroup.appendChild(changeButton);
     buttonGroup.appendChild(cancelButton);
@@ -289,8 +361,6 @@ export const createResetPasswordForm = async (
         resetButton.textContent = 'Выполняется...';
         const newPass = newPasswordInput.value;
         const repeatPass = confirmPasswordInput.value;
-        console.log(newPass);
-        console.log(repeatPass);
         if (newPass || repeatPass) {
             if (newPass !== repeatPass) {
                 alert('Новый пароль не совпадает с подтверждением');
@@ -312,7 +382,7 @@ export const createResetPasswordForm = async (
         }
         const result = await resetPassAction(passData);
         if (result) {
-            document.getElementById('blurOverlay').style.display = 'none';
+            document.getElementById('blurOverlay').remove();
             newPasswordInput.value = '';
             confirmPasswordInput.value = '';
         }
@@ -321,10 +391,10 @@ export const createResetPasswordForm = async (
     };
     const cancelButton = document.createElement('button');
     cancelButton.className = 'btn btn-secondary';
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = 'Отменить';
     cancelButton.onclick = (event) => {
         event.preventDefault();
-        document.getElementById('blurOverlay').style.display = 'none';
+        document.getElementById('blurOverlay').remove();
     };
     buttonGroup.appendChild(resetButton);
     buttonGroup.appendChild(cancelButton);
@@ -395,7 +465,7 @@ export const createChangeRoleForm = async(
         }
         const result = await changeRoleAction(roleData);
         if (result) {
-            document.getElementById('blurOverlay').style.display = 'none';
+            document.getElementById('blurOverlay').remove();
         }
         changeButton.disabled = false;
         changeButton.textContent = 'Изменить роль';
@@ -403,10 +473,10 @@ export const createChangeRoleForm = async(
 
     const cancelButton = document.createElement('button');
     cancelButton.className = 'btn btn-secondary';
-    cancelButton.textContent = 'Отмена';
+    cancelButton.textContent = 'Отменить';
     cancelButton.onclick = (event) => {
         event.preventDefault();
-        document.getElementById('blurOverlay').style.display = 'none';
+        document.getElementById('blurOverlay').remove();
     };
 
     buttonGroup.appendChild(changeButton);
