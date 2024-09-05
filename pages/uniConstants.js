@@ -18,6 +18,7 @@ export const BACK_URL  = {
     PATCH_AUTH_CHANGE_PASS: `${authMainAddress}/users/change_password`,
     PATCH_AUTH_RESET_PASS: `${authMainAddress}/users/reset_password`,
     PATCH_AUTH_CHANGE_ROLE: `${authMainAddress}/users/change_role`,
+    POST_AUTH_REGISTER_USER: `${authMainAddress}/users/register`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\-._a-zA-Z0-9]{3,20}$';

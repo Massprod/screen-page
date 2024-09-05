@@ -19,10 +19,15 @@ import {
     getCookie,
 } from "../utility/roleCookies.js";
 import NavigationButton from "../utility/navButton/navButton.js";
-import { getRequest, patchRequest } from "../utility/basicRequests.js";
+import { getRequest, patchRequest, postRequest } from "../utility/basicRequests.js";
 import convertISOToCustomFormat from "../utility/convertToIso.js";
 import flashMessage from "../utility/flashMessage/flashMessage.js";
-import { createChangeRoleForm, createPasswordChangeForm, createResetPasswordForm } from "./forms.js";
+import {
+    createChangeRoleForm,
+    createPasswordChangeForm,
+    createResetPasswordForm,
+    createRegistrationForm,
+} from "./forms.js";
 
 
 // TODO: combine all of them in 1 function,
@@ -105,15 +110,18 @@ const createUserRow = async (userData) => {
     userRow.className = 'user-row fw-bold';
     // USERNAME
     const usernameCell = document.createElement('td');
+    usernameCell.classList.add('ps-2');
     usernameCell.textContent = userData['username'];
     userRow.appendChild(usernameCell);
     // USER_ROLE
     const userRoleCell = document.createElement('td');
+    userRoleCell.classList.add('ps-2');
     const corRole = ROLE_TRANSLATION[userData['userRole']];
     userRoleCell.textContent = corRole;
     userRow.appendChild(userRoleCell);
     // USER_STATUS
     const userStatusCell = document.createElement('td');
+    userStatusCell.classList.add('text-end', 'pe-5');
     const userStatusImage = document.createElement('img');
     userStatusImage.classList.add('user-status-image');
     if (userData['isBlocked']) {
@@ -321,6 +329,43 @@ const changeRoleAction = async (roleData) => {
     }
     return false;
 }
+
+const registerNewUserAction = async (userData) => {
+    const token = await getCookie(AUTH_COOKIE_NAME);
+    const username = userData['username'];
+    const userRole = REVERSE_ROLE_TRANSLATION[userData['userRole']];
+    const userPass = userData['password'];
+    const registerUserURL = `${BACK_URL.POST_AUTH_REGISTER_USER}`;
+    const body = {
+        'username': username,
+        'password': userPass,
+        'userRole': userRole,
+    }
+    const args = {
+        'headers': {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Content-type': 'application/json',
+        },
+        'method': 'POST',
+        'body': JSON.stringify(body),
+    }
+    const response = await postRequest(registerUserURL, args, false);
+    if (response.ok) {
+        flashMessage.show({
+            message: `Пользователь <b>${username}</b> успешно добавлен в систему`,
+            duration: 6000,
+        })
+        return true;
+    }
+    const responseData = await response.json();
+    if (302 == response.status) {
+        alert('Пользователь с таким именем уже существует');
+    } else {
+        alert(`Неизвестная ошибка. Сообщите администратору ${response.status}`)
+    }
+    return false;
+}
 // ---
 
 const passwordChangeButton = async (userData) => {
@@ -359,6 +404,19 @@ const roleChangeButton = async (userData) => {
     }
     return roleChangeButton;
 }
+
+const setNewUserButton = async (newUserButton) => {
+    const availableRoles = [];
+    for (let roleName of Object.values(ROLE_TRANSLATION)) {
+        availableRoles.push(roleName);
+    }
+    const registerNewuserForm = await createRegistrationForm(availableRoles, registerNewUserAction);
+    newUserButton.onclick = async () => {
+        showForm(registerNewuserForm);
+    }
+    return newUserButton;
+}
+
 // ---
 
 
@@ -516,6 +574,10 @@ const stopUpdating = async () => {
 
 
 var usersUpdatingInterval = null;
+// BASIC BUTTONS
+const newUserButton = document.getElementById('newUserButton');
+await setNewUserButton(newUserButton);
+// ---
 const usersTable = document.getElementById('usersTableBody');
 const newData = await getUsersData();
 const createdRows = await generateUserRows(newData, usersTable);
