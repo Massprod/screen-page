@@ -34,13 +34,15 @@ h2 {
     height: calc(100vh - 100px); /* Adjust height based on your needs */
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 /* Table container with scrolling */
 .table-container {
-    flex-grow: 1;
-    overflow-y: auto; /* Scrollable area */
-    margin-top: 20px; /* Space between the date range and table */
+    /* flex-grow: 1; */
+    overflow-y: auto; 
+    margin-top: 20px;
+    max-height: calc(100vh - 100px);
 }
 
 /* Keep the table header fixed at the top of the table-container */
@@ -74,4 +76,11 @@ h2 {
 
 .input-group {
     width: 100%;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-right: 20px;
 }
