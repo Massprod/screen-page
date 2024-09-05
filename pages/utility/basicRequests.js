@@ -35,21 +35,18 @@ export async function patchRequest(url, args={method: 'PATCH'}, catchErrors = tr
 }
 
 
-export async function postRequest(url, requestBody) {
+export async function postRequest(url, args = {'method': 'POST'}, catchErrors = true) {
     try {
-        const args = {
-            method: 'POST',
-            headers: {
+        if (!('headers' in args)) {
+            args['headers'] = {
                 'Content-Type': 'application/json',
-            },
+                'accept': 'application/json',
+            }
         }
-        if (requestBody) {
-            args['body'] = JSON.stringify(requestBody)
+        const response = await fetch(url, args);
+        if (catchErrors &&  !response.ok) {
+            throw new Error(`Error while making POST request = ${response.statusText}. URL = ${url}`);
         }
-        const response = await fetch(
-            url,
-            args,
-        );
         return response;
     } catch (error) {
         console.error(
