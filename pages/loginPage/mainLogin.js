@@ -13,6 +13,8 @@ import {
     COOKIE_MESSAGES_SHOW_TIME,
     COOKIE_MESSAGES_TEXT_COLOR,
     COOKIE_MESSAGES_BG_COLOR,
+    USERS_PAGE_ROLES,
+    usersPage,
 } from "../uniConstants.js";
 import { FLASH_MESSAGES } from "../managerPage/js/constants.js";
 import { setCookie, updateAuthCookie } from "../utility/roleCookies.js";
@@ -38,7 +40,6 @@ window.onload = async () => {
         window.history.replaceState(null, '', newUrl);
     }
 };
-
 
 
 document.getElementById('userData').addEventListener('submit', async (event) => {
@@ -96,7 +97,9 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
     const userRole = respData['user_role'];
     await setCookie(AUTH_COOKIE_NAME, authToken, AUTH_COOKIE_BASIC_EXPIRE);
     await setCookie(USER_ROLE_COOKIE_NAME, userRole, USER_ROLE_COOKIE_BASIC_EXPIRE)
-    if (userRole in GRID_PAGE_ROLES) {
+    if (userRole in USERS_PAGE_ROLES) {
+        window.location.href = usersPage;
+    } else if (userRole in GRID_PAGE_ROLES) {
         window.location.href = gridPage;
     } else if (userRole in LAB_PAGE_ROLES) {
         window.location.href = labPage;
