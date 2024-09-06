@@ -11,6 +11,13 @@ import {
     ADMIN_ROLE,
     ROLE_TRANSLATION,
     REVERSE_ROLE_TRANSLATION,
+    BASIC_USERNAME_REGEX,
+    BASIC_USERNAME_REGEX_TITLE,
+    BASIC_USERNAME_MIN_LENGTH,
+    BASIC_USERNAME_MAX_LENGTH,
+    BASIC_PASSWORD_REGEX_TITLE,
+    BASIC_PASSWORD_MIN_LENGTH,
+    BASIC_PASSWORD_REGEX,
 } from "../uniConstants.js";
 import {
     clearRedirect,
@@ -27,6 +34,7 @@ import {
     createPasswordChangeForm,
     createResetPasswordForm,
     createRegistrationForm,
+
 } from "./forms.js";
 
 
@@ -111,13 +119,14 @@ const createUserRow = async (userData) => {
     // USERNAME
     const usernameCell = document.createElement('td');
     usernameCell.classList.add('ps-2');
-    usernameCell.textContent = userData['username'];
+    const username = userData['username'];
+    usernameCell.textContent = username.charAt(0).toUpperCase() + username.slice(1);
     userRow.appendChild(usernameCell);
     // USER_ROLE
     const userRoleCell = document.createElement('td');
     userRoleCell.classList.add('ps-2');
     const corRole = ROLE_TRANSLATION[userData['userRole']];
-    userRoleCell.textContent = corRole;
+    userRoleCell.textContent = corRole.charAt().toUpperCase() + corRole.slice(1);
     userRow.appendChild(userRoleCell);
     // USER_STATUS
     const userStatusCell = document.createElement('td');
@@ -133,7 +142,7 @@ const createUserRow = async (userData) => {
     }
     userStatusCell.appendChild(userStatusImage);
     userRow.appendChild(userStatusCell);
-    userRow.id = userData['username'];
+    userRow.id = username;
     return userRow;
 }
 
@@ -217,7 +226,7 @@ const showForm = (form) => {
 }
 
 // BUTTON ACTIONS
-const changePasswordAction = async (passwordData) => {
+const changePasswordAction = async (newPassElement, oldPassElement, passwordData) => {
     const token = await getCookie(AUTH_COOKIE_NAME);
     const changePassURL = `${BACK_URL.PATCH_AUTH_CHANGE_PASS}`;
     const bodyData = {
@@ -243,9 +252,11 @@ const changePasswordAction = async (passwordData) => {
         return true;
     }
     if (302 === response.status) {
-        alert('Новый пароль не может быть равен старому');
+        newPassElement.setCustomValidity('Новый пароль не может быть равен старому');
+        newPassElement.reportValidity();
     } else if (400 === response.status) {
-        alert('Указан неправильный старый пароль');
+        oldPassElement.setCustomValidity('Указан неправильный старый пароль');
+        oldPassElement.reportValidity();
     } else if (404 === response.status) {
         alert('Выбранный пользователь не найден. Обновите страницу');
     } else if (403 === response.status) {
@@ -302,7 +313,7 @@ const resetPasswordAction = async (passwordData) => {
 const changeRoleAction = async (roleData) => {
     const token = await getCookie(AUTH_COOKIE_NAME);
     const username = roleData['username'];
-    const newRole = REVERSE_ROLE_TRANSLATION[roleData['newRole']];
+    const newRole = REVERSE_ROLE_TRANSLATION[roleData['newRole'].toLowerCase()];
     const roleChangeURL = `${BACK_URL.PATCH_AUTH_CHANGE_ROLE}?username=${username}&new_role=${newRole}`;
     const args = {
         'headers': {
@@ -330,10 +341,10 @@ const changeRoleAction = async (roleData) => {
     return false;
 }
 
-const registerNewUserAction = async (userData) => {
+const registerNewUserAction = async (inputElement, userData) => {
     const token = await getCookie(AUTH_COOKIE_NAME);
     const username = userData['username'];
-    const userRole = REVERSE_ROLE_TRANSLATION[userData['userRole']];
+    const userRole = REVERSE_ROLE_TRANSLATION[userData['userRole'].toLowerCase()];
     const userPass = userData['password'];
     const registerUserURL = `${BACK_URL.POST_AUTH_REGISTER_USER}`;
     const body = {
@@ -360,9 +371,11 @@ const registerNewUserAction = async (userData) => {
     }
     const responseData = await response.json();
     if (302 == response.status) {
-        alert('Пользователь с таким именем уже существует');
+        inputElement.setCustomValidity('Пользователь с таким именем уже существует');
+        inputElement.reportValidity();
     } else {
-        alert(`Неизвестная ошибка. Сообщите администратору ${response.status}`)
+        inputElement.setCustomValidity(`Неизвестная ошибка. Сообщите администратору ${response.status} | ${responseData}`)
+        inputElement.reportValidity();
     }
     return false;
 }
@@ -372,7 +385,14 @@ const passwordChangeButton = async (userData) => {
     const changeButton = document.createElement('button');
     changeButton.className = 'btn btn-secondary mt-2 me-2 fs-6';
     changeButton.textContent = 'Сменить пароль';
-    const passChangeForm = await createPasswordChangeForm(userData['username'], changePasswordAction);
+    const passChangeForm = await createPasswordChangeForm(
+        userData['username'],
+        changePasswordAction,
+        BASIC_PASSWORD_REGEX,
+        BASIC_USERNAME_REGEX_TITLE,
+        BASIC_PASSWORD_MIN_LENGTH,
+        BASIC_USERNAME_MAX_LENGTH,
+    );
     changeButton.onclick = async () => {
         showForm(passChangeForm);
     }
@@ -410,7 +430,18 @@ const setNewUserButton = async (newUserButton) => {
     for (let roleName of Object.values(ROLE_TRANSLATION)) {
         availableRoles.push(roleName);
     }
-    const registerNewuserForm = await createRegistrationForm(availableRoles, registerNewUserAction);
+    const registerNewuserForm = await createRegistrationForm(
+        availableRoles,
+        registerNewUserAction,
+        BASIC_USERNAME_REGEX,
+        BASIC_USERNAME_REGEX_TITLE,
+        BASIC_USERNAME_MIN_LENGTH,
+        BASIC_USERNAME_MAX_LENGTH,
+        BASIC_PASSWORD_REGEX,
+        BASIC_PASSWORD_REGEX_TITLE,
+        BASIC_PASSWORD_MIN_LENGTH,
+        BASIC_USERNAME_MAX_LENGTH,
+    );
     newUserButton.onclick = async () => {
         showForm(registerNewuserForm);
     }
@@ -534,7 +565,8 @@ const updateRowData = async (currenRowData, newUserData) => {
     }
     const roleElement = currenRowData['mainRow'].childNodes[1];
     if (curUserRole !== newUserRole) {
-        roleElement.textContent = ROLE_TRANSLATION[newUserRole];
+        const roleTranslation = ROLE_TRANSLATION[newUserRole];
+        roleElement.textContent = roleTranslation.charAt(0).toUpperCase() + roleTranslation.slice(1);
     }
 }
 
