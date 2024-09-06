@@ -21,8 +21,15 @@ export const BACK_URL  = {
     POST_AUTH_REGISTER_USER: `${authMainAddress}/users/register`,
 };
 // REGEX
-export const BASIC_USERNAME_REGEX = '^[\-._a-zA-Z0-9]{3,20}$';
-export const BASIC_PASSWORD_REGEX = '^[A-Za-z\d@$!%*#?&]{8,50}$';
+export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';
+export const BASIC_USERNAME_REGEX_TITLE = 'Имя пользователя должно быть размером 3-20 символов с использованием: латиницы, цифр и [-._]';
+export const BASIC_USERNAME_MIN_LENGTH = 3;
+export const BASIC_USERNAME_MAX_LENGTH = 20;
+
+export const BASIC_PASSWORD_REGEX = '^[A-Za-z\\d@$!%*#?&]+$';
+export const BASIC_PASSWORD_REGEX_TITLE = 'Пароль пользователя должен быть размером 8-50 символо с использованием: латиницы, цифр и [@$!%*#?&]';
+export const BASIC_PASSWORD_MIN_LENGTH = 8;
+export const BASIC_PASSWORD_MAX_LENGTH = 50;
 
 // auth-token cookie
 export const AUTH_COOKIE_NAME = 'auth-token';
@@ -44,10 +51,10 @@ export const OPERATOR_ROLE = 'operator'
 export const LAB_PERSONAL_ROLE = 'labPersonal';
 
 export const ROLE_TRANSLATION = {
-    'manager': 'Менеджер',
-    'admin': 'Администратор',
-    'operator': 'Оператор',
-    'labPersonal': 'Лаборант',
+    'manager': 'менеджер',
+    'admin': 'администратор',
+    'operator': 'оператор',
+    'labPersonal': 'лаборант',
 }
 
 export const REVERSE_ROLE_TRANSLATION = {}
