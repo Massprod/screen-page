@@ -18,45 +18,29 @@ export function formatDate(dateString) {
 
 
 export function validatePassword(
+    inputElement,
     password,
     regexPattern,
-    minLength,
-    maxLength,
 ) {
     const specialCharacters = '@$!%*#?&'; // Special characters for validation
     const regex = new RegExp(regexPattern);
+    let correct = true;
 
-    // Check length
-    if (password.length < minLength || password.length > maxLength) {
-        alert(`Пароль должен быть длиной от ${minLength} до ${maxLength} символов.`);
-        return false;
-    }
-
-    // Check for at least one digit
     if (!/\d/.test(password)) {
-        alert('Пароль должен содержать хотя бы одну цифру.');
-        return false;
+        inputElement.setCustomValidity('Пароль должен содержать хотя бы одну цифру.');
+        correct =  false;
+    } else if (!/[A-Za-z]/.test(password)) {
+        inputElement.setCustomValidity('Пароль должен содержать хотя бы одну букву.');
+        correct = false;
+    } else if (!password.split('').some(char => specialCharacters.includes(char))) {
+        inputElement.setCustomValidity('Пароль должен содержать хотя бы один специальный символ (@$!%*#?&).');
+        correct = false;
+    } else if (!regex.test(password)) {
+        inputElement.setCustomValidity('Пароль не соответствует требованиям безопасности.');
+        correct = false;
     }
 
-    // Check for at least one letter
-    if (!/[A-Za-z]/.test(password)) {
-        alert('Пароль должен содержать хотя бы одну букву.');
-        return false;
-    }
-
-    // Check for at least one special character
-    if (!password.split('').some(char => specialCharacters.includes(char))) {
-        alert('Пароль должен содержать хотя бы один специальный символ (@$!%*#?&).');
-        return false;
-    }
-
-    // Check the regex pattern (if necessary)
-    if (!regex.test(password)) {
-        alert('Пароль не соответствует требованиям безопасности.');
-        return false;
-    }
-
-    return true; // If all checks pass
+    return correct;
 }
 
 
