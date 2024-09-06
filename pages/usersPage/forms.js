@@ -1,29 +1,42 @@
 import {
-    validatePassword,
-    validateUsername,
+    validatePassword
 } from "../utility/utils.js";
+
+
+const alterButtonState = async (button, buttonText) => {
+    if (button.disabled) {
+        button.disabled = false;
+    } else {
+        button.disabled = true;
+    }
+    button.textContent = buttonText;
+}
 
 
 export const createRegistrationForm = async (
     availableRoles,
     registerNewUserAction,
-    usernameRegex = '^[\-._a-zA-Z0-9]+$',
+    usernameRegex = '^[\\-._a-zA-Z0-9]+$',
     usernameMinLength = 3,
     usernameMaxLength = 20,
-    regex = '^[A-Za-z\\d@$!%*#?&]+$',
-    minLength = 8,
-    maxLength = 50,
+    passwordRegex = '^[A-Za-z\\d@$!%*#?&]+$',
+    passwordMinLength = 8,
+    passwordMaxLength = 50,
 ) => {
-    const registerText = 'Зарегистрировать';
-
+    const buttonRegisterText = 'Зарегистировать';
+    const buttonPendingText = 'Выполняется...';
     const formContainer = document.createElement('div');
     formContainer.classList.add('form-container');
-
+    
+    const mainForm = document.createElement('form');
+    formContainer.appendChild(mainForm);
+    // TITLE
     const formTitle = document.createElement('h4');
     formTitle.classList.add('text-center');
     formTitle.textContent = 'Регистрация';
-    formContainer.appendChild(formTitle);
-
+    mainForm.appendChild(formTitle);
+    // --
+    // USERNAME FIELD
     const usernameContainer = document.createElement('div');
     usernameContainer.classList.add('mb-3');
     const usernameLabel = document.createElement('label');
@@ -31,15 +44,19 @@ export const createRegistrationForm = async (
     usernameLabel.setAttribute('for', 'username');
     usernameLabel.textContent = 'Имя';
     const usernameInput = document.createElement('input');
+    usernameInput.classList.add('form-control');
     usernameInput.type = 'text';
     usernameInput.id = 'username';
-    usernameInput.classList.add('form-control');
+    // USERNAME VALIDATION
+    usernameInput.pattern = usernameRegex;
     usernameInput.required = true;
-    usernameInput.minLength = 3;
+    usernameInput.minLength = usernameMinLength;
+    usernameInput.maxLength = usernameMaxLength;
+    // ---
     usernameContainer.appendChild(usernameLabel);
     usernameContainer.appendChild(usernameInput);
-    formContainer.appendChild(usernameContainer);
-
+    mainForm.appendChild(usernameContainer);
+    // PASSWORD FIELD
     const passwordContainer = document.createElement('div');
     passwordContainer.classList.add('mb-3');
     const passwordLabel = document.createElement('label');
@@ -50,12 +67,16 @@ export const createRegistrationForm = async (
     passwordInput.type = 'password';
     passwordInput.id = 'password';
     passwordInput.classList.add('form-control');
+    // PASSWORD VALIDATION
+    passwordInput.pattern = passwordRegex;
     passwordInput.required = true;
-    passwordInput.minLength = 8;
+    passwordInput.minLength = passwordMinLength;
+    passwordInput.maxLength = passwordMaxLength;
+    // ---
     passwordContainer.appendChild(passwordLabel);
     passwordContainer.appendChild(passwordInput);
-    formContainer.appendChild(passwordContainer);
-
+    mainForm.appendChild(passwordContainer);
+    // CONFIRM PASSWORD FIELD
     const confirmPasswordContainer = document.createElement('div');
     confirmPasswordContainer.classList.add('mb-3');
     const confirmPasswordLabel = document.createElement('label');
@@ -66,11 +87,17 @@ export const createRegistrationForm = async (
     confirmPasswordInput.type = 'password';
     confirmPasswordInput.id = 'confirmPassword';
     confirmPasswordInput.classList.add('form-control');
+    // CONFIRM PASS VALIDATION
+    confirmPasswordInput.pattern = passwordRegex;
     confirmPasswordInput.required = true;
+    confirmPasswordInput.minLength = passwordMinLength;
+    confirmPasswordInput.maxLength = passwordMaxLength;
+    // ---
     confirmPasswordContainer.appendChild(confirmPasswordLabel);
     confirmPasswordContainer.appendChild(confirmPasswordInput);
-    formContainer.appendChild(confirmPasswordContainer);
-
+    mainForm.appendChild(confirmPasswordContainer);
+    // ---
+    // ROLE FIELD
     const roleContainer = document.createElement('div');
     roleContainer.classList.add('mb-3');
     const roleLabel = document.createElement('label');
@@ -89,54 +116,70 @@ export const createRegistrationForm = async (
     });
     roleContainer.appendChild(roleLabel);
     roleContainer.appendChild(roleSelect);
-    formContainer.appendChild(roleContainer);
-
+    mainForm.appendChild(roleContainer);
+    // ---
     const buttonGroup = document.createElement('div');
     buttonGroup.classList.add('d-flex', 'justify-content-between', 'gap-2');
-
+    // REGISTER BUTTION
     const registerButton = document.createElement('button');
     registerButton.type = 'submit';
     registerButton.className = 'btn btn-warning';
-    registerButton.textContent = registerText;
-    registerButton.onclick = async (event) => {
+    registerButton.textContent = buttonRegisterText;
+    // ---
+    // CANCEL BUTTON
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'btn btn-secondary';
+    cancelButton.textContent = 'Отменить';
+    cancelButton.onclick = (event) => {
         event.preventDefault();
-        registerButton.disabled = true;
-        registerButton.textContent = 'Выполняется...';
-        const username = usernameInput.value;
-        if (!validateUsername(username, usernameRegex, usernameMinLength, usernameMaxLength)) {
-            usernameInput.value = '';
-            registerButton.textContent = registerText;
-            registerButton.disabled = false;
+        document.getElementById('blurOverlay').remove();
+        usernameInput.value = '';
+        passwordInput.value = '';
+        confirmPasswordInput.value = '';
+    };
+    // ---
+    buttonGroup.appendChild(registerButton);
+    buttonGroup.appendChild(cancelButton);
+    mainForm.appendChild(buttonGroup);
+
+    mainForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await alterButtonState(registerButton, buttonPendingText);
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        if(password !== confirmPassword) {
+            // No idea why, but changing `setCustomValidity()` is a one way path.
+            // If we change it once, we can't alter it to default...
+            // https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/customError
+            // ^^ offical docs, but it doesnt work, leaving as a simple `alert`. Dunno.
+            alert('Пароль и подтверждение не совпадают');
+            await alterButtonState(registerButton, buttonRegisterText);
             return;
         }
-        const selectedRole = roleSelect.value;
-        if (!selectedRole) {
-            alert('Пожалуйста, выберите роль');
-            registerButton.disabled = false;
-            registerButton.textContent = registerText;
-            return;
+        if (!usernameInput.reportValidity()
+                || !roleSelect.reportValidity()
+                || !passwordInput.reportValidity()
+                || !confirmPasswordInput.reportValidity()) {
+                    await alterButtonState(registerButton, buttonRegisterText);
+                    return;
         }
-        const newPass = passwordInput.value;
-        const repeatPass = confirmPasswordInput.value;
-        if (newPass !== repeatPass) {
-            alert('Новый пароль не совпадает с подтверждением');
-            passwordInput.value = '';
-            confirmPasswordInput.value = '';
-            registerButton.disabled = false;
-            registerButton.textContent = registerText;
-            return;
+        if (passwordInput.reportValidity()) {
+            if (!validatePassword(
+                password,
+                passwordRegex,
+                passwordMinLength,
+                passwordMaxLength,
+            )) {
+                await alterButtonState(registerButton, buttonRegisterText);
+                return;
+            }
         }
-        if (!validatePassword(newPass, regex, minLength, maxLength)
-             || !validatePassword(repeatPass, regex, minLength, maxLength)) {
-            registerButton.disabled = false;
-            registerButton.textContent = registerText;
-            return;
-        }
+        const userRole = roleSelect.value;
         const newUserData = {
-            'password': newPass,
-            'userRole': selectedRole,
-            'username': username,
-        }
+            'username': usernameInput.value,
+            'password': password,
+            'userRole': userRole,
+        };
         const result = await registerNewUserAction(newUserData);
         if (result) {
             document.getElementById('blurOverlay').remove();
@@ -144,22 +187,8 @@ export const createRegistrationForm = async (
             passwordInput.value = '';
             confirmPasswordInput.value = '';
         }
-        registerButton.disabled = false;
-        registerButton.textContent = registerText;
-    };
-
-    const cancelButton = document.createElement('button');
-    cancelButton.className = 'btn btn-secondary';
-    cancelButton.textContent = 'Отменить';
-    cancelButton.onclick = (event) => {
-        event.preventDefault();
-        document.getElementById('blurOverlay').remove();
-    };
-
-    buttonGroup.appendChild(registerButton);
-    buttonGroup.appendChild(cancelButton);
-    formContainer.appendChild(buttonGroup);
-
+        await alterButtonState(registerButton, buttonRegisterText);
+    })
     return formContainer;
 }
 
