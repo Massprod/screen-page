@@ -18,6 +18,7 @@ import {
     BASIC_PASSWORD_REGEX_TITLE,
     BASIC_PASSWORD_MIN_LENGTH,
     BASIC_PASSWORD_REGEX,
+    BASIC_PASSWORD_MAX_LENGTH,
 } from "../uniConstants.js";
 import {
     clearRedirect,
@@ -210,21 +211,6 @@ const createUnblockButton = async (userData) => {
     return unblockButton;
 }
 
-const showForm = (form) => {
-    let overlay = document.getElementById('blurOverlay');
-    
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'blurOverlay';
-        overlay.classList.add('blur-overlay');
-        document.body.appendChild(overlay);
-    }
-
-    overlay.innerHTML = ''; // Clear previous content
-    overlay.appendChild(form); // Append the provided form
-    overlay.style.display = 'flex'; // Show the overlay
-}
-
 // BUTTON ACTIONS
 const changePasswordAction = async (newPassElement, oldPassElement, passwordData) => {
     const token = await getCookie(AUTH_COOKIE_NAME);
@@ -385,16 +371,15 @@ const passwordChangeButton = async (userData) => {
     const changeButton = document.createElement('button');
     changeButton.className = 'btn btn-secondary mt-2 me-2 fs-6';
     changeButton.textContent = 'Сменить пароль';
-    const passChangeForm = await createPasswordChangeForm(
-        userData['username'],
-        changePasswordAction,
-        BASIC_PASSWORD_REGEX,
-        BASIC_USERNAME_REGEX_TITLE,
-        BASIC_PASSWORD_MIN_LENGTH,
-        BASIC_USERNAME_MAX_LENGTH,
-    );
     changeButton.onclick = async () => {
-        showForm(passChangeForm);
+        const passChangeForm = await createPasswordChangeForm(
+            userData['username'],
+            changePasswordAction,
+            BASIC_PASSWORD_REGEX,
+            BASIC_USERNAME_REGEX_TITLE,
+            BASIC_PASSWORD_MIN_LENGTH,
+            BASIC_USERNAME_MAX_LENGTH,
+        );
     }
     return changeButton;
 }
@@ -403,9 +388,15 @@ const passwordResetButton = async (userData) => {
     const resetButton = document.createElement('button');
     resetButton.className = `btn btn-secondary mt-2 me-2 fs-6`;
     resetButton.textContent = 'Сбросить пароль';
-    const passResetForm = await createResetPasswordForm(userData['username'], resetPasswordAction);
     resetButton.onclick = async () => {
-        showForm(passResetForm);
+        await createResetPasswordForm(
+            userData['username'],
+            resetPasswordAction,
+            BASIC_PASSWORD_REGEX,
+            BASIC_PASSWORD_REGEX_TITLE,
+            BASIC_PASSWORD_MIN_LENGTH,
+            BASIC_PASSWORD_MAX_LENGTH,
+        );
     }
     return resetButton;
 }
@@ -418,9 +409,13 @@ const roleChangeButton = async (userData) => {
     for (let roleName of Object.values(ROLE_TRANSLATION)) {
         availableRoles.push(roleName);
     }
-    const roleChangeForm = await createChangeRoleForm(userData['username'], availableRoles, changeRoleAction);
     roleChangeButton.onclick = async () => {
-        showForm(roleChangeForm);
+        await createChangeRoleForm(
+            userData['username'],
+            userData['userRole'],
+            availableRoles,
+            changeRoleAction
+        );
     }
     return roleChangeButton;
 }
@@ -430,20 +425,19 @@ const setNewUserButton = async (newUserButton) => {
     for (let roleName of Object.values(ROLE_TRANSLATION)) {
         availableRoles.push(roleName);
     }
-    const registerNewuserForm = await createRegistrationForm(
-        availableRoles,
-        registerNewUserAction,
-        BASIC_USERNAME_REGEX,
-        BASIC_USERNAME_REGEX_TITLE,
-        BASIC_USERNAME_MIN_LENGTH,
-        BASIC_USERNAME_MAX_LENGTH,
-        BASIC_PASSWORD_REGEX,
-        BASIC_PASSWORD_REGEX_TITLE,
-        BASIC_PASSWORD_MIN_LENGTH,
-        BASIC_USERNAME_MAX_LENGTH,
-    );
     newUserButton.onclick = async () => {
-        showForm(registerNewuserForm);
+        await createRegistrationForm(
+            availableRoles,
+            registerNewUserAction,
+            BASIC_USERNAME_REGEX,
+            BASIC_USERNAME_REGEX_TITLE,
+            BASIC_USERNAME_MIN_LENGTH,
+            BASIC_USERNAME_MAX_LENGTH,
+            BASIC_PASSWORD_REGEX,
+            BASIC_PASSWORD_REGEX_TITLE,
+            BASIC_PASSWORD_MIN_LENGTH,
+            BASIC_USERNAME_MAX_LENGTH,
+        );
     }
     return newUserButton;
 }
