@@ -13,15 +13,18 @@ const alterButtonState = async (button, buttonText) => {
 }
 
 
+
 export const createRegistrationForm = async (
     availableRoles,
     registerNewUserAction,
-    usernameRegex = '^[\\-._a-zA-Z0-9]+$',
-    usernameMinLength = 3,
-    usernameMaxLength = 20,
-    passwordRegex = '^[A-Za-z\\d@$!%*#?&]+$',
-    passwordMinLength = 8,
-    passwordMaxLength = 50,
+    usernameRegex,
+    usernameRegexTitle,
+    usernameMinLength,
+    usernameMaxLength,
+    passwordRegex,
+    passwordRegexTitle,
+    passwordMinLength,
+    passwordMaxLength,
 ) => {
     const buttonRegisterText = 'Зарегистировать';
     const buttonPendingText = 'Выполняется...';
@@ -52,6 +55,7 @@ export const createRegistrationForm = async (
     usernameInput.required = true;
     usernameInput.minLength = usernameMinLength;
     usernameInput.maxLength = usernameMaxLength;
+    usernameInput.title = usernameRegexTitle;
     // ---
     usernameContainer.appendChild(usernameLabel);
     usernameContainer.appendChild(usernameInput);
@@ -72,6 +76,7 @@ export const createRegistrationForm = async (
     passwordInput.required = true;
     passwordInput.minLength = passwordMinLength;
     passwordInput.maxLength = passwordMaxLength;
+    passwordInput.title = passwordRegexTitle;
     // ---
     passwordContainer.appendChild(passwordLabel);
     passwordContainer.appendChild(passwordInput);
@@ -92,6 +97,7 @@ export const createRegistrationForm = async (
     confirmPasswordInput.required = true;
     confirmPasswordInput.minLength = passwordMinLength;
     confirmPasswordInput.maxLength = passwordMaxLength;
+    confirmPasswordInput.title = passwordRegexTitle;
     // ---
     confirmPasswordContainer.appendChild(confirmPasswordLabel);
     confirmPasswordContainer.appendChild(confirmPasswordInput);
@@ -141,7 +147,10 @@ export const createRegistrationForm = async (
     buttonGroup.appendChild(registerButton);
     buttonGroup.appendChild(cancelButton);
     mainForm.appendChild(buttonGroup);
-
+    registerButton.onclick = event => {
+        passwordInput.setCustomValidity('');
+        usernameInput.setCustomValidity('');
+    }
     mainForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         await alterButtonState(registerButton, buttonPendingText);
@@ -152,27 +161,29 @@ export const createRegistrationForm = async (
             // If we change it once, we can't alter it to default...
             // https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/customError
             // ^^ offical docs, but it doesnt work, leaving as a simple `alert`. Dunno.
-            alert('Пароль и подтверждение не совпадают');
+            // ^^ FIXED: it was blocking form from `submit` action and we needed to restore it somewhere else!
+            passwordInput.setCustomValidity('Пароль и подтверждение не совпадают');
+            passwordInput.reportValidity();
             await alterButtonState(registerButton, buttonRegisterText);
             return;
         }
-        if (!usernameInput.reportValidity()
-                || !roleSelect.reportValidity()
-                || !passwordInput.reportValidity()
-                || !confirmPasswordInput.reportValidity()) {
-                    await alterButtonState(registerButton, buttonRegisterText);
-                    return;
+        if (!usernameInput.reportValidity() || !roleSelect.reportValidity()) {
+            await alterButtonState(registerButton, buttonRegisterText);
+            return;
         }
         if (passwordInput.reportValidity()) {
             if (!validatePassword(
+                passwordInput,
                 password,
                 passwordRegex,
-                passwordMinLength,
-                passwordMaxLength,
             )) {
+                passwordInput.reportValidity();
                 await alterButtonState(registerButton, buttonRegisterText);
                 return;
             }
+        } else {
+            await alterButtonState(registerButton, buttonRegisterText);
+            return;
         }
         const userRole = roleSelect.value;
         const newUserData = {
@@ -180,7 +191,7 @@ export const createRegistrationForm = async (
             'password': password,
             'userRole': userRole,
         };
-        const result = await registerNewUserAction(newUserData);
+        const result = await registerNewUserAction(usernameInput, newUserData);
         if (result) {
             document.getElementById('blurOverlay').remove();
             usernameInput.value = '';
@@ -196,20 +207,25 @@ export const createRegistrationForm = async (
 export const createPasswordChangeForm = async (
     username,
     changePassAction,
-    regex = '^[A-Za-z\\d@$!%*#?&]+$',
-    minLength = 8,
-    maxLength = 50,
+    passwordRegex,
+    passwordRegexTitle,
+    passwordMinLength,
+    passwordMaxLength,
 ) =>  {
-    const passRegex = new RegExp(regex);
-
+    const buttonPendingText = 'Выполняется...';
+    const buttonChangeText = 'Сменить пароль';
     const formContainer = document.createElement('div');
     formContainer.classList.add('form-container');
 
+    const mainForm = document.createElement('form');
+    formContainer.appendChild(mainForm);
+    // TITLE
     const formTitle = document.createElement('h4');
     formTitle.classList.add('text-center');
-    formTitle.textContent = 'Сменить пароль';
-    formContainer.appendChild(formTitle);
-
+    formTitle.textContent = 'Смена пароля';
+    mainForm.appendChild(formTitle);
+    // ---
+    // OLD PASSWORD FIELD
     const oldPasswordContainer = document.createElement('div');
     oldPasswordContainer.classList.add('mb-3');
     const oldPasswordLabel = document.createElement('label');
@@ -217,17 +233,19 @@ export const createPasswordChangeForm = async (
     oldPasswordLabel.setAttribute('for', 'oldPassword');
     oldPasswordLabel.textContent = 'Старый пароль';
     const oldPasswordInput = document.createElement('input');
-    oldPasswordInput.type = 'password';
     oldPasswordInput.id = 'oldPassword';
-    oldPasswordInput.pattern = passRegex;
-    oldPasswordInput.minLength = minLength;
-    oldPasswordInput.maxLength = maxLength;
-    oldPasswordInput.classList.add('form-control');
+    oldPasswordInput.type = 'password';
     oldPasswordInput.required = true;
+    oldPasswordInput.pattern = passwordRegex;
+    oldPasswordInput.minLength = passwordMinLength;
+    oldPasswordInput.maxLength = passwordMaxLength;
+    oldPasswordInput.title = passwordRegexTitle;
+    oldPasswordInput.classList.add('form-control');
     oldPasswordContainer.appendChild(oldPasswordLabel);
     oldPasswordContainer.appendChild(oldPasswordInput);
-    formContainer.appendChild(oldPasswordContainer);
-
+    mainForm.appendChild(oldPasswordContainer);
+    // ---
+    // NEW PASSWORD FIELD
     const newPasswordContainer = document.createElement('div');
     newPasswordContainer.classList.add('mb-3');
     const newPasswordLabel = document.createElement('label');
@@ -235,17 +253,19 @@ export const createPasswordChangeForm = async (
     newPasswordLabel.setAttribute('for', 'newPassword');
     newPasswordLabel.textContent = 'Новый пароль';
     const newPasswordInput = document.createElement('input');
-    newPasswordInput.type = 'password';
     newPasswordInput.id = 'newPassword';
-    newPasswordInput.pattern = passRegex;
-    newPasswordInput.minLength = minLength;
-    newPasswordInput.maxLength = maxLength;
-    newPasswordInput.classList.add('form-control');
+    newPasswordInput.type = 'password';
     newPasswordInput.required = true;
+    newPasswordInput.pattern = passwordRegex;
+    newPasswordInput.minLength = passwordMinLength;
+    newPasswordInput.maxLength = passwordMaxLength;
+    newPasswordInput.title = passwordRegexTitle;
+    newPasswordInput.classList.add('form-control');
     newPasswordContainer.appendChild(newPasswordLabel);
     newPasswordContainer.appendChild(newPasswordInput);
-    formContainer.appendChild(newPasswordContainer);
-
+    mainForm.appendChild(newPasswordContainer);
+    // ---
+    // CONFIRM PASSWORD FIELD
     const confirmPasswordContainer = document.createElement('div');
     confirmPasswordContainer.classList.add('mb-3');
     const confirmPasswordLabel = document.createElement('label');
@@ -253,59 +273,27 @@ export const createPasswordChangeForm = async (
     confirmPasswordLabel.setAttribute('for', 'confirmPassword');
     confirmPasswordLabel.textContent = 'Подтвердите новый пароль';
     const confirmPasswordInput = document.createElement('input');
-    confirmPasswordInput.type = 'password';
     confirmPasswordInput.id = 'confirmPassword';
-    confirmPasswordInput.pattern = passRegex;
-    confirmPasswordInput.minLength = minLength;
-    confirmPasswordInput.maxLength = maxLength;
-    confirmPasswordInput.classList.add('form-control');
+    confirmPasswordInput.type = 'password';
     confirmPasswordInput.required = true;
+    confirmPasswordInput.pattern = passwordRegex;
+    confirmPasswordInput.minLength = passwordMinLength;
+    confirmPasswordInput.maxLength = passwordMaxLength;
+    confirmPasswordInput.title = passwordRegexTitle;
+    confirmPasswordInput.classList.add('form-control');
     confirmPasswordContainer.appendChild(confirmPasswordLabel);
     confirmPasswordContainer.appendChild(confirmPasswordInput);
-    formContainer.appendChild(confirmPasswordContainer);
-
+    mainForm.appendChild(confirmPasswordContainer);
+    // ---
     const buttonGroup = document.createElement('div');
     buttonGroup.classList.add('d-flex', 'justify-content-between');
-
     const changeButton = document.createElement('button');
     changeButton.type = 'submit';
     changeButton.className = 'btn btn-warning';
-    changeButton.textContent = 'Сменить пароль';
+    changeButton.textContent = buttonChangeText;
     changeButton.onclick = async (event) => {
-        event.preventDefault();
-        changeButton.disabled = true;
-        changeButton.textContent = 'Выполняется...';
-        // PASS change function
-        const oldPass = oldPasswordInput.value;
-        const newPass = newPasswordInput.value;
-        const repeatPass = confirmPasswordInput.value;
-        if (newPass !== repeatPass) {
-            alert('Новый пароль не совпадает с подтверждением');
-            newPasswordInput.value = '';
-            confirmPasswordInput.value = '';
-            changeButton.disabled = false;
-            changeButton.textContent = 'Сменить пароль';
-            return;
-        }
-        if (!validatePassword(oldPass, regex, minLength, maxLength)
-             || !validatePassword(newPass, regex, minLength, maxLength)) {
-            changeButton.disabled = false;
-            changeButton.textContent = 'Сменить пароль';
-            return;
-        }
-        const passData = {
-            'oldPassword': oldPass,
-            'newPassword': newPass,
-            'username': username,
-        }
-        const result = await changePassAction(passData);
-        if (result) {
-            document.getElementById('blurOverlay').remove();
-            newPasswordInput.value = '';
-            confirmPasswordInput.value = '';
-        }
-        changeButton.disabled = false;
-        changeButton.textContent = 'Сменить пароль';
+        newPasswordInput.setCustomValidity('');
+        oldPasswordInput.setCustomValidity('');
     };
     const cancelButton = document.createElement('button');
     cancelButton.className = 'btn btn-secondary';
@@ -313,10 +301,54 @@ export const createPasswordChangeForm = async (
     cancelButton.onclick = (event) => {
         event.preventDefault();
         document.getElementById('blurOverlay').remove();
+        oldPasswordInput.value = '';
+        newPasswordInput.value = '';
+        confirmPasswordInput.value = '';
     };
     buttonGroup.appendChild(changeButton);
     buttonGroup.appendChild(cancelButton);
-    formContainer.appendChild(buttonGroup);
+    mainForm.appendChild(buttonGroup);
+    
+    mainForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await alterButtonState(changeButton, buttonPendingText);
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        if (newPassword !== confirmPassword) {
+            newPasswordInput.setCustomValidity('Пароль и подтверждение не совпадают');
+            newPasswordInput.reportValidity();
+            await alterButtonState(changeButton, buttonChangeText);
+            return;
+        }
+        if (!oldPasswordInput.reportValidity()
+             || !newPasswordInput.reportValidity()) {
+                await alterButtonState(changeButton, buttonChangeText);
+                return;
+            }
+        const oldPassword = oldPasswordInput.value;
+        if (!validatePassword(
+            newPasswordInput,
+            newPassword,
+            passwordRegex,
+        )) {
+            newPasswordInput.reportValidity();
+            await alterButtonState(changeButton, buttonChangeText);
+            return;
+        }
+        const newPassData = {
+            'oldPassword': oldPassword,
+            'newPassword': newPassword,
+            'username': username,
+        }
+        const result = await changePassAction(newPasswordInput, oldPasswordInput, newPassData);
+        if (result) {
+            document.getElementById('blurOverlay').remove();
+            oldPasswordInput.value = '';
+            newPasswordInput.value = '';
+            confirmPasswordInput.value = '';
+        }
+        await alterButtonState(changeButton, buttonChangeText);
+    });
 
     return formContainer;
 }
