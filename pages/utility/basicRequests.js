@@ -1,5 +1,10 @@
-import { getCookie } from './roleCookies.js';
-import { AUTH_COOKIE_NAME } from '../uniConstants.js';
+import { clearRedirect, getCookie } from './roleCookies.js';
+import {
+    AUTH_COOKIE_NAME,
+    BASIC_COOKIES,
+    loginPage,
+    AUTH_COOKIE_INVALID,
+} from '../uniConstants.js';
 
 
 export async function getRequest(url, catchErrors = true, includeAuthCookie = false, args = {method: "GET"}) {
@@ -22,6 +27,7 @@ export async function getRequest(url, catchErrors = true, includeAuthCookie = fa
             }
         }
         const response = await fetch(url, args)
+        await validAuthorization(response);
         if (catchErrors && !response.ok) {
             throw new Error(`Error while getting data ${response.statusText}. URL = ${url}`);
         }
@@ -55,6 +61,7 @@ export async function patchRequest(url, catchErrors = true,  includeAuthCookie =
             }
         }
         const response = await fetch(url, args);
+        await validAuthorization(response);
         if (catchErrors &&  !response.ok) {
             throw new Error(`Error while making PATCH request = ${response.statusText}. URL = ${url}`);
         }
@@ -88,6 +95,7 @@ export async function postRequest(url, catchErrors = true, includeAuthCookie = f
             }
         }
         const response = await fetch(url, args);
+        await validAuthorization(response);
         if (catchErrors &&  !response.ok) {
             throw new Error(`Error while making POST request = ${response.statusText}. URL = ${url}`);
         }
@@ -97,5 +105,15 @@ export async function postRequest(url, catchErrors = true, includeAuthCookie = f
             `There was a problem with POST request: ${error}`
         );
         throw error;
+    }
+}
+
+
+async function validAuthorization(response) {
+    // AUTH error, only getting 401 from backPart when TOKEN is Invalid,
+    //  so we can cover this error in every request.
+    const redirectUrl = `${loginPage}?message=${AUTH_COOKIE_INVALID}`
+    if (401 === response.status) {
+        await clearRedirect(BASIC_COOKIES, redirectUrl);
     }
 }

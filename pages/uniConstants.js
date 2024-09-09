@@ -39,6 +39,7 @@ export const COOKIE_UPDATE_INTERVAL = 1 * 30 * 1000;
 export const AUTH_COOKIE_NOT_FOUND = 'auth-cookie-not-found';
 export const AUTH_COOKIE_SESSION_EXPIRED = 'auth-cookie-session-expired';
 export const RESTRICTED_TO_THIS_ROLE = 'user-role-restricted';
+export const AUTH_COOKIE_INVALID ='auth-cookie-invalid';
 // user-role cookie.
 export const USER_ROLE_COOKIE_NAME = 'user-role';
 export const USER_ROLE_COOKIE_BASIC_EXPIRE = 3 * 60;
@@ -82,6 +83,7 @@ export const COOKIE_MESSAGES = {
     [AUTH_COOKIE_NOT_FOUND]: "Токен доступа не найден.<br> Перезайдите в систему.",
     [AUTH_COOKIE_SESSION_EXPIRED]: "Токен доступа больше не действителен.<br> Перезайдите в систему.",
     [RESTRICTED_TO_THIS_ROLE]: `Использование страниц без прав доступа запрещено<br>Произведён автоматический выход из системы<br>Перезайдите в систему`,
+    [AUTH_COOKIE_INVALID]: "Не действительный токен доступа. Перезайдите в систему.",
 }
 export const COOKIE_MESSAGES_TEXT_COLOR = 'white';
 export const COOKIE_MESSAGES_BG_COLOR = 'black';
