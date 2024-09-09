@@ -20,7 +20,7 @@ export default function convertISOToCustomFormat(
         const timezoneOffsetInMinutes = date.getTimezoneOffset();
         // console.log('Timezone offset in minutes:', timezoneOffsetInMinutes);
         if (includeTimezone) {
-            var timezoneShift = timezoneOffsetInMinutes / 60; 
+            var timezoneShift = (timezoneOffsetInMinutes / 60) * -1;
         }
         // Convert the offset to milliseconds and adjust the date
         date = new Date(date.getTime() - (timezoneOffsetInMinutes * 60 * 1000));
@@ -44,7 +44,8 @@ export default function convertISOToCustomFormat(
     }
 
     if (convertToLocalTimezone && includeTimezone) {
-        formattedDate = `${formattedDate} | UTC ${timezoneShift}:00`;
+        const sign = timezoneShift >= 0 ? '+' : '-';
+        formattedDate = `${formattedDate} | UTC ${sign}${Math.abs(timezoneShift)}:00`;
     }
     return formattedDate;
 }
