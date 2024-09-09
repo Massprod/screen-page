@@ -133,7 +133,7 @@ export const createRegistrationForm = async (
     availableRoles.forEach(role => {
         const option = document.createElement('option');
         option.value = role;
-        option.textContent = role;
+        option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
         roleSelect.appendChild(option);
     });
     roleContainer.appendChild(roleLabel);
