@@ -14,10 +14,12 @@ export default class BatchesExpandedContainer{
     // +++ WheelstacksContainer
     async createWheelstackRow(wheelstackId) {
         const wheelstackDataURL = `${BACK_URLS.GET_WHEELSTACK_DATA_BY_ID}/${wheelstackId}`;
-        const wheelstackData = await getRequest(wheelstackDataURL)
+        const wheelstackResponse = await getRequest(wheelstackDataURL, true, true)
+        const wheelstackData = await wheelstackResponse.json();
         const topWheelObjectId = wheelstackData['wheels'][wheelstackData['wheels'].length - 1];
         const topWheelDataURL = `${BACK_URLS.GET_WHEEL_DATA_BY_OBJECT_ID}/${topWheelObjectId}`;
-        const topWheelData = await getRequest(topWheelDataURL);
+        const topWheelResponse = await getRequest(topWheelDataURL, true, true);
+        const topWheelData = await topWheelResponse.json(); 
         const topWheelId = topWheelData['wheelId'];
         const wheelstackRow = document.createElement('div');
         wheelstackRow.classList.add('storage-element-expanded-row');
@@ -162,7 +164,8 @@ export default class BatchesExpandedContainer{
         }
 
         this.batchesInStorageDataURL = `${BACK_URLS.GET_STORAGE}/?include_data=true&storage_id=${this.storageId}`;
-        this.newBatchesInStorageData = await getRequest(this.batchesInStorageDataURL);
+        const response = await getRequest(this.batchesInStorageDataURL, true, true);
+        this.newBatchesInStorageData = await response.json();
         const newBatches = Object.keys(this.newBatchesInStorageData['elements']);
         // TODO: Delete empty records from DB. We need extra endpoint for this.
         if (0 === newBatches.length) {
@@ -181,7 +184,7 @@ export default class BatchesExpandedContainer{
         newBatches.forEach( async (batchNumber) => {
             if (0 === Object.keys(this.newBatchesInStorageData['elements'][batchNumber]).length) {
                 const CLEAR_URL = `${BACK_URLS.PATCH_CLEAR_EMPTY_BATCHES_STORAGES}/?storage_id=${this.storageId}&batch_number=${batchNumber}`;
-                await patchRequest(CLEAR_URL);
+                await patchRequest(CLEAR_URL, true, true);
                 return;
             }
             if (batchNumber in this.createdBatchRows) {
@@ -198,7 +201,7 @@ export default class BatchesExpandedContainer{
                     this.createdBatchRows[batchNumber].remove();
                     delete this.createdBatchRows[batchNumber];
                     const CLEAR_URL = `${BACK_URLS.PATCH_CLEAR_EMPTY_BATCHES_STORAGES}/?storage_id=${this.storageId}&batch_number=${batchNumber}`;
-                    await patchRequest(CLEAR_URL);
+                    await patchRequest(CLEAR_URL, true, true);
                 }
                 return;
             }

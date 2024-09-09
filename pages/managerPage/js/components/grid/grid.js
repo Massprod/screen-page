@@ -3,6 +3,7 @@ import CellsRow from "../cellsRow/cellsRow.js";
 import ExtraElement from "../extraElement/extraElement.js";
 import BatchElement from "../batchElement/batchElement.js";
 import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
+import { getRequest } from "../../../../utility/basicRequests.js";
 
 
 // TODO: Merge GridManager AND BasePlatformManager
@@ -42,7 +43,7 @@ export default class GridManager{
     
     async #getData(url) {
         try {
-            const response = await(fetch(url));
+            const response = await getRequest(url, false, true);
             if (!response.ok) {
                 throw new Error(`Error while getting gridData ${response.statusText}. URL = ${url}`);
             }

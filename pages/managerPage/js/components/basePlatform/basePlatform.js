@@ -1,5 +1,6 @@
 import { BACK_URLS, UPDATE_PERIODS } from "../../constants.js"
 import CellsRow from "../cellsRow/cellsRow.js";
+import { getRequest } from "../../../../utility/basicRequests.js"; 
 
 
 export default class BasePlatformManager{
@@ -25,25 +26,26 @@ export default class BasePlatformManager{
         this.container.appendChild(this.element);
     }
 
-    async #getData(url) {
-        try {
-            const response = await(fetch(url));
-            if (!response.ok) {
-                throw new Error(`Error while getting platformData ${response.statusText}. URL = ${url}`);
-            }
-            const presetData = await response.json();
-            return presetData;
-        } catch (error) {
-            console.error(
-                `There was a problem with getting platformData: ${error}`
-            );
-            throw error
-        }
-    }
+    // async #getData(url) {
+    //     try {
+    //         const response = await(fetch(url));
+    //         if (!response.ok) {
+    //             throw new Error(`Error while getting platformData ${response.statusText}. URL = ${url}`);
+    //         }
+    //         const presetData = await response.json();
+    //         return presetData;
+    //     } catch (error) {
+    //         console.error(
+    //             `There was a problem with getting platformData: ${error}`
+    //         );
+    //         throw error
+    //     }
+    // }
 
     async updatePreset(presetName) {
         const url = `${this.getPresetURL}/${presetName}`;
-        this.presetData = await this.#getData(url);
+        const response = await getRequest(url, true, true);
+        this.presetData = await response.json();
         this.presetName = presetName;
     }
 
@@ -71,7 +73,7 @@ export default class BasePlatformManager{
     async updatePlatformCells() {
         if (this.lastChange !== null) {
             const lastChangeUrl = `${this.getCellsLastChange}/${this.platformId}`;
-            const lastChangeData = await this.#getData(lastChangeUrl);
+            const lastChangeData = await getRequest(lastChangeUrl, true, true);
             const newChangeTime = new Date(lastChangeData['lastChange']);
             // console.log(`OLD_TIME: ${this.lastChange}`);
             // console.log(`NEW_TIME: ${newChangeTime}`);
@@ -84,7 +86,8 @@ export default class BasePlatformManager{
         //  Because we need to be able to have more than 1 platform and we need to choose them.
         //  But it won't interfere with the main goal, so it's all later.
         const cellDataUrl = `${this.getCellsDataURL}/${this.platformName}`;
-        const platformData = await this.#getData(cellDataUrl);
+        const response = await getRequest(cellDataUrl, true, true);
+        const platformData = await response.json();
         this.platformId = platformData['_id'];
         this.element.id = this.platformId;
         this.lastChange = new Date(platformData['lastChange']);

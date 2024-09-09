@@ -75,40 +75,28 @@ const getUsersData = async (onlyBlocked = false) => {
         clearRedirect(BASIC_COOKIES, redirectUrl);
     }
     const args = {
+        'method': 'GET',
         'headers': {
             'accept': 'application/json',
             'Authorization': `Bearer ${authToken}`,
         },
     }
-    const usersData = await getRequest(usersDataUrl, args)
+    const response = await getRequest(usersDataUrl, true, true, args)
+    const usersData = await response.json();
     return usersData;
 }
 
 
 const blockUserRequest = async (username, blockSeconds, token) => {
     const blockURL = `${BACK_URL.PATCH_AUTH_BLOCK_USER}?username=${username}&block_seconds=${blockSeconds}`;
-    const args = {
-        'headers': {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        'method': 'PATCH',
-    }
-    const response = await patchRequest(blockURL, args);
+    const response = await patchRequest(blockURL, true, true);
     return response;
 }
 
 
 const unblockUserRequest = async (username, token) => {
     const unblockURL = `${BACK_URL.PATCH_AUTH_UNBLOCK_USER}?username=${username}`;
-    const args = {
-        'headers': {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        'method': 'PATCH',
-    }
-    const response = await patchRequest(unblockURL, args);
+    const response = await patchRequest(unblockURL, true, true);
     return response;
 }
 // ---
@@ -229,7 +217,7 @@ const changePasswordAction = async (newPassElement, oldPassElement, passwordData
         'method': 'PATCH',
         'body': JSON.stringify(bodyData),
     }
-    const response = await patchRequest(changePassURL, args, false);
+    const response = await patchRequest(changePassURL, false, false, args);
     if (response.ok) {
         flashMessage.show({
             message: `Пароль для пользователя <b>${passwordData['username']}</b> успешно изменён`,
@@ -271,7 +259,7 @@ const resetPasswordAction = async (passwordData) => {
         'method': 'PATCH',
         'body': JSON.stringify(bodyData),
     }
-    const response = await patchRequest(resetPassURL, args, false);
+    const response = await patchRequest(resetPassURL, false, false, args);
     if (response.ok) {
         if (passwordData['newPassword']) {
             flashMessage.show({
@@ -297,19 +285,10 @@ const resetPasswordAction = async (passwordData) => {
 }
 
 const changeRoleAction = async (roleData) => {
-    const token = await getCookie(AUTH_COOKIE_NAME);
     const username = roleData['username'];
     const newRole = REVERSE_ROLE_TRANSLATION[roleData['newRole'].toLowerCase()];
     const roleChangeURL = `${BACK_URL.PATCH_AUTH_CHANGE_ROLE}?username=${username}&new_role=${newRole}`;
-    const args = {
-        'headers': {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'Content-type': 'application/json',
-        },
-        'method': 'PATCH',
-    }
-    const response = await patchRequest(roleChangeURL, args, false);
+    const response = await patchRequest(roleChangeURL, false, true);
     if (response.ok) {
         flashMessage.show({
             message: `Роль для пользователя <b>${roleData['username']}</b> успешно изменена на <b>${newRole}</b>`,
@@ -347,7 +326,7 @@ const registerNewUserAction = async (inputElement, userData) => {
         'method': 'POST',
         'body': JSON.stringify(body),
     }
-    const response = await postRequest(registerUserURL, args, false);
+    const response = await postRequest(registerUserURL, false, false, args);
     if (response.ok) {
         flashMessage.show({
             message: `Пользователь <b>${username}</b> успешно добавлен в систему`,

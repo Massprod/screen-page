@@ -1,3 +1,4 @@
+import { getRequest } from "../../../../utility/basicRequests.js";
 import { BACK_URLS } from "../../constants.js";
 import { 
     batchesContextMenu,
@@ -25,10 +26,7 @@ export default class Cell{
 
     async #getElementData(url) {
         try {
-            const response = await(fetch(url));
-            if (!response.ok) {
-                throw new Error(`Error while getting cellElementData ${response.statusText}. URL = ${url}`);
-            }
+            const response = await getRequest(url, true, true);
             const presetData = await response.json();
             return presetData;
         } catch (error) {
@@ -41,7 +39,7 @@ export default class Cell{
 
     async #getLastChange(url) {
         try {
-            const response = await(fetch(url));
+            const response = await getRequest(url, false, true);
             if (!response.ok) {
                 throw new Error(`Error while getting lastChange ${response.statusText}. URL = ${url}`);
             }

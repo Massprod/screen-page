@@ -9,6 +9,7 @@ import { gridManager, platformManager } from "../../mainScript.js";
 import { createProRejOrderBulk } from "../../../../utility/ordersCreation.js";
 import { getCookie } from "../../../../utility/roleCookies.js";
 import { OPERATOR_ROLE } from "../../../../uniConstants.js";
+import { getRequest } from "../../../../utility/basicRequests.js"; 
 
 
 export default class BatchesContextMenu{
@@ -22,7 +23,7 @@ export default class BatchesContextMenu{
 
     async getBatchdata(url) {
         try {
-            const response = await fetch(url);
+            const response = await getRequest(url, false, true);
             if (!response.ok) {
                 flashMessage.show({
                     message: `Ошибка при получении данных партии: ${response.status}`,
@@ -96,8 +97,8 @@ export default class BatchesContextMenu{
         if (newData['laboratoryTestDate']) {
             newDate = convertISOToCustomFormat(newData['laboratoryTestDate']);
         }
-        this.lastTestDateParag.innerHTML = `<b>Дата последнего испытания</b> ${newDate}`;
-        const resultStr = `<b>Результат последнего теста:</b>`;
+        this.lastTestDateParag.innerHTML = `<b>Дата последнего испытания</b><br> ${newDate}`;
+        const resultStr = `<b>Результат последнего теста:</b><br>`;
         if (!this.batchData['laboratoryTestDate']) {
             this.lastTestResultParag.innerHTML = `${resultStr} Не производились`;
         } else if (this.batchData['laboratoryPassed']) {
@@ -232,9 +233,9 @@ export default class BatchesContextMenu{
         this.lastTestDateParag = document.createElement('p');
         let lastTestDate = 'Не производились';
         if (this.batchData['laboratoryTestDate']) {
-            lastTestDate = convertISOToCustomFormat(this.batchData['laboratoryTestDate']);
+            lastTestDate = convertISOToCustomFormat(this.batchData['laboratoryTestDate'], false, true, true);
         }
-        this.lastTestDateParag.innerHTML = `<b>Дата последнего испытания</b> ${lastTestDate}`;
+        this.lastTestDateParag.innerHTML = `<b>Дата последнего испытания</b><br> ${lastTestDate}`;
         this.lastTestDateRow.appendChild(this.lastTestDateParag);
         this.element.appendChild(this.lastTestDateRow);
         // LAST RESULT ROW
@@ -243,7 +244,7 @@ export default class BatchesContextMenu{
         this.lastTestResult.id = 'lastTestResult';
 
         this.lastTestResultParag = document.createElement('p');
-        const resultStr = `<b>Результат последнего теста:</b>`;
+        const resultStr = `<b>Результат последнего теста:</b><br>`;
         if (!this.batchData['laboratoryTestDate']) {
             this.lastTestResultParag.innerHTML = `${resultStr} Не производились`;
         } else if (this.batchData['laboratoryPassed']) {

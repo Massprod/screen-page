@@ -38,7 +38,7 @@ export default class OrdersTable{
 
     async #getData(url) {
         try {
-            const response = await fetch(url);
+            const response = await getRequest(url, false, true);
             if (404 === response.status) {
                 return null;
             }
@@ -105,7 +105,7 @@ export default class OrdersTable{
             placementRecord = `<b>${PLACEMENT_TYPES[placementType]}</b><br>Р: <b>${placementRow}</b> | К: <b>${placementCol}</b>`;
         } else {
             const storageGetNoDataURL = `${BACK_URLS.GET_STORAGE}/?storage_id=${placementId}&include_data=false`;
-            const storageData = await getRequest(storageGetNoDataURL);
+            const storageData = await getRequest(storageGetNoDataURL, true, true);
             const storageName = storageData['name'];
             placementRecord = `${PLACEMENT_TYPES[placementType]}<br><b>${storageName}</b>`;
         }

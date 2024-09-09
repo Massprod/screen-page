@@ -1,3 +1,4 @@
+import { getRequest, postRequest } from "../../../../utility/basicRequests.js";
 import flashMessage from "../../../../utility/flashMessage/flashMessage.js";
 import {
     FLASH_MESSAGES,
@@ -27,7 +28,7 @@ export default class OrdersContextMenu{
 
     async #getOrderData(url) {
         try {
-            const response = await fetch(url);
+            const response = await getRequest(url, false, true);
             if (404 === response.status) {
                 return null;
             }
@@ -53,9 +54,7 @@ export default class OrdersContextMenu{
 
     async #postOrderData(url) {
         try {
-            const response = await fetch(url, {
-                method: "POST",
-            });
+            const response = await postRequest(url, false, true);
             if (!response.ok) {
                 flashMessage.show({
                     message: `Ошибка при обновлении статуса заказа: ${response.status}`,

@@ -51,13 +51,16 @@ const navButton = new NavigationButton(
 // ---
 const statusChangeRequest = async (batchNumber, result) => {
     const statusUpdateURL = `${BACK_URL.POST_BATCH_STATUS_UPDATE}/${batchNumber}?laboratory_passed=${result}`;
-    const resp = await patchRequest(statusUpdateURL);
+    const resp = await patchRequest(statusUpdateURL, true, true);
     return resp;
 }
+
+
 const batchNumberDataRequest = async (batchNumber) => {
     const getDataURL = `${BACK_URL.GET_BATCH_DATA}/${batchNumber}`;
-    const resp = await getRequest(getDataURL);
-    return resp;
+    const response = await getRequest(getDataURL, true, true);
+    const respData = await response.json();
+    return respData;
 }
 
 
@@ -316,7 +319,17 @@ document.getElementById('fetchBatchesBtn').addEventListener('click', async (even
         return;
     }
     batchDataURL = `${BACK_URL.GET_BATCHES_DATA_PERIOD}?period_start=${startDate}&period_end=${endDate}`;
-    const data = await getRequest(batchDataURL);
+    const authCookie = await getCookie(AUTH_COOKIE_NAME);
+    const args = {
+        'method': "GET",
+        'headers': {
+            'Authorization': `Bearer ${authCookie}`,
+            'Content-Type': 'application/json',
+            'accept': 'application/json',
+        }
+    }
+    const response = await getRequest(batchDataURL, true, true);
+    const data = await response.json()
     await generateBatchRows(data);
     startUpdating();
 })
@@ -379,7 +392,8 @@ const updateCreatedRows = async () => {
         return;
     }
     const tableBody = document.getElementById('batchesTableBody');
-    const newBatchesData = await getRequest(batchDataURL);
+    const response = await getRequest(batchDataURL, true, true);
+    const newBatchesData = await response.json();
     for (let batchData of newBatchesData) {
         const batchNumber = batchData['batchNumber'];
         if (batchNumber in createdRows) {

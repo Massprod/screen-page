@@ -150,7 +150,8 @@ export default class WheelstackContextMenu{
             }
         } else {
             const getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES}/?include_data=false`; 
-            const allStorages = await getRequest(getAllStoragesNoDataURL);
+            const response = await getRequest(getAllStoragesNoDataURL, true, true);
+            const allStorages = await response.json();
             if (0 === allStorages.length) {
                 flashMessage.show({
                     message: 'Нет созданных хранилищ',
@@ -186,7 +187,8 @@ export default class WheelstackContextMenu{
     // UPDATE ELEMENT
     async updateElementData() {
         const getElementDataURL = `${BACK_URLS.GET_WHEELSTACK_DATA_BY_ID}/${this.elementId}`;
-        this.elementData = await getRequest(getElementDataURL);
+        const response = await getRequest(getElementDataURL, true, true);
+        this.elementData = await response.json();
     }
 
     async updateElement() {
@@ -236,7 +238,8 @@ export default class WheelstackContextMenu{
             wheelElement.id = wheelObjectId;
             wheelElement.style.visibility = 'visible';
             const getWheelDataURL = `${BACK_URLS.GET_WHEEL_DATA_BY_OBJECT_ID}/${wheelObjectId}`;
-            const wheelData = await getRequest(getWheelDataURL);
+            const response = await getRequest(getWheelDataURL, true, true);
+            const wheelData = await response.json();
             parag.innerText = wheelData['wheelId'];
             parag.style.visibility = 'visible';
         })
@@ -274,7 +277,8 @@ export default class WheelstackContextMenu{
             blockedParag.id = this.elementData['lastOrder'];
             blockedParag.innerHTML = `<b>Ожидает выполнения:</b><br>${this.elementData['lastOrder']}`;
             const getOrderDataURL = `${BACK_URLS.GET_ORDER_DATA_BY_ID}/${this.elementData['lastOrder']}`;
-            const currentOrderData = await getRequest(getOrderDataURL);
+            const response = await getRequest(getOrderDataURL, true, true);
+            const currentOrderData = await response.json();
             if (ORDER_MOVE_TO_LABORATORY === currentOrderData['orderType']) {
                 this.blockedWheel = currentOrderData['affectedWheels']['source'][0];
                 const blockedWheelElement = this.wheelsContainer.querySelector(`#${CSS.escape(this.blockedWheel)}`);

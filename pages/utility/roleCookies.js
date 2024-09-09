@@ -65,7 +65,7 @@ export async function updateAuthCookie(cookieName) {
             'accept': 'application/json',
         }
     }
-    const response = await postRequest(refreshURL, args, false);
+    const response = await postRequest(refreshURL, false, false, args);
     if (!response.ok) {
         await deleteCookie(cookieName);
         if (window.location.href !== loginPage) {

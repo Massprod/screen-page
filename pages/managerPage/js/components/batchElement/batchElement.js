@@ -45,7 +45,8 @@ export default class BatchElement{
         const allWheels = wheelstackData['wheels'];
         const lastWheelObjectId = allWheels[allWheels.length - 1]
         const wheelDataURL = `${BACK_URLS.GET_WHEEL_DATA_BY_OBJECT_ID}/${lastWheelObjectId}`;
-        const wheelData = await getRequest(wheelDataURL);
+        const response = await getRequest(wheelDataURL, true, true);
+        const wheelData = await response.json();
         const wheelstackRow = document.createElement('div');
         wheelstackRow.classList.add('extra-element-expanded-row');
         const parag = document.createElement('p');
