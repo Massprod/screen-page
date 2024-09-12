@@ -53,6 +53,20 @@ const navButton = new NavigationButton(
 const hoverCoord = new CellHoverCoordinate('placement-cell');
 // ---
 // TODO: Check what can be moved to unils.
+const getPlacementRecords = async (url) => {
+    const allRecordsResponse = await getRequest(url, true, true);
+    const allRecordsData = await allRecordsResponse.json();
+    return allRecordsData;
+}
+
+const preparePlacement = async (placementId, presetId, placement) => {
+    placement.placementId = placementId;
+    const presetDataURL = `${BACK_URL.GET_PRESET_DATA}/${presetId}`;
+    const response = await getRequest(presetDataURL, true, true);
+    const presetData = await response.json();
+    placement.buildPreset(presetData, false); 
+}
+
 const getPlacementHistory = async (url, queries) => {
     let requestUrl = `${url}?`;
     for (let [query, value] of Object.entries(queries)) {
@@ -135,13 +149,6 @@ const correctDatePeriod = async (periodStart, periodEnd) => {
 // + PLATFORM +
 var platformCurrentHistory = [];
 
-const getPlatforms = async (url) => {
-    const allRecordsResponse = await getRequest(url, true, true);
-    const allRecordsData = await allRecordsResponse.json();
-    return allRecordsData;
-}
-
-
 const platformsContainer = document.getElementById('platformsContainer');
 const switchPlatformViewBut = platformsContainer.querySelector('#switchView');
 // True == placement shown | False == selector shown
@@ -160,10 +167,14 @@ const platformSelectActiveElements = new Set ([
 platformsRefreshBut.addEventListener('click', async (event) => {
     event.preventDefault();
     const getPlatformsURL = `${BACK_URL.GET_PLATFORMS}?include_data=false`;    
-    const platformRecords = await  getPlatforms(getPlatformsURL);
+    const platformRecords = await  getPlacementRecords(getPlatformsURL);
     platformSelector.innerHTML = '';
     platformRecords.forEach( async record => {
-        const newOption = await createOption(record['name'], record['name']);
+        const optionValue = {
+            '_id': record['_id'],
+            'presetId': record['preset'],
+        }
+        const newOption = await createOption(JSON.stringify(optionValue), record['name']);
         platformSelector.appendChild(newOption);
     })
 })
@@ -178,6 +189,22 @@ const platformPlacementActiveElements = new Set([
     platformHistorySlider,
 ]);
 
+platformSelectBut.addEventListener('click', async (event) => {
+    event.preventDefault();
+    if (!platformSelector.value) {
+        flashMessage.show({
+            'message': 'Выберите расположение',
+        })
+        return;
+    }
+    const optionValue = JSON.parse(platformSelector.value);
+    const placementId = optionValue['_id'];
+    const presetId = optionValue['presetId'];
+    await preparePlacement(placementId, presetId, platformPlacement);
+    await switchView(platformSelectActiveElements, platformPlacementActiveElements);
+    platformView = !platformView;
+})
+
 switchPlatformViewBut.addEventListener('click', async (event) => {
     event.preventDefault();
     if (platformView) {
@@ -191,7 +218,6 @@ switchPlatformViewBut.addEventListener('click', async (event) => {
 
 // + SLIDER +
 // True == period view | False == date selector view
-var sliderView = true; 
 const platformHistoryDateInputGroup = platformHistorySlider.querySelector('#dateInput');
 const platformHistoryLoadDataButton = platformHistorySlider.querySelector('#loadData');
 const platformHistoryStartDate = platformHistorySlider.querySelector('#startDateTime');
@@ -228,7 +254,7 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         'include_data': false,
         'period_start': encodeURIComponent(startDate),
         'period_end': encodeURIComponent(endDate),
-        'placementId': placementId,
+        'placement_id': placementId,
     }
     platformCurrentHistory = await getPlacementHistory(platformHistoryDataURL, queries);
     const optionsData = {}
@@ -248,30 +274,44 @@ periodChangeBut.addEventListener('click', async (event) => {
     await switchView(chooseDataElements, choosePeriodElements);
 })
 
-// TODO: change both to universal, just parge selector as argument.
+const triggerChange = async (element) => {
+    const event = new Event('change');
+    element.dispatchEvent(event);
+}
+
+platformHistorySelector.addEventListener('change', async event => {
+    const selectedIndex = platformHistorySelector.selectedIndex;
+    const historyIndex = platformHistorySelector.options[selectedIndex].value;
+    const historyRecordId = platformCurrentHistory[historyIndex]['_id'];
+    const historyRecordURL = `${BACK_URL.GET_HISTORY_RECORD}?record_id=${historyRecordId}`;
+    const historyDataResponse = await getRequest(historyRecordURL, true, true);
+    const historyRecordData = await historyDataResponse.json();
+    const recordDate = historyRecordData['createdAt'];
+    platformPlacement.updatePlacementHistory(historyRecordData);
+    flashMessage.show({
+        'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
+        'duration': 6000,
+    })
+})
+
+// TODO: change both to universal, just parge selector as args
 platformHistoryPreviousBut.addEventListener('click', async (event) => {
     event.preventDefault();
-    console.log(platformCurrentHistory);
     if (platformHistorySelector.selectedIndex > 0) {
         platformHistorySelector.selectedIndex -= 1;
-        console.log(platformHistorySelector.selectedIndex);
         let index = platformHistorySelector.selectedIndex;
         let historyRecord = platformHistorySelector.options[index].value;
-        console.log(platformCurrentHistory[historyRecord]);
-        // async populatePlacement()
+        triggerChange(platformHistorySelector);
     }
 })
 
 platformHistoryNextBut.addEventListener('click', async (event) => {
     event.preventDefault();
-    console.log(platformCurrentHistory);
     if (platformHistorySelector.selectedIndex < platformHistorySelector.options.length - 1) {
         platformHistorySelector.selectedIndex += 1;
-        console.log(platformHistorySelector.selectedIndex);
         let index = platformHistorySelector.selectedIndex;
         let historyRecord = platformHistorySelector.options[index].value;
-        console.log(historyRecord);
-        console.log(platformCurrentHistory[historyRecord]);
+        triggerChange(platformHistorySelector);
     }
 })
 
@@ -280,56 +320,3 @@ platformHistoryNextBut.addEventListener('click', async (event) => {
 // - PLATFORM -
 
 var gridCurrentHistory = [];
-
-
-
-// document.addEventListener('DOMContentLoaded', async () => {
-
-
-
-//     const platformPresetDataURL = `${BACK_URL.GET_PRESET_DATA_BY_NAME}/${BASIC_PMK_PLATFORM_PRESET}`;
-//     const platformPresetResponse = await getRequest(platformPresetDataURL, true, true);
-//     const platformPresetData = await platformPresetResponse.json();
-//     platformPlacement.buildPreset(platformPresetData, false);
-//     // - PLATFORM -
-//     // + GRID + 
-//     const gridContainer = document.getElementById('gridsContainer');
-//     const gridPlacement = new Placement('grid');
-//     gridContainer.appendChild(gridPlacement.element);
-//     const gridPresetDataURL = `${BACK_URL.GET_PRESET_DATA_BY_NAME}/${BASIC_PMK_GRID_PRESET}`;
-//     const gridPresetResponse = await getRequest(gridPresetDataURL, true, true);
-//     const gridPresetData = await gridPresetResponse.json();
-//     gridPlacement.buildPreset(gridPresetData, true);
-//     const zoomer = new ZoomAndDrag({
-//         'grid': gridPlacement.element,
-//         'viewport': gridContainer, 
-//     })
-//     // - GRID -
-//     // + PLATFORM HISTORY + 
-//     const platformHistoryContainer = document.getElementById('platformSlider');
-//     const platformStartDate = platformHistoryContainer.querySelector('#startDateTime');
-//     const platformEndDate = platformHistoryContainer.querySelector('#endDateTime');
-//     const platformLoadButton = platformHistoryContainer.querySelector('#loadData');
-//     platformHistoryDataURL = `${BACK_URL.GET_PLACEMENT_HISTORY}`;
-//     platformLoadButton.addEventListener('click', (event) => {
-//         event.preventDefault();
-//         const startDate = platformStartDate.value;
-//         const endDate = platformEndDate.value;
-//         const queries = {
-//             'include_data': true,
-//             'period_start': startDate,
-//             'period_end': endDate,
-//             'placementId': platformPlacement,
-//         }
-//         platformCurrentHistory = getPlacementHistory(platformHistoryDataURL, queries);
-//     } )
-    
-//     // * GATHER DATA *
-//     const getPlacementHistory = (dataUrl, queries) => {
-//         console.log('start: ', startDate, '\nend: ', endDate);
-//         // const
-//     }
-//     // ---
-//     // - PLATFORM HISTORY -
-
-// })

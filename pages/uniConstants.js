@@ -27,6 +27,9 @@ export const BACK_URL  = {
     GET_PRESET_DATA_BY_NAME: `${mainAddress}/presets/by_name`,
     GET_PLACEMENT_HISTORY: `${mainAddress}/history/all`,
     GET_PLATFORMS: `${mainAddress}/platform/all`,
+    GET_PLACEMENT_DATA: `${mainAddress}/`,
+    GET_PRESET_DATA: `${mainAddress}/presets/by_id`,
+    GET_HISTORY_RECORD: `${mainAddress}/history/record`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';

@@ -10,6 +10,7 @@ export default class Placement{
         this.placementType = placementType;
         this.presetId = null;
         this.placementRows = null;
+        this.placementExtraRows = null;
         this.presetData = null;
         this.#init();
     }
@@ -31,7 +32,9 @@ export default class Placement{
         if (this.presetData && this.presetData['_id'] === presetData['_id']) {
             return;
         }
+        this.presetId = presetData['_id'];
         this.presetData = presetData;
+        this.placementExtraRows = this.presetData['extra'];
         this.placementRows = {};
         this.element.innerHTML = "";
         const rowsOrder = presetData['rowsOrder'];
@@ -46,10 +49,11 @@ export default class Placement{
         }
     }
 
-    async updatePlacement(placementData) {
+    async updatePlacementHistory(historyData) {
         if (!this.presetId || !this.placementRows) {
             throw new Error('Placement doesnt have build preset. First create a preset to populate with data.')
         }
+        const placementData = historyData['placementData'];
         const presetId = placementData['preset'];
         if (this.presetId && this.presetId !== presetId) {
             throw new Error(`Incorrect placementData for used in this Placement preset.
@@ -60,6 +64,41 @@ export default class Placement{
             this.placementId = placementData['_id'];
             this.element.id = this.placementId;
         }
-
+        // Bad and sad, but w.e
+        // We either update orders inside of them or we just reassign which is even faster.
+        this.placementExtraRows = placementData['extra'];
+        for (let rowId of placementData['rowsOrder']) {
+            const columns = this.placementRows[rowId].columns;
+            const columnOrder = placementData['rows'][rowId]['columnsOrder'];
+            for (let colId of columnOrder) {
+                const placementCell = columns[colId];
+                const cellData = placementData['rows'][rowId]['columns'][colId];
+                placementCell.setElementData(cellData);
+                if (cellData['blocked']) {
+                    placementCell.blockState();
+                } else {
+                    placementCell.unblockState();
+                }
+                // TODO: We need to utilize it beter.
+                if ('wheelStack' in cellData && cellData['wheelStack']) {
+                    placementCell.setAsElement();
+                } else {
+                    placementCell.setAsEmptyCell();
+                }
+            }
+        }
+        const wheelstacksData = historyData['wheelstacksData'];
+        wheelstacksData.forEach( element => {
+            const elementRow = element['rowPlacement'];
+            const elementCol = element['colPlacement'];
+            const wheelstackId = element['_id'];
+            const numWheels = element['wheels'].length;
+            const cellElement = this.placementRows[elementRow]['columns'][elementCol];
+            const cellParag = document.createElement('p');
+            cellParag.id = wheelstackId;
+            cellParag.innerHTML = `<b>${numWheels}</b>`;
+            cellElement.element.appendChild(cellParag);
+            cellElement.historyData = element;
+        })
     }
 }

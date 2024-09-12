@@ -10,6 +10,7 @@ export default class PlacementCell {
         this.colId = colId;
         this.placementType = placementType;
         this.elementData = null;
+        this.elementHistoryData = null;
         this.#init();
     }
 
@@ -27,6 +28,10 @@ export default class PlacementCell {
         this.element.id = `${this.rowId}|${this.colId}`;
         this.element.classList.add('placement-cell');
         this.#addBasicStyle();
+    }
+
+    setElementData(elementData) {
+        this.elementData = elementData;
     }
 
     setAsIdentifier(identifier) {
@@ -57,12 +62,11 @@ export default class PlacementCell {
         this.element.classList.add('placement-cell-empty');
     }
 
-    setAsElement(elementData) {
+    setAsElement() {
         this.element.innerHTML = '';
         this.element.classList.remove('placement-cell-empty');
         this.element.classList.remove('placement-cell-whitespace');
         // this.element.classList.add('placement-cell-element');
-        this.elementData = elementData;
     }
 
     blockState() {

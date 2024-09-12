@@ -38,6 +38,8 @@ export default class PlacementRow {
                 cell.setAsIdentifier(cellData['identifierString']);
             } else if (cellData['whitespace']) {
                 cell.setAsWhitespace();
+            } else {
+                cell.setAsEmptyCell();
             }
         }
     }

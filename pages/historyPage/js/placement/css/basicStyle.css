@@ -50,6 +50,7 @@
     align-items: center;
     display: flex;
     cursor: pointer;
+    justify-content: center;
 }
 
 .placement-cell:hover {
@@ -59,7 +60,7 @@
 }
 
 .placement-cell p {
-    font-size: 5em;
+    font-size: 100%;
 }
 
 .placement-cell.identifier-cell {
