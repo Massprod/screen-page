@@ -46,12 +46,17 @@ export default class NavigationButton {
             const button = document.createElement('button');
             button.className = btnInfo.class;
             button.textContent = btnInfo.text;
-            button.onclick = () => {
+            button.onclick = (event) => {
                 if (window.location.href !== btnInfo.href) {
                     if (btnInfo.href === loginPage) {
                         this.clearCookies.forEach( (cookieName) => {
                             deleteCookie(cookieName);
                         })
+                    }
+                    if (event.ctrlKey || event.metaKey) {
+                        // Ctrl+Click (or Cmd+Click on macOS) - open in a new tab
+                        window.open(btnInfo.href, '_blank');
+                        return;
                     }
                     window.location.href = btnInfo.href;
                 }
