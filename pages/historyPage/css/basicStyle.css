@@ -1,0 +1,175 @@
+@import url(../js/placement/css/basicStyle.css);
+@import url(../../utility/navButton/navStyle.css);
+@import url(../../utility/cellHover/cellHover.css);
+@import url(../../utility/flashMessage/css/basicStyle.css);
+
+
+* {
+    box-sizing: border-box;
+    outline: none;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* + MAIN CONTAINERS + */
+.main-page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: black;
+}
+
+.main-page-top-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%; /* Since min-width and max-width are the same, just use width */
+    height: 400px; /* Same for height */
+    border-bottom: 2px solid #ccccccb8;
+    background-color: whitesmoke;
+}
+
+.main-page-bottom-container {
+    flex: 1;
+    width: 100vw;
+    position: relative;
+}
+/* - MAIN CONTAINERS - */
+
+/* + ELEMENT CONTAINERS + */
+.platforms-container {
+    display: block;
+    min-width: 700px;
+    max-width: 45%; /* Restricting to 45% of parent container */
+    height: 100%; /* Full height of parent container */
+    border-right: 2px solid #ccccccb8;
+    margin: auto;
+    background-color: whitesmoke;
+}
+
+.platforms-container.select-active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.orders-table-container {
+    flex: 1; /* Take the remaining space next to the platforms container */
+    min-width: 600px;
+    height: 100%;
+    overflow-x: auto;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+    background-color: whitesmoke;
+    position: relative;
+}
+
+.grids-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    background-color: whitesmoke;
+}
+/* - ELEMENT CONTAINERS - */
+
+/* + HISTORY SLIDER ELEMENT + */
+/* GRID - no time to bother with correct resizing, and it fits well enought in VERT|HORIZ windows */
+.history-slider-container {
+    position: absolute; 
+    display: flex;       
+    align-items: center; 
+    justify-content: center;
+    max-width: 650px;
+    margin: auto;
+}
+/* PLATFORM - we need correct resizing for the platform == relative */
+.history-slider-container.platform {
+    position: relative;
+}
+.history-slider-container.hidden {
+    display: none;
+}
+.input-group.hidden {
+    display: none;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;      
+    align-items: center;
+    margin-right: 20px;
+}
+
+.date-slider-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;         /* Control border radius */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 8px;               /* Control padding inside the slider */
+}
+
+.slider-left, .slider-right {
+    width: 45px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.4em;
+    /* background-color: #333; */
+    /* color: white; */
+    /* border-radius: 25%; */
+    transition: background-color 0.3s ease;
+}
+
+.slider-left:hover, .slider-right:hover {
+    background-color: #555;
+}
+
+.slider-content {
+    flex: 1;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+}
+/* - HISTORY SLIDER ELEMENT - */
+
+/* + BUTTONS + */
+.switch-platform {
+    position: absolute;
+    top: 2%;
+    left: 4%;
+    width: 40px;
+    height: 40px;
+}
+/* - BUTTONS - */
+
+/* + SELECTORS + */
+.form-select.select-platform {
+    max-width: 50%;
+}
+.form-select.select-date {
+    max-width: 100%;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+/* - SELECTORS - */
+
+
+.shift-image {
+    height: 25px;
+    width: 20px;
+}
+
+.hidden {
+    display: none;
+}

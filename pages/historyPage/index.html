@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История</title>
+    <link rel="stylesheet" href="./css/basicStyle.css">
+    <link rel="stylesheet" href="../bootstrap/bootstrap.min.css">
+</head>
+<body>
+    <div class="main-page-container">
+        <div class="main-page-top-container" id="topContainer">
+            <div class="platforms-container select-active" id="platformsContainer">
+                <button id="switchView" class="btn btn-secondary rounded-circle switch-platform">X</button>
+                <!-- platform selector -->
+                <div class="input-group input-group-lg mb-3 justify-content-center" id="platformSelectInputGroup">
+                    <select class="form-select border-secondary fw-bold select-platform" id="platformsSelector">
+                        <option selected>Обновите данные...</option>
+                        <!-- Dynamic options will go here -->
+                    </select>
+                </div>
+                <!-- Buttons below the select field -->
+                <div class="button-group justify-content-center" id="platformSelectButtons">
+                    <button id="refreshPlatforms" class="btn btn-lg btn-outline-secondary mx-2">Обновить</button>
+                    <button id="selectPlatform" class="btn btn-lg btn-secondary mx-2">Выбрать</button>
+                </div>
+                <!-- platform selector -->
+                <!-- platform history slider -->
+                <div class="history-slider-container platform hidden" id="platformHistorySlider">
+                    <div class="input-group" id="dateInput">
+                        <input type="datetime-local" id="startDateTime" class="form-control" placeholder="Start DateTime">
+                        <input type="datetime-local" id="endDateTime" class="form-control" placeholder="End DateTime">
+                        <button id="loadData" class="btn btn-secondary">Загрузить</button>
+                    </div>
+                
+                    <div class="date-slider-container hidden" id="platformHistory">
+                        <button class="btn btn-dark me-3" id="periodChange">Период</button>
+                        <button class="btn btn-outline-light" id="prevRecord">
+                            <img class="shift-image" src="../images/left-arrow.png" alt="previousHistoryRecord">
+                        </button>
+                        <select class="form-select border-light fw-bold select-date" id="platformsHistorySelector">
+                            <option selected>Выберите запись...</option>
+                            <!-- Dynamic options will go here -->
+                        </select>
+                        <button class="btn btn-outline-light" id="nextRecord">
+                            <img class="shift-image" src="../images/right-arrow.png" alt="nextHistoryRecord">
+                        </button>
+                    </div>
+                </div>
+                <!-- platform history slider -->
+            </div>
+            <div class="orders-table-container" id="ordersTableContainer">
+            </div>
+        </div>
+        <div class="main-page-bottom-container" id ="botContainer">
+            <div class="grids-container" id="gridsContainer"></div>
+        </div>
+    </div>
+    <script type="module" src="./js/main.js"></script>
+    <script type="module" src="../bootstrap/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

@@ -5,7 +5,12 @@ export const labPage = `${serviceDom}/screen/pages/labPage/laboratoryPage.html`;
 export const gridPage = `${serviceDom}/screen/pages/managerPage/managerPage.html`;
 export const loginPage = `${serviceDom}/screen/pages/loginPage/mainLogin.html`;
 export const usersPage = `${serviceDom}/screen/pages/usersPage/usersPage.html`;
-
+export const historyPage = `${serviceDom}/screen/pages/historyPage/index.html`;
+// TODO: We need to find some analog of `.env` for js.
+// PRESET NAMES
+export const BASIC_PMK_PLATFORM_PRESET = `pmkBasePlatform`;
+export const BASIC_PMK_GRID_PRESET = `pmkGrid`;
+// ------
 export const BACK_URL  = {
     POST_BATCH_STATUS_UPDATE: `${mainAddress}/batch_number/update_laboratory_status`,
     GET_BATCHES_DATA_PERIOD: `${mainAddress}/batch_number/period`,
@@ -19,6 +24,9 @@ export const BACK_URL  = {
     PATCH_AUTH_RESET_PASS: `${authMainAddress}/users/reset_password`,
     PATCH_AUTH_CHANGE_ROLE: `${authMainAddress}/users/change_role`,
     POST_AUTH_REGISTER_USER: `${authMainAddress}/users/register`,
+    GET_PRESET_DATA_BY_NAME: `${mainAddress}/presets/by_name`,
+    GET_PLACEMENT_HISTORY: `${mainAddress}/history/all`,
+    GET_PLATFORMS: `${mainAddress}/platform/all`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';
@@ -79,6 +87,11 @@ export const USERS_PAGE_ROLES = {
     [ADMIN_ROLE]: true,
 }
 
+export const HISTORY_PAGE_ROLES = {
+    [ADMIN_ROLE]: true,
+    [MANAGER_ROLE]: true,
+}
+
 export const COOKIE_MESSAGES = {
     [AUTH_COOKIE_NOT_FOUND]: "Токен доступа не найден.<br> Перезайдите в систему.",
     [AUTH_COOKIE_SESSION_EXPIRED]: "Токен доступа больше не действителен.<br> Перезайдите в систему.",
@@ -113,6 +126,12 @@ const NAV_USERS_BUTTON = {
     'href': usersPage,
 }
 
+const NAV_HISTORY_BUTTON = {
+    'class': 'btn btn-secondary',
+    'text': 'История',
+    'href': historyPage,
+}
+
 export const NAV_BUTTONS = {
     [LAB_PERSONAL_ROLE]: [
         NAV_LAB_BUTTON,
@@ -121,13 +140,15 @@ export const NAV_BUTTONS = {
     [ADMIN_ROLE]: [
         NAV_USERS_BUTTON,
         NAV_LAB_BUTTON,
-        NAV_GRID_BUTTON, 
+        NAV_GRID_BUTTON,
+        NAV_HISTORY_BUTTON, 
         NAV_LOGIN_BUTTON,
     ],
     [MANAGER_ROLE]: [
         NAV_USERS_BUTTON,
         NAV_LAB_BUTTON,
         NAV_GRID_BUTTON,
+        NAV_HISTORY_BUTTON,
         NAV_LOGIN_BUTTON,
     ],
     [OPERATOR_ROLE]: [

@@ -13,3 +13,24 @@ export function getShiftedFromCurrent(days) {
     // Return the formatted date
     return `${year}-${month}-${day}`;
 }
+
+export const getISOFormatUTC = (secondsShift = 0) => {
+    // Create a new Date object
+    const date = new Date();
+
+    // Shift the date by the provided number of seconds (positive or negative)
+    date.setSeconds(date.getSeconds() + secondsShift);
+
+    // Get the ISO string and replace 'Z' with '+00:00' for explicit UTC time zone
+    const isoString = date.toISOString();
+    const isoWithUTC = isoString.replace('Z', '+00:00');
+    return isoWithUTC;
+}
+
+export const convertToUTC = (localDateTime) => {
+    // Returns UTC time in ISO 8601 format
+    let localDate = new Date(localDateTime);
+    localDate = localDate.toISOString();
+    localDate = localDate.replace('Z', '+00:00');
+    return localDate;
+}
