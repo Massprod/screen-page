@@ -71,6 +71,9 @@ class FlashMessage {
     flashMessage.style.fontSize = fontSize;
     flashMessage.style.fontFamily = fontFamily;
     flashMessage.innerHTML = message;
+    flashMessage.addEventListener('click', event => {
+      flashMessage.remove();
+    })
 
     this.flashMessagesContainer.appendChild(flashMessage);
 
