@@ -18,7 +18,7 @@ export default class CellHoverCoordinate {
         });
 
         document.addEventListener('mousemove', (event) => {
-            this.updateCoordinate(event);
+            this.updateHoverDisplayPosition(event);
         });
 
         // Touch events for mobile
@@ -38,7 +38,12 @@ export default class CellHoverCoordinate {
 
     showCoordinate(event) {
         const target = event.targetTouches ? event.targetTouches[0].target : event.target;
-        if (!target.classList.contains(this.hoverClass) && (target.parentElement &&  !target.parentElement.classList.contains(this.hoverClass))) {
+        if (!target.classList.contains(this.hoverClass)) {
+            if ((target.parentElement &&  target.parentElement.classList.contains(this.hoverClass))) {
+                this.element.classList.remove('hidden');
+                this.element.classList.add('show');
+                this.updateCoordinate(event, true);
+            }
             return;
         }
         this.element.classList.remove('hidden');
@@ -46,8 +51,14 @@ export default class CellHoverCoordinate {
         this.updateCoordinate(event);
     }
 
-    updateCoordinate(event) {
-        const target = event.targetTouches ? event.targetTouches[0].target : event.target;
+    updateCoordinate(event, parent = false) {
+        let target = 'empty';
+        if (!parent) {
+            target = event.targetTouches ? event.targetTouches[0].target : event.target;
+        } else {
+            target = event.targetTouches ? event.targetTouches[0].target : event.target;
+            target = target.parentElement;
+        }
         this.element.innerText = `${target.id}`;
         this.updateHoverDisplayPosition(event);
     }
