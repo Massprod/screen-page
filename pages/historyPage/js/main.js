@@ -16,7 +16,7 @@ import NavigationButton from "../../utility/navButton/navButton.js";
 import CellHoverCoordinate from "../../utility/cellHover/cellHoverCoordinate.js";
 import ZoomAndDrag from "../../utility/zoomDrag.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
-import { getISOFormatUTC, convertToUTC } from "../../utility/timeConvert.js";
+import { getISOFormatUTC, convertToUTC, convertUTCToLocal } from "../../utility/timeConvert.js";
 import convertISOToCustomFormat from "../../utility/convertToIso.js";
 
 
@@ -122,12 +122,16 @@ const historySelectorPopulate = async (
     ) => {
         let periodStart = startDateElement.value;
         let periodEnd = endDateElement.value;;
-        [periodStart, periodEnd] = await correctDatePeriod(periodStart, periodEnd);
-        if (!periodStart && !periodEnd) {
+        const periods = await correctDatePeriod(periodStart, periodEnd);
+        if (!periods) {
             return null;
         }
-        startDateElement.value = periodStart.split('.')[0];
-        endDateElement.value = periodEnd.split('.')[0];
+        const localPeriodStart = periods['local']['periodStart'];
+        const localPeriodEnd = periods['local']['periodEnd']
+        startDateElement.value = localPeriodStart.split('.')[0];
+        endDateElement.value = localPeriodEnd.split('.')[0];
+        periodStart = periods['utc']['periodStart'];
+        periodEnd = periods['utc']['periodEnd'];
         const queries = {
             'include_data': false,
             'period_start': encodeURIComponent(periodStart),
@@ -191,15 +195,17 @@ const correctDatePeriod = async (periodStart, periodEnd) => {
         flashMessage.show({
             'message': 'Выберите корректный период. Дата начала не должна быть выше окончания.'
         })
-        return [null, null];
+        return null;
     }
+    let standardStart = null;
+    let standardEnd = null;
     if (!periodStart && !periodEnd) {
         flashMessage.show({
             'message': 'Не выбраны данные периода. Автоматический выбор последних 24 часов',
         });
         const shift = 60 * 60 * 24
-        periodStart = getISOFormatUTC(-shift);
-        periodEnd = getISOFormatUTC();
+        standardStart = getISOFormatUTC(-shift);
+        standardEnd = getISOFormatUTC();
     } else if (!periodStart) {
         flashMessage.show({
             'message': 'Не выбрано начало периода. Автоматический выбор смещения на 24 часа',
@@ -207,7 +213,7 @@ const correctDatePeriod = async (periodStart, periodEnd) => {
         const shift = 60 * 60 * 24
         const periodEndObject = new Date(periodEnd);
         periodEndObject.setSeconds(periodEndObject.getSeconds() - shift);
-        periodStart = periodEndObject.toISOString().replace('Z','+00:00');
+        standardStart = periodEndObject.toISOString().replace('Z','+00:00');
     } else if (!periodEnd) {
         flashMessage.show({
             'message': 'Не выбрано окончание периода. Автоматический выбор смещения на 24 часа',
@@ -215,11 +221,28 @@ const correctDatePeriod = async (periodStart, periodEnd) => {
         const shift = 60 * 60 * 24
         const periodStartObject = new Date(periodStart);
         periodStartObject.setSeconds(periodStartObject.getSeconds() + shift);
-        periodEnd = periodStartObject.toISOString().replace('Z', '+00:00');
+        standardEnd = periodStartObject.toISOString().replace('Z', '+00:00');
     }
-    periodStart = convertToUTC(periodStart);
-    periodEnd = convertToUTC(periodEnd);
-    return [periodStart, periodEnd];
+    if (!standardStart) {
+        standardStart = convertToUTC(periodStart);
+    }
+    if (!standardEnd) {
+        standardEnd = convertToUTC(periodEnd);
+    }
+    // CHANGE UTCtoLocal conversion, because `periodStart` and `periodEnd` already in correct format.
+    // But because we can have them empty, we need to convert them from standard we create.
+    // For now, leaving it just as extra convert in correct | incorrect situation, it's w.e. Not critical calc.
+    const periods = {
+        'utc': {
+            'periodStart': standardStart,
+            'periodEnd': standardEnd,
+        },
+        'local': {
+            'periodStart': convertUTCToLocal(standardStart),
+            'periodEnd': convertUTCToLocal(standardEnd),
+        }
+    }
+    return periods;
 }
 
 // + PLATFORM +
@@ -328,7 +351,6 @@ periodChangeBut.addEventListener('click', async (event) => {
 })
 
 platformHistorySelector.addEventListener('change', async event => {
-    console.log('test');
     const selectedIndex = platformHistorySelector.selectedIndex;
     const historyIndex = platformHistorySelector.options[selectedIndex].value;    
     const historyRecordId = platformCurrentHistory[historyIndex]['_id'];
@@ -337,7 +359,7 @@ platformHistorySelector.addEventListener('change', async event => {
     )
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
-        'duration': 2000,
+        'duration': 1000,
     })
 })
 
@@ -474,7 +496,7 @@ gridHistorySelector.addEventListener('change', async event => {
     const recordDate = await updatePlacementHistory(gridPlacement, historyRecordId);
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
-        'duration': 2000,
+        'duration': 1000,
     })
 })
 
@@ -491,3 +513,4 @@ gridHistoryNextBut.addEventListener('click', async (event) => {
 // - GRID -
 // +  ORDERS TABLE +
 
+// - ORDERS TABLE - 
