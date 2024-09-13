@@ -30,12 +30,14 @@ html, body {
     height: 400px; /* Same for height */
     border-bottom: 2px solid #ccccccb8;
     background-color: whitesmoke;
+    min-height: 35%;
 }
 
 .main-page-bottom-container {
     flex: 1;
     width: 100vw;
     position: relative;
+    min-height: 65%;
 }
 /* - MAIN CONTAINERS - */
 
@@ -50,7 +52,7 @@ html, body {
     background-color: whitesmoke;
 }
 
-.platforms-container.select-active {
+.select-active {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -76,6 +78,15 @@ html, body {
     overflow: hidden;
     background-color: whitesmoke;
 }
+
+.select-active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
 /* - ELEMENT CONTAINERS - */
 
 /* + HISTORY SLIDER ELEMENT + */
@@ -91,6 +102,12 @@ html, body {
 /* PLATFORM - we need correct resizing for the platform == relative */
 .history-slider-container.platform {
     position: relative;
+}
+.history-slider-container.grid {
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    z-index: 2;
 }
 .history-slider-container.hidden {
     display: none;
@@ -114,7 +131,12 @@ html, body {
     border: 1px solid #ccc;
     border-radius: 6px;         /* Control border radius */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 8px;               /* Control padding inside the slider */
+    padding: 8px; 
+}
+
+.date-slider-container.grid {
+    max-width: 25%;
+    min-width: 350px;
 }
 
 .slider-left, .slider-right {
@@ -144,12 +166,20 @@ html, body {
 /* - HISTORY SLIDER ELEMENT - */
 
 /* + BUTTONS + */
-.switch-platform {
+.switch-view {
     position: absolute;
     top: 2%;
-    left: 2%;
+    left: 1%;
     width: 40px;
     height: 40px;
+}
+
+.switch-view.grid {
+    top: 5%;
+    left: 3%;
+    min-height: 52px;
+    min-width: 52px;
+    z-index: 2;
 }
 /* - BUTTONS - */
 
@@ -157,6 +187,12 @@ html, body {
 .form-select.select-platform {
     max-width: 50%;
 }
+
+.form-select.select-grid {
+    min-width: 350px !important;
+    max-width: 35%;
+}
+
 .form-select.select-date {
     max-width: 100%;
     margin-left: 20px;
@@ -171,5 +207,5 @@ html, body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }

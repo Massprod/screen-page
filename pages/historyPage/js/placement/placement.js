@@ -72,6 +72,10 @@ export default class Placement{
             const columnOrder = placementData['rows'][rowId]['columnsOrder'];
             for (let colId of columnOrder) {
                 const placementCell = columns[colId];
+                if (placementCell.element.classList.contains('identifier-cell')
+                     || placementCell.element.classList.contains('placement-cell-whitespace')) {
+                    continue;
+                }
                 const cellData = placementData['rows'][rowId]['columns'][colId];
                 placementCell.setElementData(cellData);
                 if (cellData['blocked']) {
@@ -90,13 +94,16 @@ export default class Placement{
         const wheelstacksData = historyData['wheelstacksData'];
         wheelstacksData.forEach( element => {
             const elementRow = element['rowPlacement'];
+            if ('extra' === elementRow) {
+                return;
+            }
             const elementCol = element['colPlacement'];
-            const wheelstackId = element['_id'];
+            const wheelstackId = element['_id'];    
             const numWheels = element['wheels'].length;
             const cellElement = this.placementRows[elementRow]['columns'][elementCol];
             const cellParag = document.createElement('p');
             cellParag.id = wheelstackId;
-            cellParag.innerHTML = `<b>${numWheels}</b>`;
+            cellParag.innerHTML = `${numWheels}`;
             cellElement.element.appendChild(cellParag);
             cellElement.historyData = element;
         })

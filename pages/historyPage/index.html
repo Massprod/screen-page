@@ -11,7 +11,7 @@
     <div class="main-page-container">
         <div class="main-page-top-container" id="topContainer">
             <div class="platforms-container select-active" id="platformsContainer">
-                <button id="switchView" class="btn btn-secondary rounded-circle switch-platform">X</button>
+                <button id="switchView" class="btn btn-secondary rounded-circle switch-view hidden">X</button>
                 <!-- platform selector -->
                 <div class="input-group input-group-lg mb-3 justify-content-center" id="platformSelectInputGroup">
                     <select class="form-select border-secondary fw-bold select-platform" id="platformsSelector">
@@ -40,7 +40,6 @@
                         </button>
                         <select class="form-select border-light fw-bold select-date" id="platformsHistorySelector">
                             <option selected value="">Выберите запись...</option>
-                            <!-- Dynamic options will go here -->
                         </select>
                         <button class="btn btn-outline-light" id="nextRecord">
                             <img class="shift-image" src="../images/right-arrow.png" alt="nextHistoryRecord">
@@ -50,10 +49,50 @@
                 <!-- platform history slider -->
             </div>
             <div class="orders-table-container" id="ordersTableContainer">
+            <!-- orders table -->
+            <!-- orders table -->    
             </div>
         </div>
         <div class="main-page-bottom-container" id ="botContainer">
-            <div class="grids-container" id="gridsContainer"></div>
+            <div class="grids-container select-active" id="gridsContainer">
+                <button id="switchViewGrid" class="btn btn-secondary rounded-circle switch-view grid hidden">X</button>
+                <!-- + grid selector + -->
+                <div class="input-group input-group-lg mb-3 justify-content-center" id="gridSelectInputGroup">
+                    <select class="form-select border-secondary fw-bold select-grid" id="gridsSelector">
+                        <option selected value="">Обновите данные...</option>
+                    </select>
+                </div>
+                 <!-- Buttons below the select field -->
+                 <div class="button-group justify-content-center" id="gridSelectButtons">
+                    <button id="refreshGrids" class="btn btn-lg btn-outline-secondary mx-2">Обновить</button>
+                    <button id="selectGrid" class="btn btn-lg btn-secondary mx-2">Выбрать</button>
+                </div>
+                <!-- - grid selector - -->
+
+                <!-- platform history slider -->
+                <div class="history-slider-container grid hidden" id="gridHistorySlider">
+                    <div class="input-group grid" id="dateInput">
+                        <input type="datetime-local" id="startDateTime" class="form-control" placeholder="Start DateTime">
+                        <input type="datetime-local" id="endDateTime" class="form-control" placeholder="End DateTime">
+                        <button id="loadData" class="btn btn-secondary">Загрузить</button>
+                    </div>
+                
+                    <div class="date-slider-container hidden" id="gridHistory">
+                        <button class="btn btn-dark me-3" id="periodChange">Период</button>
+                        <button class="btn btn-outline-light" id="prevRecord">
+                            <img class="shift-image" src="../images/left-arrow.png" alt="previousHistoryRecord">
+                        </button>
+                        <select class="form-select border-light fw-bold select-date" id="gridHistorySelector">
+                            <option selected value="">Выберите запись...</option>
+                        </select>
+                        <button class="btn btn-outline-light" id="nextRecord">
+                            <img class="shift-image" src="../images/right-arrow.png" alt="nextHistoryRecord">
+                        </button>
+                    </div>
+                </div>
+                <!-- platform history slider -->
+            </div>
+            <div class="grid-container hidden" id="gridContainer"></div>
         </div>
     </div>
     <script type="module" src="./js/main.js"></script>

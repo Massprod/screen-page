@@ -2,8 +2,6 @@ import Placement from "./placement/placement.js";
 import { getRequest } from "../../utility/basicRequests.js";
 import {
     BACK_URL,
-    BASIC_PMK_PLATFORM_PRESET,
-    BASIC_PMK_GRID_PRESET,
     AUTH_COOKIE_NAME,
     loginPage,
     RESTRICTED_TO_THIS_ROLE,
@@ -53,18 +51,60 @@ const navButton = new NavigationButton(
 const hoverCoord = new CellHoverCoordinate('placement-cell');
 // ---
 // TODO: Check what can be moved to unils.
+const triggerChange = async (element) => {
+    const event = new Event('change');
+    element.dispatchEvent(event);
+}
+
+const shiftSelector = async (selectorElement, shift) => {
+    if (0 < shift && selectorElement.selectedIndex < selectorElement.options.length - 1) {
+        selectorElement.selectedIndex += shift;
+        triggerChange(selectorElement);
+    } else if (0 > shift && 0 < selectorElement.selectedIndex) {
+        selectorElement.selectedIndex += shift;
+        triggerChange(selectorElement);
+    }
+}
+
+const selectPlacementButtonAction = async (
+    selectorElement, placement, showElements,
+    hideElements, viewState, viewButton, useIdentifiers) => {
+    if (!selectorElement.value) {
+        flashMessage.show({
+            'message': 'Выберите расположение',
+        })
+        return viewState;
+    }
+    const optionValue = JSON.parse(selectorElement.value);
+    const placementId = optionValue['_id'];
+    const presetId = optionValue['presetId'];
+    await preparePlacement(placementId, presetId, placement, useIdentifiers);
+    await switchView(hideElements, showElements);
+    viewButton.classList.remove('hidden');
+    return !viewState;
+}
+
+const updatePlacementHistory = async (placement, historyRecordId) => {
+    const historyRecordURL = `${BACK_URL.GET_HISTORY_RECORD}?record_id=${historyRecordId}`;
+    const historyDataResponse = await getRequest(historyRecordURL, true, true);
+    const historyRecordData = await historyDataResponse.json();
+    const recordDate = historyRecordData['createdAt'];
+    placement.updatePlacementHistory(historyRecordData);
+    return recordDate;
+}
+
 const getPlacementRecords = async (url) => {
     const allRecordsResponse = await getRequest(url, true, true);
     const allRecordsData = await allRecordsResponse.json();
     return allRecordsData;
 }
 
-const preparePlacement = async (placementId, presetId, placement) => {
+const preparePlacement = async (placementId, presetId, placement, useIdentifiers) => {
     placement.placementId = placementId;
     const presetDataURL = `${BACK_URL.GET_PRESET_DATA}/${presetId}`;
     const response = await getRequest(presetDataURL, true, true);
     const presetData = await response.json();
-    placement.buildPreset(presetData, false); 
+    placement.buildPreset(presetData, useIdentifiers); 
 }
 
 const getPlacementHistory = async (url, queries) => {
@@ -76,6 +116,43 @@ const getPlacementHistory = async (url, queries) => {
     const responseData = await response.json();
     return responseData;
 }
+
+const historySelectorPopulate = async (
+    placementId, startDateElement, endDateElement, selectorElement
+    ) => {
+        let periodStart = startDateElement.value;
+        let periodEnd = endDateElement.value;;
+        [periodStart, periodEnd] = await correctDatePeriod(periodStart, periodEnd);
+        if (!periodStart && !periodEnd) {
+            return null;
+        }
+        startDateElement.value = periodStart.split('.')[0];
+        endDateElement.value = periodEnd.split('.')[0];
+        const queries = {
+            'include_data': false,
+            'period_start': encodeURIComponent(periodStart),
+            'period_end': encodeURIComponent(periodEnd),
+            'placement_id': placementId,
+        }
+        const placementHistoryDataURL = `${BACK_URL.GET_PLACEMENT_HISTORY}`;
+        const historyRecords = await getPlacementHistory(placementHistoryDataURL, queries);
+        if (!historyRecords || 0 === historyRecords.length) {
+            flashMessage.show({
+                'message': '<b>Нет данных за выбранный период</b>',
+                'color': 'red',
+            })
+            return historyRecords;
+        }
+        const optionsData = {};
+        for (let index = 0; index < historyRecords.length; index += 1) {
+            const optionValue = index;
+            const optionName = historyRecords[index]['createdAt'];
+            const corDate = convertISOToCustomFormat(optionName, false, true, true);
+            optionsData[corDate] = optionValue;
+        }
+        await populateSelector(selectorElement, optionsData);
+        return historyRecords;
+    }
 
 const createOption = async (optionValue, optionName, selected) => {
     const newOption = document.createElement('option');
@@ -100,7 +177,6 @@ const populateSelector = async (selectorElement, optionsData) => {
     selectorElement.innerHTML = '';
     if (0 === optionsData.length || 0 === Object.keys(optionsData).length) {
         const emptyOption = await createOption(null, 'Нет данных', true);
-
         selectorElement.appendChild(emptyOption);
         return;
     }
@@ -158,6 +234,7 @@ var platformView = false;
 const platformSelector = platformsContainer.querySelector('#platformsSelector');
 const platformSelectBut = platformsContainer.querySelector('#selectPlatform');
 const platformsRefreshBut = platformsContainer.querySelector('#refreshPlatforms');
+
 const platformSelectInputGroup = platformsContainer.querySelector('#platformSelectInputGroup');
 const platformSelectButtonsContainer = platformsContainer.querySelector('#platformSelectButtons');
 const platformSelectActiveElements = new Set ([
@@ -191,18 +268,10 @@ const platformPlacementActiveElements = new Set([
 
 platformSelectBut.addEventListener('click', async (event) => {
     event.preventDefault();
-    if (!platformSelector.value) {
-        flashMessage.show({
-            'message': 'Выберите расположение',
-        })
-        return;
-    }
-    const optionValue = JSON.parse(platformSelector.value);
-    const placementId = optionValue['_id'];
-    const presetId = optionValue['presetId'];
-    await preparePlacement(placementId, presetId, platformPlacement);
-    await switchView(platformSelectActiveElements, platformPlacementActiveElements);
-    platformView = !platformView;
+    platformView = await selectPlacementButtonAction(
+        platformSelector, platformPlacement, platformPlacementActiveElements,
+        platformSelectActiveElements, platformView, switchPlatformViewBut, false
+    )
 })
 
 switchPlatformViewBut.addEventListener('click', async (event) => {
@@ -212,8 +281,7 @@ switchPlatformViewBut.addEventListener('click', async (event) => {
     } else {
         await switchView(platformSelectActiveElements, platformPlacementActiveElements);
     }
-    
-    platformView = !platformView
+    platformView = !platformView;
 })
 
 // + SLIDER +
@@ -222,19 +290,17 @@ const platformHistoryDateInputGroup = platformHistorySlider.querySelector('#date
 const platformHistoryLoadDataButton = platformHistorySlider.querySelector('#loadData');
 const platformHistoryStartDate = platformHistorySlider.querySelector('#startDateTime');
 const platformHistoryEndDate = platformHistorySlider.querySelector('#endDateTime');
-const choosePeriodElements = new Set([
+const platformPeriodElements = new Set([
     platformHistoryDateInputGroup,
 ])
 const platformHistoryContainer = platformHistorySlider.querySelector('#platformHistory');
-const chooseDataElements = new Set([
+const platformHistorySelectElements = new Set([
     platformHistoryContainer,
 ])
 const platformHistorySelector = platformHistoryContainer.querySelector('#platformsHistorySelector');
 const platformHistoryPreviousBut = platformHistoryContainer.querySelector('#prevRecord');
 const platformHistoryNextBut = platformHistoryContainer.querySelector('#nextRecord');
 
-const platformHistoryDataURL = `${BACK_URL.GET_PLACEMENT_HISTORY}`;
-// TODO: Change to universal, because we can use everything independent.
 platformHistoryLoadDataButton.addEventListener('click', async (event) => {
     event.preventDefault();
     const placementId = platformPlacement.placementId;
@@ -244,79 +310,184 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         })
         return;
     }
-    let startDate = platformHistoryStartDate.value;
-    let endDate = platformHistoryEndDate.value;
-    [startDate, endDate] = await correctDatePeriod(startDate, endDate);
-    if (!startDate && !endDate) {
+    const newHistoryRecords = await historySelectorPopulate(
+        placementId, platformHistoryStartDate, platformHistoryEndDate, platformHistorySelector,
+    )
+    if (!newHistoryRecords || 0 === newHistoryRecords.length) {
         return;
     }
-    const queries = {
-        'include_data': false,
-        'period_start': encodeURIComponent(startDate),
-        'period_end': encodeURIComponent(endDate),
-        'placement_id': placementId,
-    }
-    platformCurrentHistory = await getPlacementHistory(platformHistoryDataURL, queries);
-    const optionsData = {}
-    for (let index = 0; index < platformCurrentHistory.length; index += 1) {
-        const optionValue = index;
-        const optionName = platformCurrentHistory[index]['createdAt'];
-        const corDate = convertISOToCustomFormat(optionName, false, true, true);
-        optionsData[corDate] = optionValue;
-    }
-    await populateSelector(platformHistorySelector, optionsData);
-    await switchView(choosePeriodElements, chooseDataElements);
+    await updatePlacementHistory(platformPlacement, newHistoryRecords[0]['_id']);
+    platformCurrentHistory = newHistoryRecords;
+    await switchView(platformPeriodElements, platformHistorySelectElements);
 })
 
 const periodChangeBut = platformHistoryContainer.querySelector('#periodChange');
 periodChangeBut.addEventListener('click', async (event) => {
     event.preventDefault();
-    await switchView(chooseDataElements, choosePeriodElements);
+    await switchView(platformHistorySelectElements, platformPeriodElements);
 })
 
-const triggerChange = async (element) => {
-    const event = new Event('change');
-    element.dispatchEvent(event);
-}
-
 platformHistorySelector.addEventListener('change', async event => {
+    console.log('test');
     const selectedIndex = platformHistorySelector.selectedIndex;
-    const historyIndex = platformHistorySelector.options[selectedIndex].value;
+    const historyIndex = platformHistorySelector.options[selectedIndex].value;    
     const historyRecordId = platformCurrentHistory[historyIndex]['_id'];
-    const historyRecordURL = `${BACK_URL.GET_HISTORY_RECORD}?record_id=${historyRecordId}`;
-    const historyDataResponse = await getRequest(historyRecordURL, true, true);
-    const historyRecordData = await historyDataResponse.json();
-    const recordDate = historyRecordData['createdAt'];
-    platformPlacement.updatePlacementHistory(historyRecordData);
+    const recordDate = await updatePlacementHistory(
+        platformPlacement, historyRecordId,
+    )
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
-        'duration': 6000,
+        'duration': 2000,
     })
 })
 
-// TODO: change both to universal, just parge selector as args
 platformHistoryPreviousBut.addEventListener('click', async (event) => {
     event.preventDefault();
-    if (platformHistorySelector.selectedIndex > 0) {
-        platformHistorySelector.selectedIndex -= 1;
-        let index = platformHistorySelector.selectedIndex;
-        let historyRecord = platformHistorySelector.options[index].value;
-        triggerChange(platformHistorySelector);
-    }
+    await shiftSelector(platformHistorySelector, -1);
 })
 
 platformHistoryNextBut.addEventListener('click', async (event) => {
     event.preventDefault();
-    if (platformHistorySelector.selectedIndex < platformHistorySelector.options.length - 1) {
-        platformHistorySelector.selectedIndex += 1;
-        let index = platformHistorySelector.selectedIndex;
-        let historyRecord = platformHistorySelector.options[index].value;
-        triggerChange(platformHistorySelector);
-    }
+    await shiftSelector(platformHistorySelector, 1);
 })
-
 // - SLIDER -
-
 // - PLATFORM -
 
+// + GRID + 
 var gridCurrentHistory = [];
+
+const gridsContainer = document.getElementById('gridsContainer');
+const gridContainer = document.getElementById('gridContainer');
+const switchGridViewBut = gridsContainer.querySelector('#switchViewGrid');
+// TRUE = grid show | False == selector shown
+var gridView = false;
+
+// SELECTOR rel
+const gridsSelector = gridsContainer.querySelector('#gridsSelector');
+const gridSelectBut = gridsContainer.querySelector('#selectGrid');
+const gridRefreshBut = gridsContainer.querySelector('#refreshGrids');
+
+const gridSelectInputGroup = gridsContainer.querySelector('#gridSelectInputGroup');
+const gridSelectButtonsContainer = gridsContainer.querySelector('#gridSelectButtons');
+const gridSelectActiveElements = new Set([
+    gridSelectInputGroup,
+    gridSelectButtonsContainer,
+])
+// ---
+// Refresh grid options
+gridRefreshBut.addEventListener('click', async (event) => {
+    event.preventDefault();
+    const getGridsURL = `${BACK_URL.GET_GRIDS}?include_data=false`;
+    const gridRecords = await getPlacementRecords(getGridsURL);
+    gridsSelector.innerHTML = '';
+    gridRecords.forEach( async record => {
+        let optionValue = {
+            '_id': record['_id'],
+            'presetId': record['preset'],
+        }
+        optionValue = JSON.stringify(optionValue);
+        const newOption = await createOption(optionValue, record['name']);
+        gridsSelector.appendChild(newOption);
+    })
+})
+// ---
+// PLACEMENT rel
+const gridPlacement = new Placement('grid');
+// ZOOMER
+const zoomer = new ZoomAndDrag({
+    'viewport': gridContainer,
+    'grid': gridPlacement.element,
+    'maxScale': 0.7,
+});
+// ---
+// VIEW SWITCH
+gridContainer.appendChild(gridPlacement.element);
+const gridHistorySlider = document.getElementById('gridHistorySlider');
+const gridPlacementActiveElements = new Set([
+    gridContainer,
+    gridHistorySlider,
+])
+gridSelectBut.addEventListener('click', async (event) => {
+    event.preventDefault();
+    gridView = await selectPlacementButtonAction(
+        gridsSelector, gridPlacement, gridPlacementActiveElements,
+        gridSelectActiveElements, gridView, switchGridViewBut, true
+    )
+})
+
+switchGridViewBut.addEventListener('click', async (event) => {
+    event.preventDefault();
+    if (gridView) {
+        await switchView(gridPlacementActiveElements, gridSelectActiveElements);
+    } else {
+        await switchView(gridSelectActiveElements, gridPlacementActiveElements);
+    }
+    gridView = !gridView;
+})
+// ---
+// History slider
+const gridHistoryDateInputGroup = gridHistorySlider.querySelector('#dateInput');
+const gridHistoryLoadDataButton = gridHistorySlider.querySelector('#loadData');
+const gridHistoryStartDate = gridHistorySlider.querySelector('#startDateTime');
+const gridHistoryEndDate = gridHistorySlider.querySelector('#endDateTime');
+const gridPeriodElements = new Set([
+    gridHistoryDateInputGroup,
+]);
+const gridHistoryContainer = gridHistorySlider.querySelector('#gridHistory');
+const gridHistorySelectElements = new Set([
+    gridHistoryContainer,
+]);
+const gridHistorySelector = gridHistoryContainer.querySelector('#gridHistorySelector');
+const gridHistoryPreviousBut = gridHistoryContainer.querySelector('#prevRecord');
+const gridHistoryNextBut = gridHistoryContainer.querySelector('#nextRecord');
+
+gridHistoryLoadDataButton.addEventListener('click', async (event) => {
+    event.preventDefault();
+    const placementId = gridPlacement.placementId;
+    if (!placementId) {
+        flashMessage.show({
+            'message': 'Не выбрано расположение',
+        })
+        return;
+    }
+    const newHistoryRecords = await historySelectorPopulate(
+        placementId, gridHistoryStartDate, gridHistoryEndDate, gridHistorySelector,
+    )
+    if (!newHistoryRecords || 0 === newHistoryRecords.length) {
+        return;
+    }
+    await updatePlacementHistory(gridPlacement, newHistoryRecords[0]['_id']);
+    gridCurrentHistory = newHistoryRecords;
+    await switchView(gridPeriodElements, gridHistorySelectElements);
+})
+
+const gridPeriodChangeBut = gridHistoryContainer.querySelector('#periodChange');
+gridPeriodChangeBut.addEventListener('click', async (event) => {
+    event.preventDefault();
+    await switchView(gridHistorySelectElements, gridPeriodElements);
+})
+
+gridHistorySelector.addEventListener('change', async event => {
+    const selectedIndex = gridHistorySelector.selectedIndex;
+    const historyIndex = gridHistorySelector.options[selectedIndex].value;
+    const historyRecordId = gridCurrentHistory[historyIndex]['_id'];
+    const recordDate = await updatePlacementHistory(gridPlacement, historyRecordId);
+    flashMessage.show({
+        'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
+        'duration': 2000,
+    })
+})
+
+gridHistoryPreviousBut.addEventListener('click', async (event) => {
+    event.preventDefault();
+    await shiftSelector(gridHistorySelector, -1);
+})
+
+gridHistoryNextBut.addEventListener('click', async (event) => {
+    event.preventDefault();
+    await shiftSelector(gridHistorySelector, 1);
+})
+// ---
+// - GRID -
+// +  ORDERS TABLE +
+
