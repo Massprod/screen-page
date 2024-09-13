@@ -43,10 +43,11 @@ export default class NavigationButton {
 
         // Create navigation buttons from buttonsData
         for ( let btnInfo of this.buttonsData) {
-            const button = document.createElement('button');
-            button.className = btnInfo.class;
-            button.textContent = btnInfo.text;
-            button.onclick = (event) => {
+            const buttonLink = document.createElement('a');
+            buttonLink.className = btnInfo.class;
+            buttonLink.textContent = btnInfo.text;
+            buttonLink.href = btnInfo.href;
+            buttonLink.onclick = (event) => {
                 if (window.location.href !== btnInfo.href) {
                     if (btnInfo.href === loginPage) {
                         this.clearCookies.forEach( (cookieName) => {
@@ -61,7 +62,7 @@ export default class NavigationButton {
                     window.location.href = btnInfo.href;
                 }
             };
-            navContainer.appendChild(button);
+            navContainer.appendChild(buttonLink);
         }
 
         // Append navButton and navContainer to the body
