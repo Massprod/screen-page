@@ -101,6 +101,7 @@ export default class Placement{
             const wheelstackId = element['_id'];    
             const numWheels = element['wheels'].length;
             const cellElement = this.placementRows[elementRow]['columns'][elementCol];
+            cellElement.innerHTML = '';
             const cellParag = document.createElement('p');
             cellParag.id = wheelstackId;
             cellParag.innerHTML = `${numWheels}`;
