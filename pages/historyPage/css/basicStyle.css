@@ -193,18 +193,82 @@ html, body {
     max-width: 35%;
 }
 
+/* .form-select.select-date {
+    max-width: 100%;
+    margin-left: 17px;
+    margin-right: 17px;
+} */
 .form-select.select-date {
     max-width: 100%;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 17px;
+    margin-right: 17px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease; /* Transition for shadow and border */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Light initial shadow */
+    border: 1px solid #ccc; /* Default border */
 }
-/* - SELECTORS - */
 
+/* Subtle focus or hover effect */
+.form-select.select-date:focus, 
+.form-select.select-date:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Slightly deeper shadow */
+    border-color: #6c757d; /* Change border color to indicate focus */
+}
+
+/* Pressed state */
+.form-select.select-date:active {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12); /* Keep light shadow when pressed */
+}
+
+/* - SELECTORS - */
 
 .shift-image {
     height: 25px;
     width: 20px;
 }
+
+
+/* + RECORD BUTTONS + */
+#nextRecord {
+    display: inline-block;
+    border-radius: 8px;
+    transition: box-shadow 0.15s ease, transform 0.15s ease; /* Faster, smoother transition */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Very light shadow */
+}
+
+#nextRecord:hover {
+    transform: translateX(2px); /* Very slight right movement */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); /* Slight increase in shadow */
+}
+
+#nextRecord img {
+    transition: transform 0.15s ease; /* Subtle transition */
+}
+
+#nextRecord:hover img {
+    transform: translateX(1px); /* Very slight image movement */
+}
+
+/* Subtle hover animation for prevRecord button */
+#prevRecord {
+    display: inline-block;
+    border-radius: 8px;
+    transition: box-shadow 0.15s ease, transform 0.15s ease; /* Smooth, subtle transition */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Very light shadow */
+}
+
+#prevRecord:hover {
+    transform: translateX(-2px); /* Slight left movement */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); /* Slight increase in shadow */
+}
+
+#prevRecord img {
+    transition: transform 0.15s ease; /* Smooth image transition */
+}
+
+#prevRecord:hover img {
+    transform: translateX(-1px); /* Slight left image movement */
+}
+/* - RECORD BUTTONS - */
 
 .hidden {
     display: none !important;
