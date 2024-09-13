@@ -34,3 +34,16 @@ export const convertToUTC = (localDateTime) => {
     localDate = localDate.replace('Z', '+00:00');
     return localDate;
 }
+
+export const convertUTCToLocal = (utcDateTime) => {
+    const utcDate = new Date(utcDateTime);
+    
+    // Get local time offset in minutes and convert to milliseconds
+    const offset = utcDate.getTimezoneOffset() * 60000;
+    
+    // Adjust the UTC time to local by adding the offset
+    const localTime = new Date(utcDate.getTime() - offset);
+    
+    // Format as "YYYY-MM-DDTHH:MM" (required for <input type="datetime-local">)
+    return localTime.toISOString().slice(0, 16);
+}
