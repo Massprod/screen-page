@@ -11,7 +11,7 @@ import {
     NAV_BUTTONS,
     USER_ROLE_COOKIE_UPDATE_INTERVAL,
 } from "../../uniConstants.js";
-import { ORDER_TYPES_TRANSLATE_TABLE } from "../../managerPage/js/constants.js";
+import { BASE_PLATFORM_NAME, ORDER_TYPES_TRANSLATE_TABLE } from "../../managerPage/js/constants.js";
 import { keepAuthCookieFresh, clearRedirect, validateRoleCookie, getCookie } from "../../utility/roleCookies.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import CellHoverCoordinate from "../../utility/cellHover/cellHoverCoordinate.js";
@@ -51,9 +51,30 @@ const navButton = new NavigationButton(
 // ---
 // HOVERING
 const hoverCoord = new CellHoverCoordinate('placement-cell');
+window.addEventListener('resize', (event) => {
+    const breakerRows = document.querySelectorAll('.data-breaker');
+    if (window.innerWidth <= 1600) {
+        breakerRows.forEach( element => {
+            adjustRowsBreaker(element);
+        })
+    } else {
+        breakerRows.forEach( element => {
+            adjustRowsBreaker(element);
+        })
+    }
+})
 // ---
 // TODO: Check what can be moved to utils.
 // + UNI +
+
+const adjustRowsBreaker = async (element) => {
+    if (window.innerWidth <= 1600) {
+        element.colSpan = 4;
+    } else {
+        element.colSpan = 6;
+    }
+}
+
 const triggerChange = async (element) => {
     const event = new Event('change');
     element.dispatchEvent(event);
@@ -66,6 +87,12 @@ const shiftSelector = async (selectorElement, shift) => {
     } else if (0 > shift && 0 < selectorElement.selectedIndex) {
         selectorElement.selectedIndex += shift;
         triggerChange(selectorElement);
+    }
+}
+
+const clearElements = async (elements) => {
+    for (let element of elements) {
+        element.remove();
     }
 }
 
@@ -84,16 +111,31 @@ const gatherOrderRowData = async (orderData) => {
     return showData;
 }
 
-const createOrderRecords = async (ordersData, targetTable) => {
+const createOrderRecords = async (ordersData, targetTable, placementType) => {
     const orderElements = [];
-    ordersData.forEach( async (orderData) => {
+    const emptyRow = document.createElement('tr');
+    const emptyRecord = document.createElement('td');
+    emptyRow.classList.add('data-breaker');
+    emptyRecord.id = 'recordsBreak';
+    await adjustRowsBreaker(emptyRecord);
+    emptyRecord.classList.add('data-breaker');
+    emptyRecord.style.fontWeight = 625;
+    if (0 !== ordersData.length) {
+        emptyRecord.innerHTML = `Данные для <b>${placementType}</b>`;
+    } else {
+        emptyRecord.innerHTML = `Нет данных для отображения: <b>${placementType}</b>`;
+    }
+    emptyRow.appendChild(emptyRecord);
+    targetTable.appendChild(emptyRow);
+    orderElements.push(emptyRow);
+    for (let orderData of ordersData) {
         const displayData = await gatherOrderRowData(orderData);
         const rowElement = await createTableRow(displayData);
         rowElement.id = displayData['orderId'];
         rowElement.childNodes[0].id = displayData['batchNumber'];
         targetTable.appendChild(rowElement);
         orderElements.push(rowElement);
-    })
+    }
     return orderElements;
 }
 
@@ -280,6 +322,7 @@ var ordersTable = document.getElementById('ordersTableBody');
 var platformCurrentHistory = [];
 var platformActiveHistoryData = null;
 var platformActiveHistoryElements = null;
+var platformHistoryLoading = null;
 
 const platformsContainer = document.getElementById('platformsContainer');
 const switchPlatformViewBut = platformsContainer.querySelector('#switchView');
@@ -366,6 +409,15 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         })
         return;
     }
+    if (platformHistoryLoading) {
+        flashMessage.show({
+            'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
+            'duration': 1000,
+            'color': 'red',
+        })
+        return;
+    }
+    platformHistoryLoading = true;
     const newHistoryRecords = await historySelectorPopulate(
         placementId, platformHistoryStartDate, platformHistoryEndDate, platformHistorySelector,
     )
@@ -376,11 +428,11 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
     platformCurrentHistory = newHistoryRecords;
     if (platformActiveHistoryData) {
         if (platformActiveHistoryElements) {
-            platformActiveHistoryElements.forEach( element => {
-                element.remove();
-            })
+            await clearElements(platformActiveHistoryElements);
         }
-        platformActiveHistoryElements = await createOrderRecords(platformActiveHistoryData['placementOrders'], ordersTable);
+        platformActiveHistoryElements = await createOrderRecords(
+            platformActiveHistoryData['placementOrders'], ordersTable, 'платформы',
+        );
     }
     await switchView(platformPeriodElements, platformHistorySelectElements);
     const recordDate = platformActiveHistoryData['createdAt'];
@@ -388,6 +440,7 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
     })
+    platformHistoryLoading = false;
 })
 
 const periodChangeBut = platformHistoryContainer.querySelector('#periodChange');
@@ -397,6 +450,15 @@ periodChangeBut.addEventListener('click', async (event) => {
 })
 
 platformHistorySelector.addEventListener('change', async event => {
+    if (platformHistoryLoading) {
+        flashMessage.show({
+            'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
+            'duration': 1000,
+            'color': 'red',
+        })
+        return;
+    }
+    platformHistoryLoading = true;
     const selectedIndex = platformHistorySelector.selectedIndex;
     const historyIndex = platformHistorySelector.options[selectedIndex].value;    
     const historyRecordId = platformCurrentHistory[historyIndex]['_id'];
@@ -405,26 +467,43 @@ platformHistorySelector.addEventListener('change', async event => {
     )
     if (platformActiveHistoryData) {
         if (platformActiveHistoryElements) {
-            platformActiveHistoryElements.forEach( element => {
-                element.remove();
-            })
+            await clearElements(platformActiveHistoryElements);
         }
-        platformActiveHistoryElements = await createOrderRecords(platformActiveHistoryData['placementOrders'], ordersTable);
+        platformActiveHistoryElements = await createOrderRecords(
+            platformActiveHistoryData['placementOrders'], ordersTable, 'платформы'
+        );
     }
     const recordDate = platformActiveHistoryData['createdAt'];
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
-    })
+    });
+    platformHistoryLoading = false;
 })
 
 platformHistoryPreviousBut.addEventListener('click', async (event) => {
     event.preventDefault();
+    if (platformHistoryLoading) {
+        flashMessage.show({
+            'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
+            'duration': 1000,
+            'color': 'red',
+        })
+        return;
+    }
     await shiftSelector(platformHistorySelector, -1);
 })
 
 platformHistoryNextBut.addEventListener('click', async (event) => {
     event.preventDefault();
+    if (platformHistoryLoading) {
+        flashMessage.show({
+            'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
+            'duration': 1000,
+            'color': 'red',
+        })
+        return;
+    }
     await shiftSelector(platformHistorySelector, 1);
 })
 // - SLIDER -
@@ -434,6 +513,7 @@ platformHistoryNextBut.addEventListener('click', async (event) => {
 var gridCurrentHistory = [];
 var gridActiveHistoryData = null;
 var gridActiveHistoryElements = null;
+var gridHistoryLoading = false;
 
 const gridsContainer = document.getElementById('gridsContainer');
 const gridContainer = document.getElementById('gridContainer');
@@ -529,6 +609,15 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
         })
         return;
     }
+    if (gridHistoryLoading) {
+        flashMessage.show({
+            'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
+            'duration': 1000,
+            'color': 'red',
+        })
+        return;
+    }
+    gridHistoryLoading = true;
     const newHistoryRecords = await historySelectorPopulate(
         placementId, gridHistoryStartDate, gridHistoryEndDate, gridHistorySelector,
     )
@@ -539,11 +628,11 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
     gridCurrentHistory = newHistoryRecords;
     if (gridActiveHistoryData) {
         if (gridActiveHistoryElements) {
-            gridActiveHistoryElements.forEach( element => {
-                element.remove();
-            })
+            clearElements(gridActiveHistoryElements);
         }
-        gridActiveHistoryElements = await createOrderRecords(gridActiveHistoryData['placementOrders'], ordersTable);
+        gridActiveHistoryElements = await createOrderRecords(
+            gridActiveHistoryData['placementOrders'], ordersTable, 'приямка'
+        );
     }
     await switchView(gridPeriodElements, gridHistorySelectElements);
     const recordDate = gridActiveHistoryData['createdAt'];
@@ -551,6 +640,7 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
     })
+    gridHistoryLoading = false;
 })
 
 const gridPeriodChangeBut = gridHistoryContainer.querySelector('#periodChange');
@@ -560,36 +650,60 @@ gridPeriodChangeBut.addEventListener('click', async (event) => {
 })
 
 gridHistorySelector.addEventListener('change', async event => {
+    if (gridHistoryLoading) {
+        flashMessage.show({
+            'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
+            'duration': 1000,
+            'color': 'red',
+        })
+        return;
+    }
+    gridHistoryLoading = true;
     const selectedIndex = gridHistorySelector.selectedIndex;
     const historyIndex = gridHistorySelector.options[selectedIndex].value;
     const historyRecordId = gridCurrentHistory[historyIndex]['_id'];
     gridActiveHistoryData = await updatePlacementHistory(gridPlacement, historyRecordId);
     if (gridActiveHistoryData) {
         if (gridActiveHistoryElements) {
-            gridActiveHistoryElements.forEach( element => {
-                element.remove();
-            })
+            await clearElements(gridActiveHistoryElements);
+            gridActiveHistoryElements = [];
         }
-        gridActiveHistoryElements = await createOrderRecords(gridActiveHistoryData['placementOrders'], ordersTable);
+        gridActiveHistoryElements = await createOrderRecords(
+            gridActiveHistoryData['placementOrders'], ordersTable, 'приямка',
+        );
     }
     const recordDate = gridActiveHistoryData['createdAt'];
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
     })
+    gridHistoryLoading = false;
 })
 
 gridHistoryPreviousBut.addEventListener('click', async (event) => {
     event.preventDefault();
+    if (gridHistoryLoading) {
+        flashMessage.show({
+            'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
+            'duration': 1000,
+            'color': 'red',
+        })
+        return;
+    }
     await shiftSelector(gridHistorySelector, -1);
 })
 
 gridHistoryNextBut.addEventListener('click', async (event) => {
     event.preventDefault();
+    if (gridHistoryLoading) {
+        flashMessage.show({
+            'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
+            'duration': 1000,
+            'color': 'red',
+        })
+        return;
+    }
     await shiftSelector(gridHistorySelector, 1);
 })
 // ---
 // - GRID -
-// +  ORDERS TABLE +
-
-// - ORDERS TABLE - 
