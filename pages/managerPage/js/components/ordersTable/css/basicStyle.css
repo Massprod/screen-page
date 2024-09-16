@@ -34,10 +34,10 @@
 }
 
 .orders-table-header th {
-    padding: 20px 15px;
+    padding: 5px;
     text-align: center;
     font-weight: 650;
-    font-size: 1em;
+    font-size: 1.1em;
     color: #fff;
     text-transform: uppercase;
     background: linear-gradient(to top, #444, #333);
