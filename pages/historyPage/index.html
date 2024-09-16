@@ -48,10 +48,26 @@
                 </div>
                 <!-- platform history slider -->
             </div>
-            <div class="orders-table-container" id="ordersTableContainer">
             <!-- orders table -->
-            <!-- orders table -->    
+            <div class="orders-table-container" id="ordersTableContainer">
+                <!-- orders table -->
+                <table class="orders-table" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th id="batchNumber">Номер партии</th>
+                            <th id="orderId">Номер заказа</th>
+                            <th id="orderType">Тип заказа</th>
+                            <th id="source">Исходная</th>
+                            <th id="destination">Конечная</th>
+                            <th id="createdAt">Время поступления</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                    </tbody>
+                </table>
+                <!-- orders table -->    
             </div>
+            <!-- orders table -->   
         </div>
         <div class="main-page-bottom-container" id ="botContainer">
             <div class="grids-container select-active" id="gridsContainer">

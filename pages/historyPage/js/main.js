@@ -11,6 +11,7 @@ import {
     NAV_BUTTONS,
     USER_ROLE_COOKIE_UPDATE_INTERVAL,
 } from "../../uniConstants.js";
+import { ORDER_TYPES_TRANSLATE_TABLE } from "../../managerPage/js/constants.js";
 import { keepAuthCookieFresh, clearRedirect, validateRoleCookie, getCookie } from "../../utility/roleCookies.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import CellHoverCoordinate from "../../utility/cellHover/cellHoverCoordinate.js";
@@ -18,6 +19,7 @@ import ZoomAndDrag from "../../utility/zoomDrag.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import { getISOFormatUTC, convertToUTC, convertUTCToLocal } from "../../utility/timeConvert.js";
 import convertISOToCustomFormat from "../../utility/convertToIso.js";
+import { createPlacementRecord, createTableRow } from "./ordersTable/ordersTable.js";
 
 
 // TODO: Can be universal on all pages, only change is roles.
@@ -50,7 +52,8 @@ const navButton = new NavigationButton(
 // HOVERING
 const hoverCoord = new CellHoverCoordinate('placement-cell');
 // ---
-// TODO: Check what can be moved to unils.
+// TODO: Check what can be moved to utils.
+// + UNI +
 const triggerChange = async (element) => {
     const event = new Event('change');
     element.dispatchEvent(event);
@@ -64,6 +67,34 @@ const shiftSelector = async (selectorElement, shift) => {
         selectorElement.selectedIndex += shift;
         triggerChange(selectorElement);
     }
+}
+
+const gatherOrderRowData = async (orderData) => {
+    const showData = {};
+    const wheelstackId = orderData['affectedWheelStacks']['source'];
+    const wheelstackURL = `${BACK_URL.GET_WHEELSTACK_RECORD}/${wheelstackId}`;
+    const wheelstackResp = await getRequest(wheelstackURL, true, true);
+    const wheelstackData = await wheelstackResp.json();
+    showData['batchNumber'] = `<b>${wheelstackData['batchNumber']}</b>`;
+    showData['orderId'] = orderData['_id'];
+    showData['orderType'] = ORDER_TYPES_TRANSLATE_TABLE[orderData['orderType']];
+    showData['source'] = await createPlacementRecord(orderData['source']);
+    showData['destination'] = await createPlacementRecord(orderData['destination']);
+    showData['createdAt'] = `<b>${convertISOToCustomFormat(orderData['createdAt'], true, true)}</b>`;
+    return showData;
+}
+
+const createOrderRecords = async (ordersData, targetTable) => {
+    const orderElements = [];
+    ordersData.forEach( async (orderData) => {
+        const displayData = await gatherOrderRowData(orderData);
+        const rowElement = await createTableRow(displayData);
+        rowElement.id = displayData['orderId'];
+        rowElement.childNodes[0].id = displayData['batchNumber'];
+        targetTable.appendChild(rowElement);
+        orderElements.push(rowElement);
+    })
+    return orderElements;
 }
 
 const selectPlacementButtonAction = async (
@@ -88,9 +119,8 @@ const updatePlacementHistory = async (placement, historyRecordId) => {
     const historyRecordURL = `${BACK_URL.GET_HISTORY_RECORD}?record_id=${historyRecordId}`;
     const historyDataResponse = await getRequest(historyRecordURL, true, true);
     const historyRecordData = await historyDataResponse.json();
-    const recordDate = historyRecordData['createdAt'];
     placement.updatePlacementHistory(historyRecordData);
-    return recordDate;
+    return historyRecordData;
 }
 
 const getPlacementRecords = async (url) => {
@@ -244,9 +274,12 @@ const correctDatePeriod = async (periodStart, periodEnd) => {
     }
     return periods;
 }
-
+// - UNI -
 // + PLATFORM +
+var ordersTable = document.getElementById('ordersTableBody');
 var platformCurrentHistory = [];
+var platformActiveHistoryData = null;
+var platformActiveHistoryElements = null;
 
 const platformsContainer = document.getElementById('platformsContainer');
 const switchPlatformViewBut = platformsContainer.querySelector('#switchView');
@@ -339,9 +372,22 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
     if (!newHistoryRecords || 0 === newHistoryRecords.length) {
         return;
     }
-    await updatePlacementHistory(platformPlacement, newHistoryRecords[0]['_id']);
+    platformActiveHistoryData = await updatePlacementHistory(platformPlacement, newHistoryRecords[0]['_id']);
     platformCurrentHistory = newHistoryRecords;
+    if (platformActiveHistoryData) {
+        if (platformActiveHistoryElements) {
+            platformActiveHistoryElements.forEach( element => {
+                element.remove();
+            })
+        }
+        platformActiveHistoryElements = await createOrderRecords(platformActiveHistoryData['placementOrders'], ordersTable);
+    }
     await switchView(platformPeriodElements, platformHistorySelectElements);
+    const recordDate = platformActiveHistoryData['createdAt'];
+    flashMessage.show({
+        'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
+        'duration': 1000,
+    })
 })
 
 const periodChangeBut = platformHistoryContainer.querySelector('#periodChange');
@@ -354,9 +400,18 @@ platformHistorySelector.addEventListener('change', async event => {
     const selectedIndex = platformHistorySelector.selectedIndex;
     const historyIndex = platformHistorySelector.options[selectedIndex].value;    
     const historyRecordId = platformCurrentHistory[historyIndex]['_id'];
-    const recordDate = await updatePlacementHistory(
+    platformActiveHistoryData = await updatePlacementHistory(
         platformPlacement, historyRecordId,
     )
+    if (platformActiveHistoryData) {
+        if (platformActiveHistoryElements) {
+            platformActiveHistoryElements.forEach( element => {
+                element.remove();
+            })
+        }
+        platformActiveHistoryElements = await createOrderRecords(platformActiveHistoryData['placementOrders'], ordersTable);
+    }
+    const recordDate = platformActiveHistoryData['createdAt'];
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
@@ -377,6 +432,8 @@ platformHistoryNextBut.addEventListener('click', async (event) => {
 
 // + GRID + 
 var gridCurrentHistory = [];
+var gridActiveHistoryData = null;
+var gridActiveHistoryElements = null;
 
 const gridsContainer = document.getElementById('gridsContainer');
 const gridContainer = document.getElementById('gridContainer');
@@ -478,9 +535,22 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
     if (!newHistoryRecords || 0 === newHistoryRecords.length) {
         return;
     }
-    await updatePlacementHistory(gridPlacement, newHistoryRecords[0]['_id']);
+    gridActiveHistoryData = await updatePlacementHistory(gridPlacement, newHistoryRecords[0]['_id']);
     gridCurrentHistory = newHistoryRecords;
+    if (gridActiveHistoryData) {
+        if (gridActiveHistoryElements) {
+            gridActiveHistoryElements.forEach( element => {
+                element.remove();
+            })
+        }
+        gridActiveHistoryElements = await createOrderRecords(gridActiveHistoryData['placementOrders'], ordersTable);
+    }
     await switchView(gridPeriodElements, gridHistorySelectElements);
+    const recordDate = gridActiveHistoryData['createdAt'];
+    flashMessage.show({
+        'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
+        'duration': 1000,
+    })
 })
 
 const gridPeriodChangeBut = gridHistoryContainer.querySelector('#periodChange');
@@ -493,7 +563,16 @@ gridHistorySelector.addEventListener('change', async event => {
     const selectedIndex = gridHistorySelector.selectedIndex;
     const historyIndex = gridHistorySelector.options[selectedIndex].value;
     const historyRecordId = gridCurrentHistory[historyIndex]['_id'];
-    const recordDate = await updatePlacementHistory(gridPlacement, historyRecordId);
+    gridActiveHistoryData = await updatePlacementHistory(gridPlacement, historyRecordId);
+    if (gridActiveHistoryData) {
+        if (gridActiveHistoryElements) {
+            gridActiveHistoryElements.forEach( element => {
+                element.remove();
+            })
+        }
+        gridActiveHistoryElements = await createOrderRecords(gridActiveHistoryData['placementOrders'], ordersTable);
+    }
+    const recordDate = gridActiveHistoryData['createdAt'];
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
