@@ -80,13 +80,13 @@
 
 @keyframes dataBreakerFlashlight {
     0%, 100% {
-        background-color: rgba(210, 210, 210, 1); /* Bright white */
+        background-color: rgba(205, 210, 210, 1); /* Bright white */
     }
     25%, 75% {
-        background-color: rgba(180, 180, 180, 0.8); /* Dark gray */
+        background-color: rgba(195, 200, 200, 0.8); /* Dark gray */
     }
     50% {
-        background-color: rgba(190, 195, 190, 1); /* Darker gray */
+        background-color: rgba(195, 205, 205, 0.5); /* Darker gray */
     }
 }
 

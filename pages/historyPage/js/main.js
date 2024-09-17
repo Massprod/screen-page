@@ -516,6 +516,9 @@ var gridHistoryLoading = false;
 
 const gridsContainer = document.getElementById('gridsContainer');
 const gridContainer = document.getElementById('gridContainer');
+gridContainer.addEventListener('contextmenu', event => {
+    event.preventDefault();
+})
 const switchGridViewBut = gridsContainer.querySelector('#switchViewGrid');
 // TRUE = grid show | False == selector shown
 var gridView = false;
