@@ -67,16 +67,15 @@ export default class Placement{
         // Bad and sad, but w.e
         // We either update orders inside of them or we just reassign which is even faster.
         this.placementExtraRows = placementData['extra'];
-        for (let rowId of placementData['rowsOrder']) {
-            const columns = this.placementRows[rowId].columns;
-            const columnOrder = placementData['rows'][rowId]['columnsOrder'];
-            for (let colId of columnOrder) {
-                const placementCell = columns[colId];
+        console.log(placementData);
+        placementData['rowsOrder'].forEach( rowId => {
+            placementData['rows'][rowId]['columnsOrder'].forEach( colId => {
+                const placementCell = this.placementRows[rowId]['columns'][colId];
                 if (placementCell.element.classList.contains('identifier-cell')
                      || placementCell.element.classList.contains('placement-cell-whitespace')) {
-                    continue;
+                    return;
                 }
-                const cellData = placementData['rows'][rowId]['columns'][colId];
+                const cellData = placementData['rows'][rowId][['columns']][colId];
                 placementCell.setElementData(cellData);
                 if (cellData['blocked']) {
                     placementCell.blockState();
@@ -89,8 +88,32 @@ export default class Placement{
                 } else {
                     placementCell.setAsEmptyCell();
                 }
-            }
-        }
+            }) 
+        })
+        // for (let rowId of placementData['rowsOrder']) {
+        //     const columns = this.placementRows[rowId].columns;
+        //     const columnOrder = placementData['rows'][rowId]['columnsOrder'];
+        //     for (let colId of columnOrder) {
+        //         const placementCell = columns[colId];
+        //         if (placementCell.element.classList.contains('identifier-cell')
+        //              || placementCell.element.classList.contains('placement-cell-whitespace')) {
+        //             continue;
+        //         }
+        //         const cellData = placementData['rows'][rowId]['columns'][colId];
+        //         placementCell.setElementData(cellData);
+        //         if (cellData['blocked']) {
+        //             placementCell.blockState();
+        //         } else {
+        //             placementCell.unblockState();
+        //         }
+        //         // TODO: We need to utilize it beter.
+        //         if ('wheelStack' in cellData && cellData['wheelStack']) {
+        //             placementCell.setAsElement();
+        //         } else {
+        //             placementCell.setAsEmptyCell();
+        //         }
+        //     }
+        // }
         const wheelstacksData = historyData['wheelstacksData'];
         wheelstacksData.forEach( element => {
             const elementRow = element['rowPlacement'];

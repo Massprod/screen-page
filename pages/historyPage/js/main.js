@@ -111,29 +111,26 @@ const gatherOrderRowData = async (orderData) => {
     return showData;
 }
 
-const createOrderRecords = async (ordersData, targetTable, placementType) => {
+const createOrderRecords = async (ordersData, targetTable, placementType, breakerRow = null, useBreaker = true) => {
     const orderElements = [];
-    const emptyRow = document.createElement('tr');
-    const emptyRecord = document.createElement('td');
-    emptyRow.classList.add('data-breaker');
-    emptyRecord.id = 'recordsBreak';
-    await adjustRowsBreaker(emptyRecord);
-    emptyRecord.classList.add('data-breaker');
-    emptyRecord.style.fontWeight = 625;
-    if (0 !== ordersData.length) {
-        emptyRecord.innerHTML = `Данные для <b>${placementType}</b>`;
-    } else {
-        emptyRecord.innerHTML = `Нет данных для отображения: <b>${placementType}</b>`;
+    if (breakerRow) {
+        await adjustRowsBreaker(breakerRow);
     }
-    emptyRow.appendChild(emptyRecord);
-    targetTable.appendChild(emptyRow);
-    orderElements.push(emptyRow);
+    if (0 !== ordersData.length) {
+        breakerRow.childNodes[0].innerHTML = `Данные для <b>${placementType}</b>`;
+    } else {
+        breakerRow.childNodes[0].innerHTML = `Нет данных для отображения: <b>${placementType}</b>`;
+    }
     for (let orderData of ordersData) {
         const displayData = await gatherOrderRowData(orderData);
         const rowElement = await createTableRow(displayData);
         rowElement.id = displayData['orderId'];
         rowElement.childNodes[0].id = displayData['batchNumber'];
-        targetTable.appendChild(rowElement);
+        if (breakerRow && useBreaker) {
+            targetTable.insertBefore(rowElement, breakerRow);
+        } else {
+            targetTable.appendChild(rowElement);
+        }
         orderElements.push(rowElement);
     }
     return orderElements;
@@ -323,6 +320,8 @@ var platformCurrentHistory = [];
 var platformActiveHistoryData = null;
 var platformActiveHistoryElements = null;
 var platformHistoryLoading = null;
+var platformBreaker = document.getElementById('platformBreaker');
+var gridBreaker = document.getElementById('gridBreaker');
 
 const platformsContainer = document.getElementById('platformsContainer');
 const switchPlatformViewBut = platformsContainer.querySelector('#switchView');
@@ -431,7 +430,7 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
             await clearElements(platformActiveHistoryElements);
         }
         platformActiveHistoryElements = await createOrderRecords(
-            platformActiveHistoryData['placementOrders'], ordersTable, 'платформы',
+            platformActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker
         );
     }
     await switchView(platformPeriodElements, platformHistorySelectElements);
@@ -470,7 +469,7 @@ platformHistorySelector.addEventListener('change', async event => {
             await clearElements(platformActiveHistoryElements);
         }
         platformActiveHistoryElements = await createOrderRecords(
-            platformActiveHistoryData['placementOrders'], ordersTable, 'платформы'
+            platformActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker
         );
     }
     const recordDate = platformActiveHistoryData['createdAt'];
@@ -631,7 +630,7 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
             clearElements(gridActiveHistoryElements);
         }
         gridActiveHistoryElements = await createOrderRecords(
-            gridActiveHistoryData['placementOrders'], ordersTable, 'приямка'
+            gridActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, false
         );
     }
     await switchView(gridPeriodElements, gridHistorySelectElements);
@@ -669,7 +668,7 @@ gridHistorySelector.addEventListener('change', async event => {
             gridActiveHistoryElements = [];
         }
         gridActiveHistoryElements = await createOrderRecords(
-            gridActiveHistoryData['placementOrders'], ordersTable, 'приямка',
+            gridActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, false,
         );
     }
     const recordDate = gridActiveHistoryData['createdAt'];
