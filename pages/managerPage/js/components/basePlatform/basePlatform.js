@@ -73,7 +73,8 @@ export default class BasePlatformManager{
     async updatePlatformCells() {
         if (this.lastChange !== null) {
             const lastChangeUrl = `${this.getCellsLastChange}/${this.platformId}`;
-            const lastChangeData = await getRequest(lastChangeUrl, true, true);
+            const lastChangeResp = await getRequest(lastChangeUrl, true, true);
+            const lastChangeData = await lastChangeResp.json();
             const newChangeTime = new Date(lastChangeData['lastChange']);
             // console.log(`OLD_TIME: ${this.lastChange}`);
             // console.log(`NEW_TIME: ${newChangeTime}`);
