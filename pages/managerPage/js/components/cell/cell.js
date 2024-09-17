@@ -94,7 +94,7 @@ export default class Cell{
     }
 
     setAsEmptyCell() {
-        this.element.classList = [];
+        // this.element.classList = [];
         this.element.innerHTML = ""
         this.element.classList.add("cell");
         this.element.classList.add("cell-empty");
@@ -113,12 +113,13 @@ export default class Cell{
     }
 
     setAsContainsElement() {
-        this.element.classList = [];
+        // this.element.classList = [];
         this.element.classList.add("cell");
         if (this.data['blockedBy'] !== null || this.data['blocked']) {
             this.element.classList.add("cell-blocked");
         } else {
             this.element.classList.remove("cell-blocked");
+            this.element.classList.remove('cell-empty-blocked');
         }
         if (this.gridCell) {
             this.element.classList.add('cell-grid');
