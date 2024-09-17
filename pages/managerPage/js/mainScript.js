@@ -30,6 +30,7 @@ import {
     getCookie,
     clearRedirect,
     validateRoleCookie,
+    updateAuthCookie,
 } from "../../utility/roleCookies.js";
 
 
@@ -96,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await platformManager.updatePreset(platformPresetName);
     platformManager.platformName = TEST_PLATFORM_NAME;
     await platformManager.buildPlatform();
-    await platformManager.updatePlatformCells();
+    platformManager.updatePlatformCells();
     platformManager.startUpdating();
     // basePlatform SETUP ---
     // +++ GRID SETUP
@@ -113,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     })
     gridManager.gridName = TEST_GRID_NAME;
     await gridManager.buildGrid();
-    await gridManager.updateGridCells();
+    gridManager.updateGridCells();
     gridManager.startUpdating();
     // GRID SETUP ---
     // +++ ORDERS TABLE
@@ -130,6 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     //     "cell",
     //     BACK_URLS.CREATE_MOVE_WHOLE_ORDER,
     // );
+    await ordersTable.updateActiveOrders();
     ordersTable.startUpdating();
     storagesManager = new StoragesManager(extraElementsContainer);
     batchesExpandedElements = new BatchesExpandedContainer();

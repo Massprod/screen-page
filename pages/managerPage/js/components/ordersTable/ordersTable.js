@@ -174,21 +174,21 @@ export default class OrdersTable{
         })
     }
 
-    async updateOrderRows(initialFill) {
+    async updateOrderRows(initial) {
         for (let orderId in this.activeOrders) {
             if (orderId in this.createdRows) {
                 continue
             }
-            if (!initialFill) {
+            await this.createNewRow(orderId);
+            if (!initial) {
                 flashMessage.show({
                     message: `Поступил новый заказ ID: ${orderId}`,
                     color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
                     backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
                     position: 'top-center',
-                    duration: 3500,
+                    duration: 2000,
                 });
             }
-            this.createNewRow(orderId);
         }
     }
 
@@ -218,26 +218,26 @@ export default class OrdersTable{
             this.activeOrders = null;
             return;
         };
-    if (this.emptyOrdersInterval) {
-        clearInterval(this.emptyOrdersInterval);
-        this.emptyOrdersInterval = null;
-        flashMessage.show({
-            message: 'Поступили новые заказы',
-            color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
-            backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
-            position: 'top-center',
-            duration: 3000,
-        })
-    }
-    let initialFill = false;
-    if (!this.activeOrders) {
-            initialFill = true;
+        if (this.emptyOrdersInterval) {
+            clearInterval(this.emptyOrdersInterval);
+            this.emptyOrdersInterval = null;
+            flashMessage.show({
+                message: 'Поступили новые заказы',
+                color: FLASH_MESSAGES.FETCH_NOT_FOUND_FONT_COLOR,
+                backgroundColor: FLASH_MESSAGES.FETCH_NOT_FOUND_BG_COLOR,
+                position: 'top-center',
+                duration: 3000,
+            })
+        }
+        let initial = false;
+        if (!this.activeOrders) {
+            initial = true;
         }
         this.activeOrders = activeOrders;
-        this.updateOrderRows(initialFill);
+        await this.updateOrderRows(initial);
     }
 
-    cullExpired() {
+    async cullExpired() {
         if (!this.activeOrders) {
             Object.keys(this.createdRows).forEach( key => {
                 this.createdRows[key].remove();
@@ -253,7 +253,7 @@ export default class OrdersTable{
         }
     }
 
-    startUpdating() {
+    async startUpdating() {
         if (this.updateIntervalId) {
             return;
         }
