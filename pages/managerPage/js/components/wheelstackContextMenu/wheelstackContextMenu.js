@@ -338,6 +338,9 @@ export default class WheelstackContextMenu{
 
     // +++ BUILD 
     async buildTemplate() {
+        if (!this.elementData) {
+            return;
+        }
         const role = await getCookie('user-role');
         // MainContainer
         this.menuContainer = document.createElement('div');
@@ -454,11 +457,15 @@ export default class WheelstackContextMenu{
                         await createOrderMoveWholestackFromStorage(this.elementData, destinationData);
                     } else {
                         await createOrderMoveWholestackFromBaseGrid(this.elementData, destinationData);
-                    } 
+                    }
                     await this.clearHandleMoveExecute();
                 }
                 element.addEventListener('contextmenu', handleOrderCreation);
-                this.gridCellsOrderExecuteListeners.set(element, handleOrderCreation);
+                if (this.gridCellsOrderExecuteListeners.has(element)) {
+                    this.gridCellsOrderExecuteListeners.get(element).push(handleOrderCreation);    
+                } else {
+                    this.gridCellsOrderExecuteListeners.set(element, [handleOrderCreation]);
+                }
             })
             this.moveButton.classList.add('order-marking');
             this.moveButton.innerText = `Отменить выбор`;
@@ -470,8 +477,6 @@ export default class WheelstackContextMenu{
             this.cancelOrderCreation = async () => {
                 await this.clearHandleMoveExecute();
             }
-
-            
 
             document.addEventListener('dblclick', this.cancelOrderCreation);
         })
@@ -529,14 +534,20 @@ export default class WheelstackContextMenu{
         )
         this.stopMarking();
         const markedCells = document.querySelectorAll('.cell-grid.mark-available');
-        markedCells.forEach((element) => {
+        markedCells.forEach( element => {
             element.classList.remove('mark-available');
-            const handleOrderExecute = this.gridCellsOrderExecuteListeners.get(element);
-            if (handleOrderExecute) {
-                element.removeEventListener('contextmenu', handleOrderExecute);
-                this.gridCellsOrderExecuteListeners.delete(element);
+            const handlers = this.gridCellsOrderExecuteListeners.get(element);
+            if (handlers) {
+                handlers.forEach( handler => {
+                    element.removeEventListener('contextmenu', handler)
+                })
+                // TODO: If there's going to be more than 1 grid, we should clear `Map`.
+                //  But the problem is, that `forEach` can still be running, and we will delete elements
+                //   which is not yet processed. So, better to create a different contextMenus for each placement :)
+                //  Or rebuild it later.
+                // this.gridCellsOrderExecuteListeners.delete(element);
             }
-        })
+        }) 
         document.removeEventListener('dblclick', this.cancelOrderCreation);
     }
 
