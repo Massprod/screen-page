@@ -222,6 +222,27 @@ export default class GridManager{
                              Trying to update with data for = ${platformData['preset']}`);
         }
         const rowsOrder = gridData['rowsOrder'];
+        // rowsOrder.forEach( async rowId => {
+        //     const columnsOrder = gridData['rows'][rowId]['columnsOrder'];
+        //     columnsOrder.forEach( async columnId => {
+        //         const cellData = gridData['rows'][rowId]['columns'][columnId];
+        //         const cell = this.gridRows[rowId]['columns'][columnId];
+        //         cell.data = cellData;
+        //         cell.gridCell = true;
+        //         if (null !== cellData['wheelStack']) {
+        //             await cell.updateElementData();
+        //             const elementData = cell.elementData;
+        //             if (!this.batchesData[elementData['batchNumber']]) {
+        //                 this.batchesData[elementData['batchNumber']] = {};
+        //             }
+        //             this.batchesData[elementData['batchNumber']][elementData['_id']] = cell;
+        //         } else {
+        //             cell.elementData = null;
+        //         }
+        //         cell.updateCellState();
+        //     })
+        // })
+
         for (let rowIndex = 0; rowIndex < rowsOrder.length; rowIndex += 1) {
             const rowId = rowsOrder[rowIndex];
             const columns = this.gridRows[rowId].columns;
