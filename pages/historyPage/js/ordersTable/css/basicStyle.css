@@ -80,13 +80,13 @@
 
 @keyframes dataBreakerFlashlight {
     0%, 100% {
-        background-color: rgba(205, 210, 210, 1); /* Bright white */
+        background-color: rgba(225, 225, 230, 0.9); /* Bright white */
     }
     25%, 75% {
-        background-color: rgba(195, 200, 200, 0.8); /* Dark gray */
+        background-color: rgba(220, 220, 220, 0.7); /*   Dark gray */
     }
     50% {
-        background-color: rgba(195, 205, 205, 0.5); /* Darker gray */
+        background-color: rgba(215, 215, 215, 0.6); /* Darker gray */
     }
 }
 
@@ -95,13 +95,10 @@
 }
 
 @media (max-width: 1600px) {
-    .orders-table td:not(.data-breaker):nth-child(1),
-    .orders-table td:not(.data-breaker):nth-child(2),
-    .orders-table th:nth-child(1),
-    .orders-table th:nth-child(2) {
+    .orders-table tr:not(.data-breaker) td:nth-child(1),
+    .orders-table tr:not(.data-breaker) td:nth-child(2),
+    .orders-table tr:not(.data-breaker) th:nth-child(1),
+    .orders-table tr:not(.data-breaker) th:nth-child(2) {
         display: none;
-    }
-    .data-breaker {
-        column-span: all;
     }
 }

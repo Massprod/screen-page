@@ -53,19 +53,56 @@ const navButton = new NavigationButton(
 const hoverCoord = new CellHoverCoordinate('placement-cell');
 window.addEventListener('resize', (event) => {
     const breakerRows = document.querySelectorAll('.data-breaker');
-    if (window.innerWidth <= 1600) {
-        breakerRows.forEach( element => {
-            adjustRowsBreaker(element);
-        })
-    } else {
-        breakerRows.forEach( element => {
-            adjustRowsBreaker(element);
-        })
-    }
+    breakerRows.forEach( element => {
+        adjustRowsBreaker(element.childNodes[0]);
+    })
+})
+window.addEventListener('DOMContentLoaded', event => {
+    const breakerRows = document.querySelectorAll('.data-breaker');
+    breakerRows.forEach( element => {
+        adjustRowsBreaker(element.childNodes[0]);
+    })
 })
 // ---
 // TODO: Check what can be moved to utils.
 // + UNI +
+const switchRecordButtonState = async (button, lastRecord) => {
+    if (lastRecord) {
+        button.classList.add('last-record', 'shake');
+        flashMessage.show({
+            'message': 'Отображена последняя запись',
+            'color': 'red',
+            'duration': 500,
+        })
+        setTimeout( () => {
+            button.classList.remove('shake');
+        }, 500);
+    } else {
+        button.classList.remove('last-record');
+    }
+}
+
+const checkButtonState = async (prevButton, nextButton, selectorElement) => {
+    const selectedIndex = selectorElement.selectedIndex;
+    console.log(selectorElement);
+    console.log(selectedIndex);
+    console.log(selectorElement.options.length);
+    if (0 === selectedIndex &&  selectedIndex === selectorElement.options.length - 1) {
+        switchRecordButtonState(prevButton, true);
+        switchRecordButtonState(nextButton, true);
+        return;
+    }
+    if (0 === selectedIndex) {
+        switchRecordButtonState(prevButton, true);
+    } else {
+        switchRecordButtonState(prevButton, false);
+    }
+    if (selectedIndex === selectorElement.options.length - 1) {
+        switchRecordButtonState(nextButton, true);
+    } else {
+        switchRecordButtonState(nextButton, false);
+    }
+}
 
 const adjustRowsBreaker = async (element) => {
     if (window.innerWidth <= 1600) {
@@ -408,6 +445,12 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         })
         return;
     }
+    const newHistoryRecords = await historySelectorPopulate(
+        placementId, platformHistoryStartDate, platformHistoryEndDate, platformHistorySelector,
+    )
+    if (!newHistoryRecords || 0 === newHistoryRecords.length) {
+        return;
+    }
     if (platformHistoryLoading) {
         flashMessage.show({
             'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
@@ -417,12 +460,6 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         return;
     }
     platformHistoryLoading = true;
-    const newHistoryRecords = await historySelectorPopulate(
-        placementId, platformHistoryStartDate, platformHistoryEndDate, platformHistorySelector,
-    )
-    if (!newHistoryRecords || 0 === newHistoryRecords.length) {
-        return;
-    }
     platformActiveHistoryData = await updatePlacementHistory(platformPlacement, newHistoryRecords[0]['_id']);
     platformCurrentHistory = newHistoryRecords;
     if (platformActiveHistoryData) {
@@ -434,6 +471,7 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         );
     }
     await switchView(platformPeriodElements, platformHistorySelectElements);
+    checkButtonState(platformHistoryPreviousBut, platformHistoryNextBut, platformHistorySelector);
     const recordDate = platformActiveHistoryData['createdAt'];
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
@@ -457,6 +495,7 @@ platformHistorySelector.addEventListener('change', async event => {
         })
         return;
     }
+    checkButtonState(platformHistoryPreviousBut, platformHistoryNextBut, platformHistorySelector);
     platformHistoryLoading = true;
     const selectedIndex = platformHistorySelector.selectedIndex;
     const historyIndex = platformHistorySelector.options[selectedIndex].value;    
@@ -490,6 +529,7 @@ platformHistoryPreviousBut.addEventListener('click', async (event) => {
         })
         return;
     }
+    checkButtonState(platformHistoryPreviousBut, platformHistoryNextBut, platformHistorySelector);
     await shiftSelector(platformHistorySelector, -1);
 })
 
@@ -503,6 +543,7 @@ platformHistoryNextBut.addEventListener('click', async (event) => {
         })
         return;
     }
+    checkButtonState(platformHistoryPreviousBut, platformHistoryNextBut, platformHistorySelector);
     await shiftSelector(platformHistorySelector, 1);
 })
 // - SLIDER -
@@ -611,6 +652,12 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
         })
         return;
     }
+    const newHistoryRecords = await historySelectorPopulate(
+        placementId, gridHistoryStartDate, gridHistoryEndDate, gridHistorySelector,
+    )
+    if (!newHistoryRecords || 0 === newHistoryRecords.length) {
+        return;
+    }
     if (gridHistoryLoading) {
         flashMessage.show({
             'message': `<b>Подождите загрузки данных прошлой записи.</b>`,
@@ -620,12 +667,6 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
         return;
     }
     gridHistoryLoading = true;
-    const newHistoryRecords = await historySelectorPopulate(
-        placementId, gridHistoryStartDate, gridHistoryEndDate, gridHistorySelector,
-    )
-    if (!newHistoryRecords || 0 === newHistoryRecords.length) {
-        return;
-    }
     gridActiveHistoryData = await updatePlacementHistory(gridPlacement, newHistoryRecords[0]['_id']);
     gridCurrentHistory = newHistoryRecords;
     if (gridActiveHistoryData) {
@@ -637,6 +678,7 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
         );
     }
     await switchView(gridPeriodElements, gridHistorySelectElements);
+    checkButtonState(gridHistoryPreviousBut, gridHistoryNextBut, gridHistorySelector);
     const recordDate = gridActiveHistoryData['createdAt'];
     flashMessage.show({
         'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
@@ -660,6 +702,7 @@ gridHistorySelector.addEventListener('change', async event => {
         })
         return;
     }
+    checkButtonState(gridHistoryPreviousBut, gridHistoryNextBut, gridHistorySelector);
     gridHistoryLoading = true;
     const selectedIndex = gridHistorySelector.selectedIndex;
     const historyIndex = gridHistorySelector.options[selectedIndex].value;
@@ -682,6 +725,7 @@ gridHistorySelector.addEventListener('change', async event => {
     gridHistoryLoading = false;
 })
 
+
 gridHistoryPreviousBut.addEventListener('click', async (event) => {
     event.preventDefault();
     if (gridHistoryLoading) {
@@ -692,6 +736,7 @@ gridHistoryPreviousBut.addEventListener('click', async (event) => {
         })
         return;
     }
+    checkButtonState(gridHistoryPreviousBut, gridHistoryNextBut, gridHistorySelector);
     await shiftSelector(gridHistorySelector, -1);
 })
 
@@ -705,6 +750,7 @@ gridHistoryNextBut.addEventListener('click', async (event) => {
         })
         return;
     }
+    checkButtonState(gridHistoryPreviousBut, gridHistoryNextBut, gridHistorySelector);
     await shiftSelector(gridHistorySelector, 1);
 })
 // ---
