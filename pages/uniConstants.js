@@ -110,31 +110,41 @@ export const COOKIE_MESSAGES_SHOW_TIME = 8000;
 
 // nav-buttons
 const NAV_LAB_BUTTON = {
-    'class': 'btn btn-secondary',
+    'class': '',
     'text': 'Лаборатория',
     'href': labPage,
+    'id': 'labRedirect',
+    'insideList': true,
 }
 const NAV_GRID_BUTTON = {
-    'class': 'btn btn-secondary',
+    'class': '',
     'text': 'Приямок',
     'href': gridPage,
+    'id': 'gridRedirect',
+    'insideList': true,
 }
 const NAV_LOGIN_BUTTON = {
-    'class': 'btn btn-danger',
+    'class': 'close-btn',
     'text': 'Выход',
     'href': loginPage,
+    'id': 'loginRedirect',
+    'insideList': false,
 }
 
 const NAV_USERS_BUTTON = {
-    'class': 'btn btn-secondary',
+    'class': '',    
     'text': 'Пользователи',
     'href': usersPage,
+    'id': 'usersRedirect',
+    'insideList': true,
 }
 
 const NAV_HISTORY_BUTTON = {
-    'class': 'btn btn-secondary',
+    'class': '',
     'text': 'История',
     'href': historyPage,
+    'id': 'historyRedirect',
+    'insideList': true,
 }
 
 export const NAV_BUTTONS = {

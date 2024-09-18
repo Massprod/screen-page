@@ -36,18 +36,21 @@ export default class NavigationButton {
 
         // Create navigation container
         const navContainer = document.createElement('div');
-        navContainer.className = 'nav-container bg-light p-3'; // Bootstrap styling
-        navContainer.style.position = 'absolute'; // Positioned relative to the button
-        navContainer.style.display = 'none';
+        navContainer.className = 'nav-menu';
+        navContainer.style.position = 'absolute';
         this.navContainer = navContainer;
+        const navigationList = document.createElement('ul');
+        navContainer.appendChild(navigationList);
 
         // Create navigation buttons from buttonsData
         for ( let btnInfo of this.buttonsData) {
-            const buttonLink = document.createElement('a');
-            buttonLink.className = btnInfo.class;
-            buttonLink.textContent = btnInfo.text;
-            buttonLink.href = btnInfo.href;
-            buttonLink.onclick = (event) => {
+            let navItem = document.createElement('li');
+            const anchorLink = document.createElement('a');
+            anchorLink.className = btnInfo.class;
+            anchorLink.textContent = btnInfo.text;
+            anchorLink.href = btnInfo.href;
+            anchorLink.id = btnInfo.id;
+            navItem.onclick = (event) => {
                 if (window.location.href !== btnInfo.href) {
                     if (btnInfo.href === loginPage) {
                         this.clearCookies.forEach( (cookieName) => {
@@ -62,7 +65,8 @@ export default class NavigationButton {
                     window.location.href = btnInfo.href;
                 }
             };
-            navContainer.appendChild(buttonLink);
+            navItem.appendChild(anchorLink);
+            navigationList.appendChild(navItem);
         }
 
         // Append navButton and navContainer to the body
@@ -75,7 +79,7 @@ export default class NavigationButton {
         });
 
         // Hide navContainer when clicking outside
-        window.addEventListener('click', (event) => {
+        window.addEventListener('mousedown', (event) => {
             if (navButton.contains(event.target) || navContainer.contains(event.target)) {
                 return;
             }
@@ -84,15 +88,19 @@ export default class NavigationButton {
     }
 
     toggleNavContainer(event) {
-        if (this.navContainer.style.display === 'block') {
+        if (this.navContainer.classList.contains('show')) {
             this.hideNavContainer();
         } else {
-            this.navContainer.style.display = 'block';
+            this.navContainer.classList.remove('hide');
+            this.navContainer.classList.add('show');
             updateMenuPosition(event, this.navContainer, true);
         }
     }
 
     hideNavContainer() {
-        this.navContainer.style.display = 'none';
+        this.navContainer.classList.add('hide')
+        setTimeout( () => {
+            this.navContainer.classList.remove('show');
+        }, 500);
     }
 }
