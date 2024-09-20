@@ -24,7 +24,7 @@
     border: 0.5px solid rgba(0, 0, 5, 0.5);
     box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 250px;
+    max-width: 224px;
     z-index: 100000;
     transform: scale(0);
     transition: opacity 0.5s ease, transform 0.5s ease;
@@ -41,7 +41,7 @@
 .nav-menu.hide {
     opacity: 0;
     transform: scale(0);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .nav-menu ul {
