@@ -45,6 +45,11 @@ window.onload = async () => {
 document.getElementById('userData').addEventListener('submit', async (event) => {
     event.preventDefault();
     const form = event.target;
+    form.classList.remove('was-validated');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    usernameInput.classList.remove('is-invalid');
+    passwordInput.classList.remove('is-invalid');
     const formData = new FormData(form);
     const requestData = new URLSearchParams();
     requestData.append('grant_type', 'password');
@@ -72,6 +77,7 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
                 position: FLASH_MESSAGES.BASIC_POSITION,
                 duration: FLASH_MESSAGES.BASIC_SHOW_TIME,
             });
+            usernameInput.classList.add('is-invalid');
         } else if (403 === response.status) {
             if ('Blocked' === respData['detail']) {
                 flashMessage.show({
@@ -81,6 +87,7 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
                     position: FLASH_MESSAGES.BASIC_POSITION,
                     duration: FLASH_MESSAGES.BASIC_SHOW_TIME,
                 });
+                form.classList.add('was-validated');
             } else {
                 flashMessage.show({
                     message: `Указан неправильный пароль.`,
@@ -89,10 +96,12 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
                     position: FLASH_MESSAGES.BASIC_POSITION,
                     duration: FLASH_MESSAGES.BASIC_SHOW_TIME,
                 });
+                passwordInput.classList.add('is-invalid');
             }
         }
         return;
     }
+    form.classList.add('was-validated');
     const authToken = respData['access_token'];
     const userRole = respData['user_role'];
     await setCookie(AUTH_COOKIE_NAME, authToken, AUTH_COOKIE_BASIC_EXPIRE);
