@@ -71,8 +71,11 @@ class FlashMessage {
     flashMessage.style.fontSize = fontSize;
     flashMessage.style.fontFamily = fontFamily;
     flashMessage.innerHTML = message;
-    flashMessage.addEventListener('click', event => {
+    flashMessage.addEventListener('mousedown', event => {
       flashMessage.remove();
+    })
+    flashMessage.addEventListener('contextmenu', event => {
+      event.preventDefault();
     })
 
     this.flashMessagesContainer.appendChild(flashMessage);
