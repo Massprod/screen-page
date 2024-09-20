@@ -11,7 +11,7 @@ import {
     NAV_BUTTONS,
     USER_ROLE_COOKIE_UPDATE_INTERVAL,
 } from "../../uniConstants.js";
-import { BASE_PLATFORM_NAME, ORDER_TYPES_TRANSLATE_TABLE } from "../../managerPage/js/constants.js";
+import { ORDER_TYPES_TRANSLATE_TABLE } from "../../managerPage/js/constants.js";
 import { keepAuthCookieFresh, clearRedirect, validateRoleCookie, getCookie } from "../../utility/roleCookies.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import CellHoverCoordinate from "../../utility/cellHover/cellHoverCoordinate.js";
@@ -20,6 +20,8 @@ import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import { getISOFormatUTC, convertToUTC, convertUTCToLocal } from "../../utility/timeConvert.js";
 import convertISOToCustomFormat from "../../utility/convertToIso.js";
 import { createPlacementRecord, createTableRow } from "./ordersTable/ordersTable.js";
+import BasicSearcher from '../../utility/search/basicSearcher.js';
+import AttributeMark from '../../utility/mark/mark.js';
 
 
 // TODO: Can be universal on all pages, only change is roles.
@@ -224,6 +226,8 @@ const updatePlacementHistory = async (placement, historyRecordId) => {
     const historyDataResponse = await getRequest(historyRecordURL, true, true);
     const historyRecordData = await historyDataResponse.json();
     placement.updatePlacementHistory(historyRecordData);
+    // + BATCH INPUT FIELD +
+    // - BATCH INPUT FIELD -
     return historyRecordData;
 }
 
@@ -382,7 +386,7 @@ const correctDatePeriod = async (periodStart, periodEnd) => {
 // + PLATFORM +
 var ordersTable = document.getElementById('ordersTableBody');
 var platformCurrentHistory = [];
-var platformActiveHistoryData = null;
+var platformActiveHistoryData = {};
 var platformActiveHistoryElements = null;
 var platformHistoryLoading = null;
 var platformBreaker = document.getElementById('platformBreaker');
@@ -494,6 +498,7 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         if (platformActiveHistoryElements) {
             await clearElements(platformActiveHistoryElements);
         }
+        updateBatchSearchData(prepareBatchesData(platformActiveHistoryData, gridActiveHistoryData));
         platformActiveHistoryElements = await createOrderRecords(
             platformActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, gridBreaker,
         );
@@ -535,6 +540,7 @@ platformHistorySelector.addEventListener('change', async event => {
         if (platformActiveHistoryElements) {
             await clearElements(platformActiveHistoryElements);
         }
+        updateBatchSearchData(prepareBatchesData(platformActiveHistoryData, gridActiveHistoryData));
         platformActiveHistoryElements = await createOrderRecords(
             platformActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, gridBreaker,
         );
@@ -579,7 +585,7 @@ platformHistoryNextBut.addEventListener('click', async (event) => {
 
 // + GRID + 
 var gridCurrentHistory = [];
-var gridActiveHistoryData = null;
+var gridActiveHistoryData = {};
 var gridActiveHistoryElements = null;
 var gridHistoryLoading = false;
 
@@ -699,8 +705,9 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
     gridCurrentHistory = newHistoryRecords;
     if (gridActiveHistoryData) {
         if (gridActiveHistoryElements) {
-            clearElements(gridActiveHistoryElements);
+            await clearElements(gridActiveHistoryElements);
         }
+        updateBatchSearchData(prepareBatchesData(platformActiveHistoryData, gridActiveHistoryData));
         gridActiveHistoryElements = await createOrderRecords(
             gridActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker, null
         );
@@ -741,6 +748,7 @@ gridHistorySelector.addEventListener('change', async event => {
             await clearElements(gridActiveHistoryElements);
             gridActiveHistoryElements = [];
         }
+        updateBatchSearchData(prepareBatchesData(platformActiveHistoryData, gridActiveHistoryData));
         gridActiveHistoryElements = await createOrderRecords(
             gridActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker, null,
         );
@@ -787,6 +795,9 @@ gridHistoryNextBut.addEventListener('click', async (event) => {
 const fulscreenBut = document.getElementById('fullScreen');
 const foldScreenBut = document.getElementById('foldScreen');
 const topContainer = document.getElementById('topContainer');
+const hidePlatformBut = document.getElementById('hidePlatform');
+const showPlatformBut = document.getElementById('showPlatform');
+
 fulscreenBut.addEventListener('click', event => {
     topContainer.classList.add('hidden');
     fulscreenBut.classList.add('hidden');
@@ -794,6 +805,7 @@ fulscreenBut.addEventListener('click', event => {
     hidePlatformBut.classList.add('hidden');
     showPlatformBut.classList.add('hidden');
 })
+
 foldScreenBut.addEventListener('click', event => {
     foldScreenBut.classList.add('hidden');
     topContainer.classList.remove('hidden');
@@ -804,14 +816,14 @@ foldScreenBut.addEventListener('click', event => {
         hidePlatformBut.classList.remove('hidden');
     }
 })
-const hidePlatformBut = document.getElementById('hidePlatform');
-const showPlatformBut = document.getElementById('showPlatform');
+
 hidePlatformBut.addEventListener('click', event => {
     platformsContainer.classList.add('hidden');
     hidePlatformBut.classList.add('hidden');
     showPlatformBut.classList.remove('hidden');
     triggerResize(window);
 })
+
 showPlatformBut.addEventListener('click', event => {
     hidePlatformBut.classList.remove('hidden');
     showPlatformBut.classList.add('hidden');
@@ -819,3 +831,61 @@ showPlatformBut.addEventListener('click', event => {
     triggerResize(window);
 })
 // - EXTRA CONTROL BUTTONS -
+// + INPUT FIELDS +
+const searchForm = document.getElementById('batchSearchForm');
+const searchField = document.getElementById('batchSearchField');
+const resultContainer = document.getElementById('batchResults');
+const clearBatchButton = document.getElementById('clearBatchSearch');
+const options = {
+    threshold: 0.4,
+    distance: 5,
+    ignoreLocation: true,
+    minMatchCharLength: 1 
+};
+
+const batchMarkSubmit = (targetValue) => {
+    if (targetValue && '' !== targetValue.trim()) {
+        batchMarker.clearMarking();
+        batchMarker.setRules('data-batch-number', targetValue);
+        batchMarker.markTargets(true);
+    }
+}
+
+const clearButAction = () => {
+    batchMarker.clearMarking();
+}
+
+const batchSearcher = new BasicSearcher(
+    searchForm,
+    searchField,
+    clearBatchButton,
+    resultContainer,
+    batchMarkSubmit,
+    clearButAction,
+)
+batchSearcher.setOptions(options);
+
+
+const prepareBatchesData = (...dataSources) => {
+    let newData = [];
+    dataSources.forEach(dataSource => {
+        const wheelstacks = dataSource['wheelstacksData'];
+        if (wheelstacks) {
+            newData = [...newData, ...wheelstacks];
+        }
+    });
+    const batchesData = new Set();
+    for (let record of newData) {
+        batchesData.add(record['batchNumber']);
+    }
+    const uniqueBatches = Array.from(batchesData);
+    return uniqueBatches;
+};
+
+
+const updateBatchSearchData = (newData) => {
+    batchSearcher.setData(newData);
+}
+// - INPUT FIELDS -
+
+export const batchMarker = new AttributeMark();

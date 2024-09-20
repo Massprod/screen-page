@@ -125,17 +125,9 @@ export default class Placement{
             const cellElement = this.placementRows[elementRow]['columns'][elementCol];
             cellElement.element.innerHTML = '';
             cellElement.element.innerHTML = `${numWheels}`
-            // const cellParag = document.createElement('p');
-            // cellParag.id = wheelstackId;
-            // cellParag.innerHTML = `${numWheels}`;
-            // cellElement.element.appendChild(cellParag);
             // + BATCH IND +
             const batchNumber = element['batchNumber'];
             cellElement.element.setAttribute('data-batch-number', batchNumber);
-            // const batchParag = document.createElement('p');
-            // batchParag.classList.add('batch-indicator');
-            // batchParag.id = batchNumber;
-            // cellElement.element.appendChild(batchParag);
             // - BATCH IND -
             cellElement.historyData = element;
         })

@@ -111,18 +111,33 @@
                 <!-- platform history slider -->
             </div>
             <div class="grid-container hidden" id="gridContainer"></div>
-            <!-- tt -->
-            <div class="extra-but-container">
-                <button id="fullScreen" class="btn btn-secondary btn-lg extra-button" title="Полный экран"><img src="../images/expand.png" alt="fulscreenButton"></button>
-                <button id="foldScreen" class="btn btn-secondary btn-lg extra-button hidden" title="Свернуть экран"><img src="../images/exit-fullscreen.png" alt="exitFulscreenButton"></button>
-                <button id="hidePlatform" class="btn btn-secondary btn-lg extra-button" title="Спрятать платформу"><img src="../images/hide.png" alt="hidePlatformButton"></button>
-                <button id="showPlatform" class="btn btn-secondary btn-lg extra-button hidden" title="Показать платформу"><img src="../images/show.png" alt="showPlatformButton"></button>
+            <!-- EXTRA BOT CONTENT -->
+            <div class="extra-bot-container">
+                <!-- + BUTTONS + -->
+                 <div class="extra-buttons-container">
+                    <button id="fullScreen" class="btn btn-secondary btn-lg extra-button" title="Полный экран"><img src="../images/expand.png" alt="fulscreenButton"></button>
+                    <button id="foldScreen" class="btn btn-secondary btn-lg extra-button hidden" title="Свернуть экран"><img src="../images/exit-fullscreen.png" alt="exitFulscreenButton"></button>
+                    <button id="hidePlatform" class="btn btn-secondary btn-lg extra-button" title="Спрятать платформу"><img src="../images/hide.png" alt="hidePlatformButton"></button>
+                    <button id="showPlatform" class="btn btn-secondary btn-lg extra-button hidden" title="Показать платформу"><img src="../images/show.png" alt="showPlatformButton"></button>
+                </div>
+                <!-- - BUTTONS - -->
+                <!-- + BATCH SEARCH + -->
+                <form id="batchSearchForm">
+                    <div class="form-group position-relative dropup">
+                        <input title="Выбор партии для выделения" type="text" id="batchSearchField" class="form-control form-control-lg fs-5" placeholder="Выберите партию..." autocomplete="on"/>
+                        <button title="Отмена выделения" type="button" class="clear-btn btn-secondary" id="clearBatchSearch" aria-label="Cancel batch search">
+                            &times;
+                        </button>
+                        <ul class="dropdown-menu w-100" id="batchResults"></ul>
+                    </div>
+                    <button type="submit" class="d-none"></button> <!-- Hidden submit button for form submission -->
+                </form>
+                <!-- - BATCH SEARCH - -->
             </div>
-            <!-- tt -->
+            <!-- EXTRA BOT CONTENT -->
         </div>
     </div>
     <script type="module" src="./js/main.js"></script>
     <script type="module" src="../bootstrap/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

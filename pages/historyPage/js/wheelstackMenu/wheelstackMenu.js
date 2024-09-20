@@ -1,11 +1,10 @@
 import { BACK_URL } from "../../../uniConstants.js";
 import { getRequest } from "../../../utility/basicRequests.js";
 import updateMenuPosition from "../../../utility/adjustContainerPosition.js";
-import AttributeMark from "../../../utility/mark/mark.js";
+import { batchMarker } from "../../../historyPage/js/main.js";
 import flashMessage from "../../../utility/flashMessage/flashMessage.js";
 
 
-const batchMarker = new AttributeMark();
 
 const focusTableOrder = async (orderId) => {
     const targetRow = ordersTable.querySelector(`tbody #${CSS.escape(orderId)}`);
@@ -91,7 +90,6 @@ export const createWheelstackMenu = async (event, openerElement, wheelstackData)
     menu.id = wheelstackData['_id'];
     menu.classList.add('wheelstack-menu');
     const wheelsList = document.createElement('ul');
-    const wheelsNumber = wheelstackData['wheels'].length;
     for (let wheelIndex = 5; wheelIndex > -1; wheelIndex -= 1) {
         const wheelObjectId = wheelstackData['wheels'][wheelIndex];
         let wheelRecord = null;

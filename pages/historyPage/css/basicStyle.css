@@ -311,14 +311,22 @@ html, body {
 }
 
 /* + SHOW | HIDE & FULLSCREEN + */
-.extra-but-container {
+.extra-bot-container {
     display: flex;
     flex-direction: row;
     position: relative;
-    bottom: 55px;
+    bottom: 60px;
     left: 25px;
     right: auto;
     top: auto;
+    gap: 35px;
+    align-items: center;
+}
+
+.extra-buttons-container {
+    display: flex;
+    flex-direction: row;
+    position: relative;
     gap: 15px;
 }
 
@@ -338,3 +346,54 @@ html, body {
     width: 25px;
 }
 /* - SHOW | HIDE & FULLSCREEN - */
+
+/* + SEARCH INPUTS + */
+.dropdown-item {
+    cursor: pointer;
+}
+.dropdown-item.active {
+    background-color: #0468d3;
+    color: white;
+}
+/* Force the dropdown to open upwards */
+.dropup .dropdown-menu {
+    top: auto;
+    bottom: 100%;
+    margin-bottom: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 0.5px solid #ced4da; /* Border similar to Bootstrap form control */
+    border-radius: 0.25rem;     /* Rounded corners like form control */
+    box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+    background-color: #fff;     /* White background like form control */
+}
+
+.dropup .dropdown-menu.show {
+    border-color: #80bdff;      /* Blue border like Bootstrap's focus state */
+    outline: none;              /* Remove any default outline */
+}
+
+.clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: whitesmoke;
+    border: none;
+    color: #6c757d; /* Bootstrap muted color */
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+}
+
+#batchSearchField:not(:placeholder-shown) ~ .clear-btn {
+    display: block; /* Show button when input is not empty */
+    z-index: 10000;
+}
+
+.clear-btn:hover {
+    color: #dc3545; /* Optional hover effect for the button */
+    opacity: 1;
+}
+/* - SEARCH INPUTS - */

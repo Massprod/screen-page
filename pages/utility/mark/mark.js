@@ -43,7 +43,12 @@ export default class AttributeMark{
         })
     }
  
-    async markTargets(setUpdate = false) {
+    async markTargets(setUpdate = false, secondsLimit = 0) {
+        if (0 !== secondsLimit) {
+            setTimeout( () => {
+                this.clearMarking();
+            }, secondsLimit * 1000);
+        }
         this.curTargets = document.querySelectorAll(`[${this.targetName}=${CSS.escape(this.targetValue)}]`);
         if (0 === this.curTargets.length) {
             this.clearMarking();
