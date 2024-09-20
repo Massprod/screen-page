@@ -67,7 +67,6 @@ export default class Placement{
         // Bad and sad, but w.e
         // We either update orders inside of them or we just reassign which is even faster.
         this.placementExtraRows = placementData['extra'];
-        console.log(placementData);
         placementData['rowsOrder'].forEach( rowId => {
             placementData['rows'][rowId]['columnsOrder'].forEach( colId => {
                 const placementCell = this.placementRows[rowId]['columns'][colId];
@@ -124,11 +123,20 @@ export default class Placement{
             const wheelstackId = element['_id'];    
             const numWheels = element['wheels'].length;
             const cellElement = this.placementRows[elementRow]['columns'][elementCol];
-            cellElement.innerHTML = '';
-            const cellParag = document.createElement('p');
-            cellParag.id = wheelstackId;
-            cellParag.innerHTML = `${numWheels}`;
-            cellElement.element.appendChild(cellParag);
+            cellElement.element.innerHTML = '';
+            cellElement.element.innerHTML = `${numWheels}`
+            // const cellParag = document.createElement('p');
+            // cellParag.id = wheelstackId;
+            // cellParag.innerHTML = `${numWheels}`;
+            // cellElement.element.appendChild(cellParag);
+            // + BATCH IND +
+            const batchNumber = element['batchNumber'];
+            cellElement.element.setAttribute('data-batch-number', batchNumber);
+            // const batchParag = document.createElement('p');
+            // batchParag.classList.add('batch-indicator');
+            // batchParag.id = batchNumber;
+            // cellElement.element.appendChild(batchParag);
+            // - BATCH IND -
             cellElement.historyData = element;
         })
     }

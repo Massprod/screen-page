@@ -1,0 +1,39 @@
+.basic-mark {
+    animation: warningFlashlight 6s infinite;
+}
+
+.basic-mark:hover {
+    background-color: rgba(245, 245, 245, 1) !important; /* Soft grey for hover */
+}
+
+@keyframes warningFlashlight {
+    0% {
+        background-color: #ffe5b4; /* Soft light orange */
+    }
+    50% {
+        background-color: #ff9800; /* Medium orange */
+    }
+    100% {
+        background-color: #ffe5b4; /* Soft light orange */
+    }
+}
+
+.basic-focus {
+    animation: focusFlashlight 5s infinite;
+}
+
+@keyframes focusFlashlight {
+    0% {
+        background-color: rgb(180, 230, 150);
+    }
+    50% {
+        background-color: rgb(180, 250, 150);
+    }
+    100% {
+        background-color: rgb(180, 230, 150);
+    }
+}
+
+.basic-focus:hover {
+    background-color: rgba(225, 225, 225, 1) !important; /* Soft grey for hover on focus */
+}

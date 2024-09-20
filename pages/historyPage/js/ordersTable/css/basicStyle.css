@@ -94,11 +94,15 @@
     animation: dataBreakerFlashlight 4s infinite ease-in-out;
 }
 
-@media (max-width: 1600px) {
+.orders-table-hidden {
+    display: none;
+}
+
+/* @media (max-width: 1600px) {
     .orders-table tr:not(.data-breaker) td:nth-child(1),
     .orders-table tr:not(.data-breaker) td:nth-child(2),
     .orders-table tr:not(.data-breaker) th:nth-child(1),
     .orders-table tr:not(.data-breaker) th:nth-child(2) {
         display: none;
     }
-}
+} */

@@ -1,0 +1,134 @@
+
+
+.wheelstack-menu {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    z-index: 10000;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.wheelstack-menu.show {
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.wheelstack-menu.hide {
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.5s ease, transform 0.6s ease;
+}
+
+.wheelstack-menu ul {
+    border-radius: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 2px solid black;
+}
+
+.wheelstack-menu li {
+    padding: 12px;
+    text-align: center;
+    border-top: 2px dashed black;
+    background-color: white;
+    font-size: 1.4rem;
+    transition: background-color 0.2s ease;
+}
+
+.wheelstack-menu li:hover {
+    font-size: 1.55rem;
+    transition: font-size 0.3s ease;
+    background-color: #94d79b;
+}
+
+/* Empty record hover effect */
+.wheelstack-menu li.empty-record {
+    font-weight: bold;
+    display: block;
+    text-align: center;
+    color: black;
+}
+
+.wheelstack-menu li.empty-record:hover {
+    background-color: #adb6a7;
+}
+
+/* First item gets no top border */
+.wheelstack-menu li:first-child {
+    border-top: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.wheelstack-menu li:last-child {
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom: none;
+}
+
+/* Batch number styling */
+.info-record {
+    text-align: center;
+    padding: 12px;
+    font-size: 1.20rem;
+    font-weight: bold;
+    background-color: #f1f1f1;
+    color: #4a4a4a;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-bottom: 1.5px dashed black;
+}
+
+.info-record:hover {
+    font-size: 1.17rem;
+    transition: font-size 0.3s ease;
+}
+
+.info-record:hover {
+    background-color: #e0e0e0;
+    color: #000;
+}
+
+.info-record.blocked {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.info-record.blocked:hover {
+    background-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* 2x2 grid for buttons */
+.wheelstack-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.wheelstack-buttons button {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    font-size: 1.4rem;
+}
+
+/* Dynamic button hover */
+.wheelstack-buttons button:hover {
+    background-color: #555;
+    transform: translateY(-1px);
+    font-size: 1.41rem;
+}

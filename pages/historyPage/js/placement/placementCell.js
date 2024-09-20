@@ -1,3 +1,4 @@
+import { createWheelstackMenu, createBlockedCellMenu } from "../wheelstackMenu/wheelstackMenu.js";
 
 
 export default class PlacementCell {
@@ -10,7 +11,7 @@ export default class PlacementCell {
         this.colId = colId;
         this.placementType = placementType;
         this.elementData = null;
-        this.elementHistoryData = null;
+        this.historyData = null;
         this.#init();
     }
 
@@ -28,6 +29,23 @@ export default class PlacementCell {
         this.element.id = `${this.rowId}|${this.colId}`;
         this.element.classList.add('placement-cell');
         this.#addBasicStyle();
+        // TODO: We shouldn't be stacked with other elements attached to the class.
+        //  But I don't see any other way of connecting menu to this.
+        //  Otherwise we will need extra O(n) traverse of all created elements
+        //   and attach menu from `main`.
+        //  Which is essentially the same and we still need to import menu...
+        this.element.addEventListener('contextmenu', async event => {
+            event.preventDefault();
+            if (this.wheelstackMenu) {
+                this.wheelstackMenu.remove();
+                this.wheelstackMenu = null;
+            }
+            if (this.historyData) {
+                this.wheelstackMenu = await createWheelstackMenu(event, this.element, this.historyData);
+            } else if (this.elementData && this.elementData['blocked']) {
+                this.wheelstackMenu = await createBlockedCellMenu(event, this.element, this.elementData);
+            }
+        })
     }
 
     setElementData(elementData) {
@@ -36,17 +54,20 @@ export default class PlacementCell {
 
     setAsIdentifier(identifier) {
         this.element.classList = [];
+        this.historyData = null;
         this.#addBasicStyle();
         this.element.classList.add('identifier-cell');
-        const identifierParag = document.createElement('p');
-        identifierParag.id = `${this.rowId}|${this.colId}`;
-        identifierParag.innerText = `${identifier}`;
-        this.element.appendChild(identifierParag);
+        this.element.innerHTML = `${identifier}`;
+        // const identifierParag = document.createElement('p');
+        // identifierParag. = `${this.rowId}|${this.colId}`;
+        // identifierParag.innerText = `${identifier}`;
+        // this.element.appendChild(identifierParag);
 
     }
 
     setAsWhitespace() {
         this.element.classList = [];
+        this.historyData = null;
         this.#addBasicStyle();
         this.element.id = 'whitespace';
         this.element.innerHTML = '';
@@ -57,9 +78,11 @@ export default class PlacementCell {
 
     setAsEmptyCell() {
         this.element.innerHTML = '';
+        this.historyData = null;
         this.element.classList.remove('placement-cell-whitespace');
         // this.element.classList.remove('placement-cell-element');
         this.element.classList.add('placement-cell-empty');
+        this.element.removeAttribute('data-batch-number');
     }
 
     setAsElement() {

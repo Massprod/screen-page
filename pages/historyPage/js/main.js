@@ -38,10 +38,10 @@ setInterval( async () => {
 // ---
 // NAV BUTTON
 const navPosition = {
-    top: '92%',
+    top: 'auto',
     left: 'auto',
     right: '3%',
-    bottom: 'auto',
+    bottom: '25px',
 }
 const roleNavButtons = NAV_BUTTONS[userRole];
 const clearCookies = [USER_ROLE_COOKIE_NAME, AUTH_COOKIE_NAME];
@@ -49,21 +49,53 @@ const navButton = new NavigationButton(
     navPosition, roleNavButtons, clearCookies,
 )
 // ---
-// HOVERING
+// + HOVER COORD +
 const hoverCoord = new CellHoverCoordinate('placement-cell');
-window.addEventListener('resize', (event) => {
-    const breakerRows = document.querySelectorAll('.data-breaker');
-    breakerRows.forEach( element => {
-        adjustRowsBreaker(element.childNodes[0]);
-    })
-})
+// - HOVER COORD -
+// + TABLE ADJUSTMENT + 
+var tableBreakSize = 936;
+var ordersTableFull = document.getElementById('ordersTable');
+
 window.addEventListener('DOMContentLoaded', event => {
     const breakerRows = document.querySelectorAll('.data-breaker');
+    adjustTableColumns(ordersTableFull, tableBreakSize);
     breakerRows.forEach( element => {
-        adjustRowsBreaker(element.childNodes[0]);
+        adjustRowsBreaker(element.childNodes[0], tableBreakSize, ordersTableFull);
+    })
+    
+})
+
+window.addEventListener('resize', async (event) => {
+    const breakerRows = document.querySelectorAll('.data-breaker');
+    await adjustTableColumns(ordersTableFull, tableBreakSize);
+    breakerRows.forEach( element => {
+        adjustRowsBreaker(element.childNodes[0], tableBreakSize, ordersTableFull);
     })
 })
-// ---
+
+const adjustTableColumns = async (table, breakSize) => {
+    const tableWidth = table.offsetWidth;
+    if (tableWidth < breakSize) {
+        const cellsToHide = table.querySelectorAll('tr:not(.data-breaker) td:nth-child(1), tr:not(.data-breaker) td:nth-child(2), th:nth-child(1), th:nth-child(2)');
+        cellsToHide.forEach(cell => {
+            cell.classList.add('orders-table-hidden');
+        });
+    } else {
+        const cellsToShow = table.querySelectorAll('.orders-table-hidden');
+        cellsToShow.forEach(cell => {
+            cell.classList.remove('orders-table-hidden');
+        });
+    }
+}
+
+const adjustRowsBreaker = async (element, breakSize, offSetElement) => {
+    if (offSetElement.offsetWidth <= breakSize) {
+        element.colSpan = 4;
+    } else {
+        element.colSpan = 6;
+    }
+}
+// - TABLE ADJUSTMENT -
 // TODO: Check what can be moved to utils.
 // + UNI +
 const switchRecordButtonState = async (button, lastRecord) => {
@@ -84,9 +116,6 @@ const switchRecordButtonState = async (button, lastRecord) => {
 
 const checkButtonState = async (prevButton, nextButton, selectorElement) => {
     const selectedIndex = selectorElement.selectedIndex;
-    console.log(selectorElement);
-    console.log(selectedIndex);
-    console.log(selectorElement.options.length);
     if (0 === selectedIndex &&  selectedIndex === selectorElement.options.length - 1) {
         switchRecordButtonState(prevButton, true);
         switchRecordButtonState(nextButton, true);
@@ -104,12 +133,10 @@ const checkButtonState = async (prevButton, nextButton, selectorElement) => {
     }
 }
 
-const adjustRowsBreaker = async (element) => {
-    if (window.innerWidth <= 1600) {
-        element.colSpan = 4;
-    } else {
-        element.colSpan = 6;
-    }
+
+const triggerResize = async (element) => {
+    const event = new Event('resize');
+    element.dispatchEvent(event);
 }
 
 const triggerChange = async (element) => {
@@ -139,7 +166,7 @@ const gatherOrderRowData = async (orderData) => {
     const wheelstackURL = `${BACK_URL.GET_WHEELSTACK_RECORD}/${wheelstackId}`;
     const wheelstackResp = await getRequest(wheelstackURL, true, true);
     const wheelstackData = await wheelstackResp.json();
-    showData['batchNumber'] = `<b>${wheelstackData['batchNumber']}</b>`;
+    showData['batchNumber'] = `${wheelstackData['batchNumber']}`;
     showData['orderId'] = orderData['_id'];
     showData['orderType'] = ORDER_TYPES_TRANSLATE_TABLE[orderData['orderType']];
     showData['source'] = await createPlacementRecord(orderData['source']);
@@ -148,25 +175,26 @@ const gatherOrderRowData = async (orderData) => {
     return showData;
 }
 
-const createOrderRecords = async (ordersData, targetTable, placementType, breakerRow = null, useBreaker = true) => {
+const createOrderRecords = async (ordersData, targetTable, placementType, identifierRow, beforeBreaker = null) => {
     const orderElements = [];
-    if (breakerRow) {
-        await adjustRowsBreaker(breakerRow);
-    }
     if (0 !== ordersData.length) {
-        breakerRow.childNodes[0].innerHTML = `Данные для <b>${placementType}</b>`;
+        identifierRow.childNodes[0].innerHTML = `Данные для <b>${placementType}</b>`;
     } else {
-        breakerRow.childNodes[0].innerHTML = `Нет данных для отображения: <b>${placementType}</b>`;
+        identifierRow.childNodes[0].innerHTML = `Нет данных для отображения: <b>${placementType}</b>`;
     }
     for (let orderData of ordersData) {
         const displayData = await gatherOrderRowData(orderData);
         const rowElement = await createTableRow(displayData);
         rowElement.id = displayData['orderId'];
-        rowElement.childNodes[0].id = displayData['batchNumber'];
-        if (breakerRow && useBreaker) {
-            targetTable.insertBefore(rowElement, breakerRow);
+        rowElement.setAttribute('data-batch-number', displayData['batchNumber']);
+        if (beforeBreaker) {
+            targetTable.insertBefore(rowElement, beforeBreaker);
         } else {
             targetTable.appendChild(rowElement);
+        }
+        if (ordersTableFull.offsetWidth < tableBreakSize) {
+            rowElement.childNodes[0].classList.add('orders-table-hidden');
+            rowElement.childNodes[1].classList.add('orders-table-hidden');
         }
         orderElements.push(rowElement);
     }
@@ -467,14 +495,14 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
             await clearElements(platformActiveHistoryElements);
         }
         platformActiveHistoryElements = await createOrderRecords(
-            platformActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker
+            platformActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, gridBreaker,
         );
     }
     await switchView(platformPeriodElements, platformHistorySelectElements);
     checkButtonState(platformHistoryPreviousBut, platformHistoryNextBut, platformHistorySelector);
     const recordDate = platformActiveHistoryData['createdAt'];
     flashMessage.show({
-        'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
+        'message': `Данные отображения <b>ПЛАТФОРМЫ</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
     })
     platformHistoryLoading = false;
@@ -508,12 +536,12 @@ platformHistorySelector.addEventListener('change', async event => {
             await clearElements(platformActiveHistoryElements);
         }
         platformActiveHistoryElements = await createOrderRecords(
-            platformActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker
+            platformActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, gridBreaker,
         );
     }
     const recordDate = platformActiveHistoryData['createdAt'];
     flashMessage.show({
-        'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
+        'message': `Данные отображения <b>ПЛАТФОРМЫ</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
     });
     platformHistoryLoading = false;
@@ -674,14 +702,14 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
             clearElements(gridActiveHistoryElements);
         }
         gridActiveHistoryElements = await createOrderRecords(
-            gridActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, false
+            gridActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker, null
         );
     }
     await switchView(gridPeriodElements, gridHistorySelectElements);
     checkButtonState(gridHistoryPreviousBut, gridHistoryNextBut, gridHistorySelector);
     const recordDate = gridActiveHistoryData['createdAt'];
     flashMessage.show({
-        'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
+        'message': `Данные отображения <b>ПРИЯМКА</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
     })
     gridHistoryLoading = false;
@@ -714,12 +742,12 @@ gridHistorySelector.addEventListener('change', async event => {
             gridActiveHistoryElements = [];
         }
         gridActiveHistoryElements = await createOrderRecords(
-            gridActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, false,
+            gridActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker, null,
         );
     }
-    const recordDate = gridActiveHistoryData['createdAt'];
+    const recordDate = gridActiveHistoryData['createdAt'];``
     flashMessage.show({
-        'message': `Данные отображения <b>платформы</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
+        'message': `Данные отображения <b>ПРИЯМКА</b> изменены<br>Дата: ${convertISOToCustomFormat(recordDate, false, true, true)}`,
         'duration': 1000,
     })
     gridHistoryLoading = false;
@@ -755,3 +783,39 @@ gridHistoryNextBut.addEventListener('click', async (event) => {
 })
 // ---
 // - GRID -
+// + EXTRA CONTROL BUTTONS +
+const fulscreenBut = document.getElementById('fullScreen');
+const foldScreenBut = document.getElementById('foldScreen');
+const topContainer = document.getElementById('topContainer');
+fulscreenBut.addEventListener('click', event => {
+    topContainer.classList.add('hidden');
+    fulscreenBut.classList.add('hidden');
+    foldScreenBut.classList.remove('hidden');
+    hidePlatformBut.classList.add('hidden');
+    showPlatformBut.classList.add('hidden');
+})
+foldScreenBut.addEventListener('click', event => {
+    foldScreenBut.classList.add('hidden');
+    topContainer.classList.remove('hidden');
+    fulscreenBut.classList.remove('hidden');
+    if (platformsContainer.classList.contains('hidden')) {
+        showPlatformBut.classList.remove('hidden');
+    } else {
+        hidePlatformBut.classList.remove('hidden');
+    }
+})
+const hidePlatformBut = document.getElementById('hidePlatform');
+const showPlatformBut = document.getElementById('showPlatform');
+hidePlatformBut.addEventListener('click', event => {
+    platformsContainer.classList.add('hidden');
+    hidePlatformBut.classList.add('hidden');
+    showPlatformBut.classList.remove('hidden');
+    triggerResize(window);
+})
+showPlatformBut.addEventListener('click', event => {
+    hidePlatformBut.classList.remove('hidden');
+    showPlatformBut.classList.add('hidden');
+    platformsContainer.classList.remove('hidden');
+    triggerResize(window);
+})
+// - EXTRA CONTROL BUTTONS -

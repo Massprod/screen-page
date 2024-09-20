@@ -32,6 +32,7 @@ export const BACK_URL  = {
     GET_PRESET_DATA: `${mainAddress}/presets/by_id`,
     GET_HISTORY_RECORD: `${mainAddress}/history/record`,
     GET_WHEELSTACK_RECORD: `${mainAddress}/wheelstacks/id`,
+    GET_WHEEL_DATA_OBJECT_ID: `${mainAddress}/wheels/object_id`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';

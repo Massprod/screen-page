@@ -63,28 +63,13 @@
     align-items: center;
     display: flex;
     cursor: pointer;
+    text-align: center;
+    font-weight: bold;
     justify-content: center;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                 opacity 0.2s ease; /* Smooth transition with easing */
     opacity: 1; /* Initial opacity */
-}
-
-.placement-cell p {
-    font-size: 100%;
-    font-weight: bold;
-}
-
-.placement-cell.identifier-cell {
-    background-color: whitesmoke;
-    border: none;
-    cursor: default;
-    justify-content: center;
-}
-
-.placement-cell.identifier-cell p {
-    font-size: 0.8em;
-    text-align: center;
 }
 
 .placement-cell.grid-cell {
@@ -97,6 +82,15 @@
     height: 125px;
     width: 125px;
     font-size: 5em;
+}
+
+.placement-cell.identifier-cell {
+    background-color: whitesmoke;
+    border: none;
+    cursor: default;
+    justify-content: center;
+    font-size: 7em;
+    text-align: center;
 }
 
 .placement-cell.placement-cell-empty {
@@ -122,15 +116,22 @@
     opacity: 0.9;
 }
 
+.placement-cell.menu-active{
+    background-color: #04f8bfd2 !important;
+    transform: translateY(-8px) scale(1.20) rotate(-1deg);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+}
+
 .placement-cell:active {
     transform: translateY(0) scale(1); /* Reset to original when clicked */
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); /* Shrink the shadow when clicked */
     opacity: 1; /* Return to full opacity when clicked */
 }
 
-
 .placement-cell.identifier-cell:hover {
     box-shadow: none;
     background-color: whitesmoke;
 }
 /* - PLACEMENT CELL - */
+
