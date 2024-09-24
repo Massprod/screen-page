@@ -6,12 +6,14 @@ export default class AttributeMark{
     ) {
         this.markClass = markClass;
         this.allMarked = new Set();
+        this.clearTimeout = null;
     }
 
-    async setRules(targetName, targetValue, ignoredElements = null) {
+    async setRules(targetName, targetValue, ignoredElements = null, attributeSeparator = ';') {
         this.targetName = targetName;
         this.targetValue = targetValue;
         this.ignoredElements = ignoredElements;
+        this.attributeSeparator = attributeSeparator;
     }
 
     async clearMarking() {
@@ -32,8 +34,8 @@ export default class AttributeMark{
         this.allMarked.forEach( (target) => {
             if (target.isConnected) {
                 for (let attribute of target.attributes) {
-                    if (attribute.value === this.targetValue) {
-                        
+                    const attValues = attribute.value.split(this.attributeSeparator);
+                    if (attValues.includes(this.targetValue)) {
                         return;
                     } 
                 }
@@ -45,11 +47,19 @@ export default class AttributeMark{
  
     async markTargets(setUpdate = false, secondsLimit = 0) {
         if (0 !== secondsLimit) {
-            setTimeout( () => {
+            if (this.clearTimeout) {
+                clearTimeout(this.clearTimeout);
+                this.clearTimeout = null;
+            }
+            this.clearTimeout = setTimeout( () => {
                 this.clearMarking();
             }, secondsLimit * 1000);
         }
-        this.curTargets = document.querySelectorAll(`[${this.targetName}=${CSS.escape(this.targetValue)}]`);
+        this.curTargets = Array.from(document.querySelectorAll(`[${this.targetName}]`)).filter(element => {
+            const attrValue = element.getAttribute(this.targetName);
+            const valueList = attrValue.split(this.attributeSeparator);
+            return valueList.includes(this.targetValue);
+        });
         if (0 === this.curTargets.length) {
             this.clearMarking();
         }
