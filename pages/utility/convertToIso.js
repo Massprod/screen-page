@@ -3,6 +3,7 @@ export default function convertISOToCustomFormat(
     withBreaker = false,
     convertToLocalTimezone = false,
     includeTimezone = false,
+    dateFirst = false,
 ) {
     // Parse the ISO date string
     let date = new Date(isoDate);
@@ -38,9 +39,17 @@ export default function convertISOToCustomFormat(
     // Generate formatted date
     let formattedDate = '';
     if (withBreaker) {
-        formattedDate = `${hours}:${minutes}:${secs} <br> ${day}.${month}.${year}`;
+        if (dateFirst) {
+            formattedDate = `${day}.${month}.${year} <br> ${hours}:${minutes}:${secs}`
+        } else {
+            formattedDate = `${hours}:${minutes}:${secs} <br> ${day}.${month}.${year}`;
+        }
     } else {
-        formattedDate = `${hours}:${minutes}:${secs} - ${day}.${month}.${year}`;
+        if (dateFirst) {
+            formattedDate = `${day}.${month}.${year} - ${hours}:${minutes}:${secs}`
+        } else {
+            formattedDate = `${hours}:${minutes}:${secs} - ${day}.${month}.${year}`;
+        }
     }
 
     if (convertToLocalTimezone && includeTimezone) {
