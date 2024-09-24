@@ -74,6 +74,8 @@ export default class Placement{
                      || placementCell.element.classList.contains('placement-cell-whitespace')) {
                     return;
                 }
+                placementCell.clearBatchStatus();
+                placementCell.clearAttributes();
                 const cellData = placementData['rows'][rowId][['columns']][colId];
                 cellData['blockedBy'] = historyData['placementOrders'][cellData['blockedBy']];
                 placementCell.setElementData(cellData);

@@ -99,4 +99,15 @@ export default class PlacementCell {
     unblockState() {
         this.element.classList.remove('blocked');
     }
+
+    clearBatchStatus() {
+        this.element.classList.remove('batch-not-tested', 'batch-passed', 'batch-not-passed')
+    }
+
+    clearAttributes() {
+        const dataAttributes = ['data-batch-number', 'data-wheels']
+        for (let attName of dataAttributes) {
+            this.element.removeAttribute(attName);
+        }
+    }
 }

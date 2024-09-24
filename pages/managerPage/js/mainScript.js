@@ -30,7 +30,6 @@ import {
     getCookie,
     clearRedirect,
     validateRoleCookie,
-    updateAuthCookie,
 } from "../../utility/roleCookies.js";
 
 
