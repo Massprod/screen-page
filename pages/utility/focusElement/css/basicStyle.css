@@ -1,0 +1,36 @@
+
+/* + FOCUS MARK  + */
+@keyframes focusFlashlightSmooth {
+  0% {
+    background: radial-gradient(circle, #ffecd9 10%, #ffba66 40%, #ffe5b3 100%);
+  }
+  50% {
+    background: radial-gradient(circle, #ffc499 10%, #ff9244 40%, #ffd7a3 100%);
+  }
+  100% {
+    background: radial-gradient(circle, #ffecd9 10%, #ffba66 40%, #ffe5b3 100%);
+  }
+}
+
+.focus-target {
+  animation: focusFlashlightSmooth 3s ease-in-out infinite; /* Smooth transitions with ease-in-out */
+}
+
+@keyframes secondFocusFlashlightSmooth {
+  0% {
+    background: radial-gradient(circle, #ccccff 10%, #4d4dcc 40%, #3030d0 100%);
+  }
+  50% {
+    background: radial-gradient(circle, #ccccff 10%, #4d4dcc 40%, #3030d0 100%);
+  }
+  100% {
+    background: radial-gradient(circle, #ccccff 10%, #4d4dcc 40%, #3030d0 100%);
+  }
+}
+
+.second-focus-target {
+  animation: secondFocusFlashlightSmooth 3s ease-in-out infinite; /* Smooth transitions with ease-in-out */
+}
+
+
+/* - FOCUS MARK - */
