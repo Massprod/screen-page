@@ -11,7 +11,7 @@ import {
     NAV_BUTTONS,
     USER_ROLE_COOKIE_UPDATE_INTERVAL,
 } from "../../uniConstants.js";
-import { ORDER_TYPES_TRANSLATE_TABLE } from "../../managerPage/js/constants.js";
+import { BASE_PLATFORM_NAME, GRID_NAME, ORDER_TYPES_TRANSLATE_TABLE } from "../../managerPage/js/constants.js";
 import { keepAuthCookieFresh, clearRedirect, validateRoleCookie, getCookie } from "../../utility/roleCookies.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import CellHoverCoordinate from "../../utility/cellHover/cellHoverCoordinate.js";
@@ -22,6 +22,8 @@ import convertISOToCustomFormat from "../../utility/convertToIso.js";
 import { createPlacementRecord, createTableRow } from "./ordersTable/ordersTable.js";
 import BasicSearcher from '../../utility/search/basicSearcher.js';
 import AttributeMark from '../../utility/mark/mark.js';
+import FocusMark from "../../utility/focusElement/focusElement.js";
+import { createBatchMenu } from "./batchMenu/batchMenu.js";
 
 
 // TODO: Can be universal on all pages, only change is roles.
@@ -100,6 +102,71 @@ const adjustRowsBreaker = async (element, breakSize, offSetElement) => {
 // - TABLE ADJUSTMENT -
 // TODO: Check what can be moved to utils.
 // + UNI +
+
+const assignPlatformFocus = (element, target, focusClass, message, callTimeout = 0) => {
+    element.addEventListener('click', event => {
+        if (focusSequence) {
+            flashMessage.show({
+                'message': `Подождите отображения эпизода прошлого заказа`,
+                'color': 'red',
+                'duration': 800,
+            })
+            return;
+        }
+        setTimeout( () => {
+            focusClass.higlightElement(target);
+            flashMessage.show({
+                'message': message,
+                'color': '#013565',
+                'duration': 1000,
+            });
+        }, callTimeout)
+    })
+} 
+
+const assignGridSequenceFocus = (element, targets, focusContainer, focusers, message, callTimeout = 1500, sequenceCooldown = 2500) => {
+    // TODO: REBUILD THIS MONSTROSITY LATER.
+    element.addEventListener('click', event => {
+        if (focusSequence) {
+            flashMessage.show({
+                'message': `Подождите отображения эпизода прошлого заказа`,
+                'color': 'red',
+                'duration': 800,
+            })
+            return;
+        }
+        focusSequence = true;
+        for (let index = 0; index < targets.length; index += 1) {
+            const target = targets[index];
+            setTimeout( () => {
+                // targets.length - index == we need to end focusing whole sequence at the same time.
+                // callTimeout * (targets.length - index) == time we need
+                // console.log(sequenceCooldown + (targets.length - index) * callTimeout);
+                let highlightTime = 5000;
+                if (1 !== targets.length) {
+                    highlightTime = sequenceCooldown + (targets.length - index) * callTimeout;
+                }
+                const newTranslationData = focusers[index].centerElementInContainer(
+                    focusContainer.childNodes[0], focusContainer, target, highlightTime
+                );
+                flashMessage.show({
+                    'message': `${message}`,
+                    'color': '#013565',
+                    'duration': 1000,
+                })
+                zoomer.translation.x = newTranslationData['newX'];
+                zoomer.translation.y = newTranslationData['newY'];
+                zoomer.translation.scale = newTranslationData['newScale'];
+                if (index === targets.length - 1) {
+                    setTimeout( () => {
+                        focusSequence = false;
+                    }, (highlightTime + 500) * index);
+                }
+            }, callTimeout * index);
+        }
+    })
+}
+
 const switchRecordButtonState = async (button, lastRecord) => {
     if (lastRecord) {
         button.classList.add('last-record', 'shake');
@@ -162,33 +229,69 @@ const clearElements = async (elements) => {
     }
 }
 
-const gatherOrderRowData = async (orderData) => {
+const gatherOrderRowData = async (orderData, wheelstacksData) => {
     const showData = {};
     const wheelstackId = orderData['affectedWheelStacks']['source'];
-    const wheelstackURL = `${BACK_URL.GET_WHEELSTACK_RECORD}/${wheelstackId}`;
-    const wheelstackResp = await getRequest(wheelstackURL, true, true);
-    const wheelstackData = await wheelstackResp.json();
-    showData['batchNumber'] = `${wheelstackData['batchNumber']}`;
-    showData['orderId'] = orderData['_id'];
-    showData['orderType'] = ORDER_TYPES_TRANSLATE_TABLE[orderData['orderType']];
-    showData['source'] = await createPlacementRecord(orderData['source']);
-    showData['destination'] = await createPlacementRecord(orderData['destination']);
-    showData['createdAt'] = `<b>${convertISOToCustomFormat(orderData['createdAt'], true, true)}</b>`;
+    const wheelstackData = wheelstacksData[wheelstackId];
+    const batchData = wheelstackData['batchNumber'];
+    let columnClasses = ['batch-indicator'];
+    if (!batchData['laboratoryTestDate']) {
+        columnClasses.push('not-tested');
+    } else if (batchData['laboratoryPassed']) {
+        columnClasses.push('passed');
+    } else if (!batchData['laboratoryPassed']) {
+        columnClasses.push('not-passed');
+    }
+    showData['batchNumber'] = {
+        'innerHTML': `${batchData['batchNumber']}`,
+        'title': `Номер партии | Нажмите для выделения всей партии`,
+        'cursor': 'pointer',
+        'classes': columnClasses,
+    };
+    showData['orderId'] = {
+        'innerHTML': orderData['_id'],
+        'title': `Номер заказа для идентификации`,
+    };
+    showData['orderType'] = {
+        'innerHTML': ORDER_TYPES_TRANSLATE_TABLE[orderData['orderType']],
+        'title': 'Тип заказа | Нажмите для выделения используемых элементов, в активном приямке и платформе',
+        'cursor': 'pointer',
+    };
+    showData['source'] = {
+        'innerHTML': await createPlacementRecord(orderData['source']),
+        'title': 'Исходная позиция для перемещения | Нажмите для выделения используемого элемента, в активном приямке и платформе',
+        'cursor': 'pointer',
+    }
+    showData['destination'] = {
+        'innerHTML': await createPlacementRecord(orderData['destination']),
+        'title': 'Конечная позиция для перемещения | Нажмите для выделения используемого элемента, в активном приямке и платформе',
+        'cursor': 'pointer',
+    }
+    showData['createdAt'] = {
+        'innerHTML': `<b>${convertISOToCustomFormat(orderData['createdAt'], true, true)}</b>`,
+        'title': 'Время создания заказа в системе',
+    };
     return showData;
 }
 
-const createOrderRecords = async (ordersData, targetTable, placementType, identifierRow, beforeBreaker = null) => {
+const createOrderRecords = async (historyData, targetTable, placementType, identifierRow, beforeBreaker = null) => {
     const orderElements = [];
+    const ordersData = Object.values(historyData['placementOrders']);
+    // TODO: Adjust back data, it's garbage. But it's okay for now, and history.
+    const wheelstacksData = historyData['wheelstacksData'];
     if (0 !== ordersData.length) {
         identifierRow.childNodes[0].innerHTML = `Данные для <b>${placementType}</b>`;
     } else {
         identifierRow.childNodes[0].innerHTML = `Нет данных для отображения: <b>${placementType}</b>`;
     }
     for (let orderData of ordersData) {
-        const displayData = await gatherOrderRowData(orderData);
+        const orderWheelstack = orderData['affectedWheelStacks']['source'];
+        const wheelstackData = wheelstacksData[orderWheelstack];
+        const batchNumber = wheelstackData['batchNumber']['batchNumber'];
+        const displayData = await gatherOrderRowData(orderData, wheelstacksData);
         const rowElement = await createTableRow(displayData);
-        rowElement.id = displayData['orderId'];
-        rowElement.setAttribute('data-batch-number', displayData['batchNumber']);
+        rowElement.id = orderData['_id'];
+        rowElement.setAttribute('data-batch-number', batchNumber);
         if (beforeBreaker) {
             targetTable.insertBefore(rowElement, beforeBreaker);
         } else {
@@ -198,6 +301,73 @@ const createOrderRecords = async (ordersData, targetTable, placementType, identi
             rowElement.childNodes[0].classList.add('orders-table-hidden');
             rowElement.childNodes[1].classList.add('orders-table-hidden');
         }
+        // + BATCH MARK +
+        rowElement.childNodes[0].addEventListener('click', event => {
+            batchMarkSubmit(batchNumber, 10);
+        })
+        rowElement.childNodes[0].addEventListener('contextmenu', event => {
+            event.preventDefault();
+            createBatchMenu(event, rowElement.childNodes[0], wheelstackData['batchNumber']);
+        })
+        // - BATCH MARK -
+        // + FOCUS ORDER TARGET +
+        // childNode[2] == source -> destination focus them one by one with delay
+        // childNode[3] == focus source cell, only in platform and grid
+        // childNode[4] == focus destination cell, only in grid (we can't move anything to platform)
+        let sourceOrderFocusMessage = `Сфокусирован <b>ИСХОДНЫЙ</b> элемент участвующий в заказе <b>${orderData['_id']}</b>`;
+        let sequenceMessage = `Сфокусирован элемент участвующий в заказе <b>${orderData['_id']}</b>`;
+        let destOrderFocusMessage = `Сфокусирован <b>КОНЕЧНЫЙ</b> элемент участвующий в заказе <b>${orderData['_id']}</b>`;
+        let sourceTargetElement = null;
+        let destTargetElement = null;
+        let sequenceTargets = [];
+        const sourceElement = rowElement.childNodes[3];
+        if (orderData && GRID_NAME === orderData['source']['placementType']) {
+            let sourceTargetElementId = `${orderData['source']['rowPlacement']}|${orderData['source']['columnPlacement']}`;
+            sourceTargetElement = gridContainer.querySelector(`#${CSS.escape(sourceTargetElementId)}`);
+            if (sourceElement && sourceTargetElement) {
+                assignGridSequenceFocus(
+                    sourceElement,
+                    [sourceTargetElement],
+                    gridContainer,
+                    [gridFocusMark, secondGridFocusMark],
+                    sourceOrderFocusMessage,
+                );
+                sequenceTargets.push(sourceTargetElement);
+            } else {
+                sequenceTargets.push(null);
+            }
+        } else if (orderData && BASE_PLATFORM_NAME === orderData['source']['placementType']) {
+            let sourceTargetElementId = `${orderData['source']['rowPlacement']}|${orderData['source']['columnPlacement']}`;
+            sourceTargetElement = platformsContainer.querySelector(`#${CSS.escape(sourceTargetElementId)}`);
+            if (sourceElement && sourceTargetElement) {
+                assignPlatformFocus(rowElement.childNodes[2], sourceTargetElement, platformFocusMark, sequenceMessage);
+                assignPlatformFocus(sourceElement, sourceTargetElement, platformFocusMark, sourceOrderFocusMessage);
+            }
+        }
+        const destElement = rowElement.childNodes[4];
+        if (orderData && GRID_NAME === orderData['destination']['placementType']) {
+            let destTargetElementId = `${orderData['destination']['rowPlacement']}|${orderData['destination']['columnPlacement']}`;
+            destTargetElement = gridContainer.querySelector(`#${CSS.escape(destTargetElementId)}`);
+            if (destElement && destTargetElement) {
+                sequenceTargets.push(destTargetElement);
+                assignGridSequenceFocus(
+                    destElement,
+                    [destTargetElement],
+                    gridContainer,
+                    [gridFocusMark, secondGridFocusMark],
+                    destOrderFocusMessage,
+                );
+            }
+        }
+        assignGridSequenceFocus(
+            rowElement.childNodes[2],
+            sequenceTargets,
+            gridContainer,
+            [gridFocusMark, secondGridFocusMark],
+            sequenceMessage,
+        );
+
+        // - FOCUS ORDER TARGET -
         orderElements.push(rowElement);
     }
     return orderElements;
@@ -383,7 +553,11 @@ const correctDatePeriod = async (periodStart, periodEnd) => {
     return periods;
 }
 // - UNI -
+var focusSequence = false;
 // + PLATFORM +
+var gridFocusMark = new FocusMark();
+var secondGridFocusMark = new FocusMark('second-focus-target');
+var platformFocusMark = new FocusMark();
 var ordersTable = document.getElementById('ordersTableBody');
 var platformCurrentHistory = [];
 var platformActiveHistoryData = {};
@@ -498,9 +672,22 @@ platformHistoryLoadDataButton.addEventListener('click', async (event) => {
         if (platformActiveHistoryElements) {
             await clearElements(platformActiveHistoryElements);
         }
-        updateBatchSearchData(prepareBatchesData(platformActiveHistoryData, gridActiveHistoryData));
+        updateSearcherData(
+            batchSearcher,
+            prepareData('batchNumber',
+                platformActiveHistoryData['batchesData'],
+                 gridActiveHistoryData['batchesData']
+               )
+            );
+        updateSearcherData(
+            wheelsSearcher,
+            prepareData('wheelId',
+                platformActiveHistoryData['wheelsData'],
+                gridActiveHistoryData['wheelsData']
+            )
+        )
         platformActiveHistoryElements = await createOrderRecords(
-            platformActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, gridBreaker,
+            platformActiveHistoryData, ordersTable, 'платформы', platformBreaker, gridBreaker,
         );
     }
     await switchView(platformPeriodElements, platformHistorySelectElements);
@@ -540,9 +727,22 @@ platformHistorySelector.addEventListener('change', async event => {
         if (platformActiveHistoryElements) {
             await clearElements(platformActiveHistoryElements);
         }
-        updateBatchSearchData(prepareBatchesData(platformActiveHistoryData, gridActiveHistoryData));
+        updateSearcherData(
+            batchSearcher,
+            prepareData('batchNumber',
+                platformActiveHistoryData['batchesData'],
+                 gridActiveHistoryData['batchesData']
+               )
+            );
+        updateSearcherData(
+            wheelsSearcher,
+            prepareData('wheelId',
+                platformActiveHistoryData['wheelsData'],
+                gridActiveHistoryData['wheelsData']
+            )
+        )
         platformActiveHistoryElements = await createOrderRecords(
-            platformActiveHistoryData['placementOrders'], ordersTable, 'платформы', platformBreaker, gridBreaker,
+            platformActiveHistoryData, ordersTable, 'платформы', platformBreaker, gridBreaker,
         );
     }
     const recordDate = platformActiveHistoryData['createdAt'];
@@ -583,7 +783,7 @@ platformHistoryNextBut.addEventListener('click', async (event) => {
 // - SLIDER -
 // - PLATFORM -
 
-// + GRID + 
+// + GRID +
 var gridCurrentHistory = [];
 var gridActiveHistoryData = {};
 var gridActiveHistoryElements = null;
@@ -707,9 +907,22 @@ gridHistoryLoadDataButton.addEventListener('click', async (event) => {
         if (gridActiveHistoryElements) {
             await clearElements(gridActiveHistoryElements);
         }
-        updateBatchSearchData(prepareBatchesData(platformActiveHistoryData, gridActiveHistoryData));
+        updateSearcherData(
+            batchSearcher,
+            prepareData('batchNumber',
+                 platformActiveHistoryData['batchesData'],
+                  gridActiveHistoryData['batchesData'],
+                )
+            );
+        updateSearcherData(
+            wheelsSearcher,
+            prepareData('wheelId',
+                platformActiveHistoryData['wheelsData'],
+                gridActiveHistoryData['wheelsData']
+            )
+        )
         gridActiveHistoryElements = await createOrderRecords(
-            gridActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker, null
+            gridActiveHistoryData, ordersTable, 'приямка', gridBreaker, null
         );
     }
     await switchView(gridPeriodElements, gridHistorySelectElements);
@@ -748,9 +961,22 @@ gridHistorySelector.addEventListener('change', async event => {
             await clearElements(gridActiveHistoryElements);
             gridActiveHistoryElements = [];
         }
-        updateBatchSearchData(prepareBatchesData(platformActiveHistoryData, gridActiveHistoryData));
+        updateSearcherData(
+            batchSearcher,
+            prepareData('batchNumber',
+                 platformActiveHistoryData['batchesData'],
+                  gridActiveHistoryData['batchesData']
+                )
+            );
+        updateSearcherData(
+            wheelsSearcher,
+            prepareData('wheelId',
+                platformActiveHistoryData['wheelsData'],
+                gridActiveHistoryData['wheelsData']
+            )
+        )
         gridActiveHistoryElements = await createOrderRecords(
-            gridActiveHistoryData['placementOrders'], ordersTable, 'приямка', gridBreaker, null,
+            gridActiveHistoryData, ordersTable, 'приямка', gridBreaker, null,
         );
     }
     const recordDate = gridActiveHistoryData['createdAt'];``
@@ -832,60 +1058,144 @@ showPlatformBut.addEventListener('click', event => {
 })
 // - EXTRA CONTROL BUTTONS -
 // + INPUT FIELDS +
-const searchForm = document.getElementById('batchSearchForm');
-const searchField = document.getElementById('batchSearchField');
-const resultContainer = document.getElementById('batchResults');
-const clearBatchButton = document.getElementById('clearBatchSearch');
-const options = {
+const prepareData = (key, ...dataSources) => {
+    let newData = [];
+    dataSources.forEach(dataSource => {
+        if (!dataSource) {
+            return;
+        }
+        if (dataSource instanceof Object) {
+            newData = [...newData, ...Object.values(dataSource)];
+            return;
+        }
+        newData = [...newData, ...dataSource];
+    });
+    let uniqueData = new Set();
+    if (key) {
+        for (let record of newData) {
+            uniqueData.add(record[key]);
+        }
+    }
+    uniqueData = Array.from(uniqueData);
+    return uniqueData;
+};
+
+const clearMarking = (marker) => {
+    marker.clearMarking();
+}
+
+const updateSearcherData = (searcher, newData) => {
+    searcher.setData(newData);
+}
+
+const focusChosenWheel = (wheelId) => {
+    const curTargets = Array.from(document.querySelectorAll(`[data-wheels]`)).filter(element => {
+        const attrValue = element.getAttribute('data-wheels');
+        const valueList = attrValue.split(';');
+        return valueList.includes(wheelId);
+    });
+    // There should be only 1 element with wheelId.
+    curTargets.forEach( target => {
+        if (gridContainer.contains(target)) {
+            const newTranslationData = gridFocusMark.centerElementInContainer(
+                gridContainer.childNodes[0],
+                gridContainer,
+                target,
+            );
+            // ZoomAndDrag saves it's direction as Class value, we need to adjust it.
+            zoomer.translation.x = newTranslationData['newX'];
+            zoomer.translation.y = newTranslationData['newY'];
+            zoomer.translation.scale = newTranslationData['newScale'];
+        } else if (platformsContainer.contains(target)) {
+            platformFocusMark.higlightElement(target);
+        }
+        flashMessage.show({
+            'message': `Сфокисурована стопка содержащая колесо: <b>${wheelId}</b>`,
+            'color': '#013565',
+        })
+    })
+}
+//  + BATCH FIELD +
+export const batchMarker = new AttributeMark('batch-mark');
+const batchOptions = {
     threshold: 0.4,
     distance: 5,
     ignoreLocation: true,
     minMatchCharLength: 1 
 };
+const batchSearchForm = document.getElementById('batchSearchForm');
+const batchSearchField = document.getElementById('batchSearchField');
+const batchResultContainer = document.getElementById('batchResults');
+const batchClearButton = document.getElementById('clearBatchSearch');
 
-const batchMarkSubmit = (targetValue) => {
+const batchMarkSubmit = (targetValue, markTimeout = 90) => {
     if (targetValue && '' !== targetValue.trim()) {
         batchMarker.clearMarking();
         batchMarker.setRules('data-batch-number', targetValue);
-        batchMarker.markTargets(true);
+        batchMarker.markTargets(true, markTimeout);
     }
 }
 
-const clearButAction = () => {
-    batchMarker.clearMarking();
+const batchMenuOpener = async (event, openerElement, targetBatchNumber) => {
+    if (!targetBatchNumber) {
+        return;
+    }
+    // gridActiveHistoryData
+    // platformActiveHistoryData
+    // TODO: We should use separated search fields, or combine grid + platform.
+    //  Because we can have a situation, where grid will have batch with later date or vice versa.
+    let menu = null;
+    if (targetBatchNumber in gridActiveHistoryData['batchesData']) {
+        menu = await createBatchMenu(event, openerElement, gridActiveHistoryData['batchesData'][targetBatchNumber]);
+    } else if (targetBatchNumber in platformActiveHistoryData['batchesData']) {
+        menu = await createBatchMenu(event, openerElement, platformActiveHistoryData['batchesData'][targetBatchNumber]);
+    }
+    return menu;
 }
 
 const batchSearcher = new BasicSearcher(
-    searchForm,
-    searchField,
-    clearBatchButton,
-    resultContainer,
+    batchSearchForm,
+    batchSearchField,
+    batchClearButton,
+    batchResultContainer,
     batchMarkSubmit,
-    clearButAction,
-)
-batchSearcher.setOptions(options);
-
-
-const prepareBatchesData = (...dataSources) => {
-    let newData = [];
-    dataSources.forEach(dataSource => {
-        const wheelstacks = dataSource['wheelstacksData'];
-        if (wheelstacks) {
-            newData = [...newData, ...wheelstacks];
-        }
-    });
-    const batchesData = new Set();
-    for (let record of newData) {
-        batchesData.add(record['batchNumber']);
-    }
-    const uniqueBatches = Array.from(batchesData);
-    return uniqueBatches;
+    () => clearMarking(batchMarker),
+    batchMenuOpener,
+);
+batchSearcher.setOptions(batchOptions);
+//  - BATCH FIELD -
+// + WHEELS FIELD +
+export const wheelsMarker = new AttributeMark('wheels-mark');
+const wheelsOptions = {
+    threshold: 0.4,
+    distance: 5,
+    ignoreLocation: true,
+    minMatchCharLength: 1,
 };
+const wheelsSearchForm = document.getElementById('wheelsSearchForm');
+const wheelsSearchField = document.getElementById('wheelsSearchField');
+const wheelsResultContainer = document.getElementById('wheelsResults');
+const wheelsClearButton = document.getElementById('clearWheelsSearch');
 
-
-const updateBatchSearchData = (newData) => {
-    batchSearcher.setData(newData);
+const wheelsMarkSubmit = (targetValue) => {
+    if (targetValue && '' !== targetValue.trim()) {
+        wheelsMarker.clearMarking();
+        wheelsMarker.setRules('data-wheels', targetValue);
+        wheelsMarker.markTargets(true);
+        focusChosenWheel(targetValue)
+    }
 }
+
+const wheelsSearcher = new BasicSearcher(
+    wheelsSearchForm,
+    wheelsSearchField,
+    wheelsClearButton,
+    wheelsResultContainer,
+    wheelsMarkSubmit,
+    () => clearMarking(wheelsMarker),
+);
+wheelsSearcher.setOptions(wheelsOptions);
+// - WHEELS FIELD -
 // - INPUT FIELDS -
 
-export const batchMarker = new AttributeMark();
+

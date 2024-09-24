@@ -42,6 +42,14 @@
     transition: background-color 0.2s ease;
 }
 
+.wheelstack-menu li.blocked {
+    background-color: rgb(245, 100, 100);
+}
+
+.wheelstack-menu li.blocked:hover {
+    background-color: rgb(227, 166, 151);
+}
+
 .wheelstack-menu li:hover {
     font-size: 1.55rem;
     transition: font-size 0.3s ease;
@@ -79,10 +87,12 @@
     padding: 12px;
     font-size: 1.20rem;
     font-weight: bold;
-    background-color: #f1f1f1;
+    background-color: #f5f4f4;
     color: #4a4a4a;
     transition: background-color 0.3s ease, color 0.3s ease;
     border-bottom: 1.5px dashed black;
+    position: relative;
+    overflow: hidden;
 }
 
 .info-record:hover {

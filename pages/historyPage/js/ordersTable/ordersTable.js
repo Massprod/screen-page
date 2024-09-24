@@ -12,7 +12,13 @@ export const createTableRow = async (rowData) => {
     const tableRow = document.createElement('tr');
     for (let [columnName, columnData] of Object.entries(rowData)) {
         const tableColumn = document.createElement('td');
-        tableColumn.innerHTML = columnData;
+        tableColumn.innerHTML = columnData['innerHTML'];
+        tableColumn.title = columnData['title'];
+        tableColumn.style.cursor = columnData['cursor'];
+
+        if ('classes' in columnData && Array.isArray(columnData['classes'])) {
+            tableColumn.classList.add(...columnData['classes']);
+        }
         tableRow.appendChild(tableColumn);
     }
     return tableRow;
@@ -23,6 +29,7 @@ export const createPlacementRecord = async (placementData) => {
     const placementId = placementData['placementId'];
     const placementRow = placementData['rowPlacement'];
     const placementCol = placementData['columnPlacement'];
+    let assignFocus = '';
     let placementRecord = "";
     if (placementCol === LABORATORY_NAME) {
         placementRecord = `<b>${PLACEMENT_TYPES[placementCol]}</b>`;
@@ -30,7 +37,7 @@ export const createPlacementRecord = async (placementData) => {
         placementRecord = `<b>${PLACEMENT_TYPES[placementType]}</b><br><b>${placementCol}</b>`;
     } else if (placementType !== STORAGE_NAME) {
         placementRecord = `<b>${PLACEMENT_TYPES[placementType]}</b><br>Р: <b>${placementRow}</b> | К: <b>${placementCol}</b>`;
-    } else {
+    } else if (placementType === STORAGE_NAME) {
         const storageGetNoDataURL = `${BACK_URLS.GET_STORAGE}/?storage_id=${placementId}&include_data=false`;
         const storageResp = await getRequest(storageGetNoDataURL, true, true);
         const storageData = await storageResp.json();

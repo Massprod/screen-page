@@ -75,6 +75,7 @@ export default class Placement{
                     return;
                 }
                 const cellData = placementData['rows'][rowId][['columns']][colId];
+                cellData['blockedBy'] = historyData['placementOrders'][cellData['blockedBy']];
                 placementCell.setElementData(cellData);
                 if (cellData['blocked']) {
                     placementCell.blockState();
@@ -114,13 +115,19 @@ export default class Placement{
         //     }
         // }
         const wheelstacksData = historyData['wheelstacksData'];
-        wheelstacksData.forEach( element => {
+        Object.values(wheelstacksData).forEach( element => {
+            if (this.placementId !== element['placement']['placementId']) {
+                return;
+            }
+            for (let index in element['wheels']) {
+                const wheelObjectId = element['wheels'][index];
+                element['wheels'][index] = historyData['wheelsData'][wheelObjectId];
+            }
             const elementRow = element['rowPlacement'];
             if ('extra' === elementRow) {
                 return;
             }
             const elementCol = element['colPlacement'];
-            const wheelstackId = element['_id'];    
             const numWheels = element['wheels'].length;
             const cellElement = this.placementRows[elementRow]['columns'][elementCol];
             cellElement.element.innerHTML = '';
@@ -128,7 +135,35 @@ export default class Placement{
             // + BATCH IND +
             const batchNumber = element['batchNumber'];
             cellElement.element.setAttribute('data-batch-number', batchNumber);
+            //  + BATCH DATA +
+            const batchData = historyData['batchesData'][batchNumber];
+            element['batchNumber'] = batchData
+            const batchState = batchData['laboratoryPassed'];
+            if (!batchData['laboratoryTestDate']) {
+                cellElement.element.classList.add('batch-not-tested');
+            } else if (batchState) {
+                cellElement.element.classList.add('batch-passed');
+            } else if (!batchState) {
+                cellElement.element.classList.add('batch-not-passed');
+            }
+            //  - BATCH DATA -
             // - BATCH IND -
+            // + WHEEL IND +
+            let wheelIndString = ``;
+            for (let wheelData of element['wheels']) {
+                const wheelId = wheelData['wheelId'];
+                wheelIndString = wheelIndString !== '' ? `${wheelIndString};${wheelId}` : `${wheelId}`;
+            }
+            cellElement.element.setAttribute('data-wheels', wheelIndString);
+            // - WHEEL IND -
+            // + BLOCKING ORDER +
+            if (element['blocked']) {
+                const blockingOrderObjectId = element['lastOrder'];
+                if (historyData['placementOrders'][blockingOrderObjectId]) {
+                    element['lastOrder'] = historyData['placementOrders'][blockingOrderObjectId];
+                }
+            } 
+            // - BLOCKING ORDER -
             cellElement.historyData = element;
         })
     }
