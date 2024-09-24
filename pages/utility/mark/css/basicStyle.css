@@ -19,21 +19,62 @@
 }
 
 .basic-focus {
-    animation: focusFlashlight 5s infinite;
+    animation: focusFlashlight 4s infinite;
 }
 
 @keyframes focusFlashlight {
     0% {
-        background-color: rgb(180, 230, 150);
+        background-color: #b3e5fc; /* Soft light blue */
     }
     50% {
-        background-color: rgb(180, 250, 150);
+        background-color: #ff9800; /* Medium orange */
     }
     100% {
-        background-color: rgb(180, 230, 150);
+        background-color: #b3e5fc; /* Soft light blue */
     }
 }
 
 .basic-focus:hover {
     background-color: rgba(225, 225, 225, 1) !important; /* Soft grey for hover on focus */
+}
+
+.batch-mark {
+    animation: batchMarkFlashlight 6s infinite;
+}
+
+.batch-mark:hover {
+    background-color: rgba(245, 245, 245, 1) !important; /* Soft grey for hover */
+}
+
+@keyframes batchMarkFlashlight {
+    0% {
+        background-color: #f7fcb3; /* Soft light yellow */
+    }
+    50% {
+        background-color: #ffee33; /* Medium yellow */
+    }
+    100% {
+        background-color: #f7fcb3; /* Soft light yellow */
+    }
+}
+
+
+.wheels-mark {
+    animation: wheelsMarkFlashlight 6s infinite;
+}
+
+.wheels-mark:hover {
+    background-color: rgba(245, 245, 245, 1) !important; /* Soft grey for hover */
+}
+
+@keyframes wheelsMarkFlashlight {
+    0% {
+        background-color: #b3f7fc; /* Soft light yellow */
+    }
+    50% {
+        background-color: #69e9f2; /* Medium yellow */
+    }
+    100% {
+        background-color: #b3f7fc; /* Soft light yellow */
+    }
 }
