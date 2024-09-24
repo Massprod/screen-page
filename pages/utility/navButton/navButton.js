@@ -24,6 +24,7 @@ export default class NavigationButton {
     init() {
         // Create hamburger button
         const navButton = document.createElement('button');
+        navButton.title = 'Меню навигации';
         navButton.className = 'nav-button'; // Use your custom class
         navButton.innerHTML = '&#9776;'; // Hamburger icon
 
@@ -45,6 +46,7 @@ export default class NavigationButton {
         // Create navigation buttons from buttonsData
         for ( let btnInfo of this.buttonsData) {
             let navItem = document.createElement('li');
+            navItem.title = btnInfo.title;
             const anchorLink = document.createElement('a');
             anchorLink.className = btnInfo.class;
             anchorLink.textContent = btnInfo.text;

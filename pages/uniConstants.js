@@ -116,6 +116,7 @@ const NAV_LAB_BUTTON = {
     'href': labPage,
     'id': 'labRedirect',
     'insideList': true,
+    'title': 'Страница изменения статуса лабораторных тестов партии',
 }
 const NAV_GRID_BUTTON = {
     'class': '',
@@ -123,6 +124,7 @@ const NAV_GRID_BUTTON = {
     'href': gridPage,
     'id': 'gridRedirect',
     'insideList': true,
+    'title': 'Основная страница приямка остывания',
 }
 const NAV_LOGIN_BUTTON = {
     'class': 'close-btn',
@@ -130,6 +132,7 @@ const NAV_LOGIN_BUTTON = {
     'href': loginPage,
     'id': 'loginRedirect',
     'insideList': false,
+    'title': 'Страница авторизации',
 }
 
 const NAV_USERS_BUTTON = {
@@ -138,6 +141,7 @@ const NAV_USERS_BUTTON = {
     'href': usersPage,
     'id': 'usersRedirect',
     'insideList': true,
+    'title': 'Страница управления пользователями системы',
 }
 
 const NAV_HISTORY_BUTTON = {
@@ -146,6 +150,7 @@ const NAV_HISTORY_BUTTON = {
     'href': historyPage,
     'id': 'historyRedirect',
     'insideList': true,
+    'title': 'Страница истории приямка остывания',
 }
 
 export const NAV_BUTTONS = {
@@ -161,7 +166,6 @@ export const NAV_BUTTONS = {
         NAV_LOGIN_BUTTON,
     ],
     [MANAGER_ROLE]: [
-        NAV_USERS_BUTTON,
         NAV_LAB_BUTTON,
         NAV_GRID_BUTTON,
         NAV_HISTORY_BUTTON,
@@ -172,3 +176,10 @@ export const NAV_BUTTONS = {
         NAV_LOGIN_BUTTON,
     ],
 };
+
+// BASIC ORDER NAMES
+export const ORDER_MOVE_TO_PROCESSING = "moveToProcessing";
+export const ORDER_MOVE_TO_REJECTED = "moveToRejected";
+export const ORDER_MOVE_TO_LABORATORY = 'moveToLaboratory';
+export const ORDER_MOVE_WHOLE_STACK = 'moveWholeStack';
+export const ORDER_MOVE_TO_STORAGE = 'moveToStorage';
