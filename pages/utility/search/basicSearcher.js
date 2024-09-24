@@ -9,6 +9,7 @@ export default class BasicSearcher{
         resultsElement,
         resultCallback,
         clearCallback = null,
+        menuCallback = null,
     ) {
         this.searchForm = searchForm;
         this.searchField = searchField;
@@ -16,6 +17,8 @@ export default class BasicSearcher{
         this.resultCallback = resultCallback;
         this.clearCallback = clearCallback;
         this.searchFieldClearButton = searchFieldClearButton;
+        this.menuCallback = menuCallback;
+        this.openedMenu = null;
         this.fuse = null;
         this.fuseOptions = null;
         this.searchData = [];
@@ -37,9 +40,12 @@ export default class BasicSearcher{
             this.triggerSubmitAction(this.searchField.value);
         });
         document.addEventListener('click', (event) => {
+            if (this.openedMenu && this.openedMenu.contains(event.target)) {
+                return;
+            }
             if (!(this.resultsElement.contains(event.target)) && event.target !== this.searchField) {
                 this.resultsElement.innerHTML = '';
-                this.resultsElement.classList.remove('show');
+                this.clearDependencies();
             }
         })
         if (this.searchFieldClearButton && this.clearCallback) {
@@ -49,12 +55,17 @@ export default class BasicSearcher{
                 this.clearCallback();
             })
         }
+    }
 
+    clearDependencies() {
+        this.resultsElement.classList.remove('show');
+        this.openedMenu = null;
     }
 
     triggerSubmitAction(selectedValue) {
         this.resultsElement.innerHTML = '';
-        this.resultsElement.classList.remove('show');
+        this.clearDependencies();
+        this.openedMenu = null;
         this.searchField.value = selectedValue;
         this.resultCallback(selectedValue);
     }
@@ -85,9 +96,17 @@ export default class BasicSearcher{
                 li.addEventListener('click', () => {
                     this.searchField.value = item;
                     this.resultsElement.innerHTML = '';
-                    this.resultsElement.classList.remove('show');
+                    this.clearDependencies();
                     this.triggerSubmitAction(item);
                 })
+                // + BATCH MENU +
+                if (this.menuCallback) {
+                    li.addEventListener('contextmenu', async (event) => {
+                        event.preventDefault();
+                        this.openedMenu = await this.menuCallback(event, li, item);
+                    })
+                }
+                // - BATCH MENU -
                 this.resultsElement.appendChild(li);
             })    
         }
@@ -125,6 +144,14 @@ export default class BasicSearcher{
                     resultItem.addEventListener('click', () => {
                         this.triggerSubmitAction(result.item);
                     });
+                    // + BATCH MENU +
+                    if (this.menuCallback) {
+                        resultItem.addEventListener('contextmenu', async (event) => {
+                            event.preventDefault();
+                            this.openedMenu = await this.menuCallback(event, resultItem, result.item);
+                        })
+                    }
+                    // - BATCH MENU -
                     this.resultsElement.appendChild(resultItem);
                 });
             }
@@ -132,7 +159,7 @@ export default class BasicSearcher{
         if (curQuery) {
             this.resultsElement.classList.add('show');
         } else {
-            this.resultsElement.classList.remove('show');
+            this.clearDependencies();
         }
     }
 
