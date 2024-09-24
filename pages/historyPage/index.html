@@ -9,132 +9,114 @@
 </head>
 <body>
     <div class="main-page-container">
-        <div class="main-page-top-container" id="topContainer">
-            <div class="platforms-container select-active" id="platformsContainer">
-                <button id="switchView" class="btn btn-secondary rounded-circle switch-view hidden">X</button>
-                <!-- platform selector -->
-                <div class="input-group input-group-lg mb-3 justify-content-center" id="platformSelectInputGroup">
-                    <select class="form-select border-secondary fw-bold select-platform" id="platformsSelector">
+        <div id="topContainer" class="main-page-top-container">
+            <div id="platformsContainer" class="platforms-container select-active">
+                <button id="switchView" title="Сменить активный вид платформы" class="btn btn-secondary rounded-circle switch-view hidden" alt="Сменить активный вид платформы">X</button>
+                <div id="platformSelectInputGroup" title="Выбор платформы для отображения" class="input-group input-group-lg mb-3 justify-content-center">
+                    <select id="platformsSelector" class="form-select border-secondary fw-bold select-platform" title="Выбор платформы для отображения" alt="Выбор платформы для отображения">
                         <option selected value="">Обновите данные...</option>
-                        <!-- Dynamic options will go here -->
                     </select>
                 </div>
-                <!-- Buttons below the select field -->
-                <div class="button-group justify-content-center" id="platformSelectButtons">
-                    <button id="refreshPlatforms" class="btn btn-lg btn-outline-secondary mx-2">Обновить</button>
-                    <button id="selectPlatform" class="btn btn-lg btn-secondary mx-2">Выбрать</button>
+                <div id="platformSelectButtons" class="button-group justify-content-center">
+                    <button id="refreshPlatforms" title="Обновить список доступных платформ" class="btn btn-lg btn-outline-secondary mx-2" alt="Обновить список доступных платформ">Обновить</button>
+                    <button id="selectPlatform" title="Выбрать доступную платформу" class="btn btn-lg btn-secondary mx-2" alt="Выбрать доступную платформу">Выбрать</button>
                 </div>
-                <!-- platform selector -->
-                <!-- platform history slider -->
-                <div class="history-slider-container platform hidden" id="platformHistorySlider">
-                    <div class="input-group" id="dateInput">
-                        <input type="datetime-local" id="startDateTime" class="form-control" placeholder="Start DateTime">
-                        <input type="datetime-local" id="endDateTime" class="form-control" placeholder="End DateTime">
-                        <button id="loadData" class="btn btn-secondary">Загрузить</button>
+                <div id="platformHistorySlider" class="history-slider-container platform hidden">
+                    <div id="dateInput" class="input-group">
+                        <input id="startDateTime" title="Начальная дата периода среза истории" type="datetime-local" class="form-control" placeholder="Start DateTime" alt="Начальная дата для истории">
+                        <input id="endDateTime" title="Конечная дата периода среза истории" type="datetime-local" class="form-control" placeholder="End DateTime" alt="Конечная дата для истории">
+                        <button id="loadData" title="Загрузить данные за выбранный период" class="btn btn-secondary" alt="Загрузить данные за выбранный период">Загрузить</button>
                     </div>
-                
-                    <div class="date-slider-container hidden" id="platformHistory">
-                        <button class="btn btn-dark me-3" id="periodChange">Период</button>
-                        <button class="btn btn-outline-light" id="prevRecord">
-                            <img class="shift-image" src="../images/left-arrow.png" alt="previousHistoryRecord">
+                    <div id="platformHistory" class="date-slider-container hidden">
+                        <button id="periodChange" title="Изменить период среза истории" class="btn btn-dark me-3" alt="Изменить период среза истории">Период</button>
+                        <button id="prevRecord" title="Выбрать предыдущую запись" class="btn btn-outline-light" alt="Выбрать предыдущую запись">
+                            <img class="shift-image" src="../images/left-arrow.png" alt="предыдущая запись истории">
                         </button>
-                        <select class="form-select border-light fw-bold select-date" id="platformsHistorySelector">
+                        <select id="platformsHistorySelector" title="Выбрать запись истории" class="form-select border-light fw-bold select-date" alt="Выбрать запись истории">
                             <option selected value="">Выберите запись...</option>
                         </select>
-                        <button class="btn btn-outline-light" id="nextRecord">
-                            <img class="shift-image" src="../images/right-arrow.png" alt="nextHistoryRecord">
+                        <button id="nextRecord" title="Выбрать следующую запись" class="btn btn-outline-light" alt="Выбрать следующую запись">
+                            <img class="shift-image" src="../images/right-arrow.png" alt="следующая запись истории">
                         </button>
                     </div>
                 </div>
-                <!-- platform history slider -->
             </div>
-            <!-- orders table -->
-            <div class="orders-table-container" id="ordersTableContainer">
-                <!-- orders table -->
-                <table class="orders-table" id="ordersTable">
+            <div id="ordersTableContainer" class="orders-table-container">
+                <table id="ordersTable" class="orders-table">
                     <thead>
                         <tr>
-                            <th id="batchNumber">Номер партии</th>
-                            <th id="orderId">Номер заказа</th>
-                            <th id="orderType">Тип заказа</th>
-                            <th id="source">Исходная</th>
-                            <th id="destination">Конечная</th>
-                            <th id="createdAt">Время поступления</th>
+                            <th id="batchNumber" title="Номер партии учавствующей в заказе">Номер партии</th>
+                            <th id="orderId" title="Номер заказа для идентификации">Номер заказа</th>
+                            <th id="orderType" title="Тип заказа переноса">Тип заказа</th>
+                            <th id="source" title="Исходная позиция для перемещения (Место забора)">Исходная</th>
+                            <th id="destination" title="Конечная позиция для перемещения (Место помещения)">Конечная</th>
+                            <th id="createdAt" title="Время поступления заказа в систему">Время поступления</th>
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
-                        <tr class="data-breaker" id="platformBreaker" ><td colspan="6">Нет данных для отображения: <b>платформа</b></td></tr>
-                        <tr class="data-breaker" id="gridBreaker" ><td colspan="6">Нет данных для отображения: <b>приямок</b></td></tr>
+                        <tr id="platformBreaker" title="Разделитель данных. Все заказы ниже него относятся к платформе" class="data-breaker"><td colspan="6">Нет данных для отображения: <b>платформа</b></td></tr>
+                        <tr id="gridBreaker" title="Разделитель данных. Все заказы ниже него относятся к приямку" class="data-breaker"><td colspan="6">Нет данных для отображения: <b>приямок</b></td></tr>
                     </tbody>
-                </table>
-                <!-- orders table -->    
-            </div>
-            <!-- orders table -->   
+                </table>  
+            </div>   
         </div>
-        <div class="main-page-bottom-container" id ="botContainer">
-            <div class="grids-container select-active" id="gridsContainer">
-                <button id="switchViewGrid" class="btn btn-secondary rounded-circle switch-view grid hidden">X</button>
-                <!-- + grid selector + -->
-                <div class="input-group input-group-lg mb-3 justify-content-center" id="gridSelectInputGroup">
-                    <select class="form-select border-secondary fw-bold select-grid" id="gridsSelector">
+        <div id="botContainer" class="main-page-bottom-container">
+            <div id="gridsContainer" class="grids-container select-active">
+                <button id="switchViewGrid" title="Сменить активный вид приямка" class="btn btn-secondary rounded-circle switch-view grid hidden" alt="Сменить активный вид приямка">X</button>
+                <div id="gridSelectInputGroup" title="Выбор приямка для отображения" class="input-group input-group-lg mb-3 justify-content-center">
+                    <select id="gridsSelector" class="form-select border-secondary fw-bold select-grid" title="Выбор приямка для отображения" alt="Выбор приямка для отображения">
                         <option selected value="">Обновите данные...</option>
                     </select>
                 </div>
-                 <!-- Buttons below the select field -->
-                 <div class="button-group justify-content-center" id="gridSelectButtons">
-                    <button id="refreshGrids" class="btn btn-lg btn-outline-secondary mx-2">Обновить</button>
-                    <button id="selectGrid" class="btn btn-lg btn-secondary mx-2">Выбрать</button>
+                <div id="gridSelectButtons" class="button-group justify-content-center">
+                    <button id="refreshGrids" title="Обновить список доступных приямков" class="btn btn-lg btn-outline-secondary mx-2" alt="Обновить список доступных приямков">Обновить</button>
+                    <button id="selectGrid" title="Выбрать доступный приямок" class="btn btn-lg btn-secondary mx-2" alt="Выбрать доступный приямок">Выбрать</button>
                 </div>
-                <!-- - grid selector - -->
-
-                <!-- platform history slider -->
-                <div class="history-slider-container grid hidden" id="gridHistorySlider">
-                    <div class="input-group grid" id="dateInput">
-                        <input type="datetime-local" id="startDateTime" class="form-control" placeholder="Start DateTime">
-                        <input type="datetime-local" id="endDateTime" class="form-control" placeholder="End DateTime">
-                        <button id="loadData" class="btn btn-secondary">Загрузить</button>
+                <div id="gridHistorySlider" class="history-slider-container grid hidden">
+                    <div id="dateInput" class="input-group grid">
+                        <input id="startDateTime" title="Начальная дата периода среза истории" type="datetime-local" class="form-control" placeholder="Start DateTime" alt="Начальная дата для истории">
+                        <input id="endDateTime" title="Конечная дата периода среза истории" type="datetime-local" class="form-control" placeholder="End DateTime" alt="Конечная дата для истории">
+                        <button id="loadData" title="Загрузить данные за выбранный период" class="btn btn-secondary" alt="Загрузить данные за выбранный период">Загрузить</button>
                     </div>
-                
-                    <div class="date-slider-container hidden" id="gridHistory">
-                        <button class="btn btn-dark me-3" id="periodChange">Период</button>
-                        <button class="btn btn-outline-light" id="prevRecord">
-                            <img class="shift-image" src="../images/left-arrow.png" alt="previousHistoryRecord">
+                    <div id="gridHistory" class="date-slider-container hidden">
+                        <button id="periodChange" title="Изменить период среза истории" class="btn btn-dark me-3" alt="Изменить период среза истории">Период</button>
+                        <button id="prevRecord" title="Выбрать предыдущую запись" class="btn btn-outline-light" alt="Выбрать предыдущую запись">
+                            <img class="shift-image" src="../images/left-arrow.png" alt="предыдущая запись истории">
                         </button>
-                        <select class="form-select border-light fw-bold select-date" id="gridHistorySelector">
+                        <select id="gridHistorySelector" title="Выбрать запись истории" class="form-select border-light fw-bold select-date" alt="Выбрать запись истории">
                             <option selected value="">Выберите запись...</option>
                         </select>
-                        <button class="btn btn-outline-light" id="nextRecord">
-                            <img class="shift-image" src="../images/right-arrow.png" alt="nextHistoryRecord">
+                        <button id="nextRecord" title="Выбрать следующую запись" class="btn btn-outline-light" alt="Выбрать следующую запись">
+                            <img class="shift-image" src="../images/right-arrow.png" alt="следующая запись истории">
                         </button>
                     </div>
                 </div>
-                <!-- platform history slider -->
             </div>
-            <div class="grid-container hidden" id="gridContainer"></div>
-            <!-- EXTRA BOT CONTENT -->
+            <div id="gridContainer" class="grid-container hidden"></div>
             <div class="extra-bot-container">
-                <!-- + BUTTONS + -->
-                 <div class="extra-buttons-container">
-                    <button id="fullScreen" class="btn btn-secondary btn-lg extra-button" title="Полный экран"><img src="../images/expand.png" alt="fulscreenButton"></button>
-                    <button id="foldScreen" class="btn btn-secondary btn-lg extra-button hidden" title="Свернуть экран"><img src="../images/exit-fullscreen.png" alt="exitFulscreenButton"></button>
-                    <button id="hidePlatform" class="btn btn-secondary btn-lg extra-button" title="Спрятать платформу"><img src="../images/hide.png" alt="hidePlatformButton"></button>
-                    <button id="showPlatform" class="btn btn-secondary btn-lg extra-button hidden" title="Показать платформу"><img src="../images/show.png" alt="showPlatformButton"></button>
+                <div class="extra-buttons-container">
+                    <button id="fullScreen" title="Полный экран" class="btn btn-secondary btn-lg extra-button" alt="Полный экран"><img src="../images/expand.png" alt="кнопка полного экрана"></button>
+                    <button id="foldScreen" title="Свернуть экран" class="btn btn-secondary btn-lg extra-button hidden" alt="Свернуть экран"><img src="../images/exit-fullscreen.png" alt="кнопка сворачивания экрана"></button>
+                    <button id="hidePlatform" title="Спрятать платформу" class="btn btn-secondary btn-lg extra-button" alt="Спрятать платформу"><img src="../images/hide.png" alt="кнопка скрытия платформы"></button>
+                    <button id="showPlatform" title="Показать платформу" class="btn btn-secondary btn-lg extra-button hidden" alt="Показать платформу"><img src="../images/show.png" alt="кнопка отображения платформы"></button>
                 </div>
-                <!-- - BUTTONS - -->
-                <!-- + BATCH SEARCH + -->
                 <form id="batchSearchForm">
                     <div class="form-group position-relative dropup">
-                        <input title="Выбор партии для выделения" type="text" id="batchSearchField" class="form-control form-control-lg fs-5" placeholder="Выберите партию..." autocomplete="on"/>
-                        <button title="Отмена выделения" type="button" class="clear-btn btn-secondary" id="clearBatchSearch" aria-label="Cancel batch search">
-                            &times;
-                        </button>
-                        <ul class="dropdown-menu w-100" id="batchResults"></ul>
+                        <input id="batchSearchField" title="Выбор партии для выделения" alt="Выбор партии" type="text" class="form-control form-control-lg fs-5" placeholder="Выберите партию..." autocomplete="off"/>
+                        <button id="clearBatchSearch" title="Отмена выделения" alt="Отмена выделения партии" type="button" class="clear-btn btn-secondary" aria-label="Cancel batch search">&times;</button>
+                        <ul id="batchResults" class="dropdown-menu w-100"></ul>
                     </div>
                     <button type="submit" class="d-none"></button> <!-- Hidden submit button for form submission -->
                 </form>
-                <!-- - BATCH SEARCH - -->
+                <form id="wheelsSearchForm">
+                    <div class="form-group position-relative dropup">
+                        <input id="wheelsSearchField" title="Выбор колеса для выделения" alt="Выбор колеса" type="text" class="form-control form-control-lg fs-5" placeholder="Выберите колесо..." autocomplete="off"/>
+                        <button id="clearWheelsSearch" title="Отмена выделения" alt="Отмена выделения колеса" type="button" class="clear-btn btn-secondary" aria-label="Cancel wheels search">&times;</button>
+                        <ul id="wheelsResults" class="dropdown-menu w-100"></ul>
+                    </div>
+                    <button type="submit" class="d-none"></button> <!-- Hidden submit button for form submission -->
+                </form>
             </div>
-            <!-- EXTRA BOT CONTENT -->
         </div>
     </div>
     <script type="module" src="./js/main.js"></script>
