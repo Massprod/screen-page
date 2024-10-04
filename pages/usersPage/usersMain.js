@@ -69,7 +69,7 @@ const navButton = new NavigationButton(
 
 // REQUESTS
 const getUsersData = async (onlyBlocked = false) => {
-    const usersDataUrl = `${BACK_URL.GET_AUTH_USERS_DATA}?only_blocked=${onlyBlocked}`;
+    const usersDataUrl = `${BACK_URL.GET_AUTH_USERS_DATA}?only_blocked=${onlyBlocked}&include_system_roles=false`;
     const authToken = await getCookie(AUTH_COOKIE_NAME);
     if (!authToken) {
         clearRedirect(BASIC_COOKIES, redirectUrl);
