@@ -20,7 +20,9 @@
   openssl genrsa -out ./nginx/selfsigned.key 2048
   openssl req -new -x509 -key ./nginx/selfsigned.key -out ./nginx/selfsigned.crt -days 365
   ```
-2. Дополнительно DF(Diffle-Hellman):
+  При создании сертификата укажите все необходимые данные: Страна, Область, Город, Организация, Подразделение, Имя, Емайл (можно оставить пустым, так как мы используем сертификат только для получения HTTPS соединения не более)
+  
+2. Дополнительно DF (Diffle-Hellman):
   ```
   openssl dhparam -out ./nginx/dhparam.pem 2048
   ```
