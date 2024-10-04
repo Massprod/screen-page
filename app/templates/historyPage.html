@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>История</title>
-    <link rel="stylesheet" href="./css/basicStyle.css">
-    <link rel="stylesheet" href="../bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/historyPage/css/basicStyle.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/bootstrap/bootstrap.min.css') }}">
 </head>
 <body>
     <div class="main-page-container">
@@ -30,13 +30,13 @@
                     <div id="platformHistory" class="date-slider-container hidden">
                         <button id="periodChange" title="Изменить период среза истории" class="btn btn-dark me-3" alt="Изменить период среза истории">Период</button>
                         <button id="prevRecord" title="Выбрать предыдущую запись" class="btn btn-outline-light" alt="Выбрать предыдущую запись">
-                            <img class="shift-image" src="../images/left-arrow.png" alt="предыдущая запись истории">
+                            <img class="shift-image" src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="предыдущая запись истории">
                         </button>
                         <select id="platformsHistorySelector" title="Выбрать запись истории" class="form-select border-light fw-bold select-date" alt="Выбрать запись истории">
                             <option selected value="">Выберите запись...</option>
                         </select>
                         <button id="nextRecord" title="Выбрать следующую запись" class="btn btn-outline-light" alt="Выбрать следующую запись">
-                            <img class="shift-image" src="../images/right-arrow.png" alt="следующая запись истории">
+                            <img class="shift-image" src="{{ url_for('static', filename='images/right-arrow.png') }}" alt="следующая запись истории">
                         </button>
                     </div>
                 </div>
@@ -81,13 +81,13 @@
                     <div id="gridHistory" class="date-slider-container hidden">
                         <button id="periodChange" title="Изменить период среза истории" class="btn btn-dark me-3" alt="Изменить период среза истории">Период</button>
                         <button id="prevRecord" title="Выбрать предыдущую запись" class="btn btn-outline-light" alt="Выбрать предыдущую запись">
-                            <img class="shift-image" src="../images/left-arrow.png" alt="предыдущая запись истории">
+                            <img class="shift-image" src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="предыдущая запись истории">
                         </button>
                         <select id="gridHistorySelector" title="Выбрать запись истории" class="form-select border-light fw-bold select-date" alt="Выбрать запись истории">
                             <option selected value="">Выберите запись...</option>
                         </select>
                         <button id="nextRecord" title="Выбрать следующую запись" class="btn btn-outline-light" alt="Выбрать следующую запись">
-                            <img class="shift-image" src="../images/right-arrow.png" alt="следующая запись истории">
+                            <img class="shift-image" src="{{ url_for('static', filename='images/right-arrow.png') }}" alt="следующая запись истории">
                         </button>
                     </div>
                 </div>
@@ -95,10 +95,10 @@
             <div id="gridContainer" class="grid-container hidden"></div>
             <div class="extra-bot-container">
                 <div class="extra-buttons-container">
-                    <button id="fullScreen" title="Полный экран" class="btn btn-secondary btn-lg extra-button" alt="Полный экран"><img src="../images/expand.png" alt="кнопка полного экрана"></button>
-                    <button id="foldScreen" title="Свернуть экран" class="btn btn-secondary btn-lg extra-button hidden" alt="Свернуть экран"><img src="../images/exit-fullscreen.png" alt="кнопка сворачивания экрана"></button>
-                    <button id="hidePlatform" title="Спрятать платформу" class="btn btn-secondary btn-lg extra-button" alt="Спрятать платформу"><img src="../images/hide.png" alt="кнопка скрытия платформы"></button>
-                    <button id="showPlatform" title="Показать платформу" class="btn btn-secondary btn-lg extra-button hidden" alt="Показать платформу"><img src="../images/show.png" alt="кнопка отображения платформы"></button>
+                    <button id="fullScreen" title="Полный экран" class="btn btn-secondary btn-lg extra-button" alt="Полный экран"><img src="{{ url_for('static', filename='images/expand.png') }}" alt="кнопка полного экрана"></button>
+                    <button id="foldScreen" title="Свернуть экран" class="btn btn-secondary btn-lg extra-button hidden" alt="Свернуть экран"><img src="{{ url_for('static', filename='images/exit-fullscreen.png') }}" alt="кнопка сворачивания экрана"></button>
+                    <button id="hidePlatform" title="Спрятать платформу" class="btn btn-secondary btn-lg extra-button" alt="Спрятать платформу"><img src="{{ url_for('static', filename='images/hide.png') }}" alt="кнопка скрытия платформы"></button>
+                    <button id="showPlatform" title="Показать платформу" class="btn btn-secondary btn-lg extra-button hidden" alt="Показать платформу"><img src="{{ url_for('static', filename='images/show.png') }}" alt="кнопка отображения платформы"></button>
                 </div>
                 <form id="batchSearchForm">
                     <div class="form-group position-relative dropup">
@@ -119,7 +119,7 @@
             </div>
         </div>
     </div>
-    <script type="module" src="./js/main.js"></script>
-    <script type="module" src="../bootstrap/bootstrap.bundle.min.js"></script>
+    <script type="module" src="{{ url_for('static', filename='js/historyPage/js/main.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/bootstrap/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Логин</title>
-    <link href="../bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link href="../utility/flashMessage/css/basicStyle.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='js/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='js/utility/flashMessage/css/basicStyle.css') }}" rel="stylesheet">
 </head>
 <body>
     <div class="container text-center">
@@ -32,6 +32,6 @@
             </div>
         </form>
     </div>
-    <script type="module" src="./mainLogin.js"></script>
+    <script type="module" src="{{ url_for('static', filename='js/loginPage/mainLogin.js') }}"></script>
 </body>
 </html>

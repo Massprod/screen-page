@@ -1,5 +1,4 @@
-
-const mainAddress = "http://127.0.0.1:8000";
+import { mainAddress } from "../../uniConstants.js";
 
 // TODO: No REact => No ENV => No security
 export const BACK_URLS = {
@@ -36,7 +35,6 @@ export const BACK_URLS = {
     POST_STORAGE_MOVE_TO: `${mainAddress}/orders/create/storage/move_to`,
     POST_STORAGE_MOVE_FROM: `${mainAddress}/orders/create/storage/move_from`,
     PATCH_CLEAR_EMPTY_BATCHES_STORAGES: `${mainAddress}/storages/clear`,
-    
 }
 
 export const ELEMENT_TYPES = {

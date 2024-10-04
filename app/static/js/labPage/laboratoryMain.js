@@ -86,13 +86,13 @@ const createBatchRow = async (batchData) => {
     const resultImage = document.createElement('img');
     resultImage.classList.add('result-image');
     if (!lastTestDate) {
-        resultImage.src = "../images/notTested.png";
+        resultImage.src = "static/images/notTested.png";
         resultImage.alt = "Not Tested"
     } else if (batchData['laboratoryPassed']) {
-        resultImage.src = "../images/approved.png";
+        resultImage.src = "static/images/approved.png";
         resultImage.alt = "Approved";
     } else {
-        resultImage.src = "../images/disapproved.png"
+        resultImage.src = "static/images/disapproved.png"
         resultImage.alt = "Disapproved";
     }
     resultImageCell.appendChild(resultImage);
@@ -345,10 +345,10 @@ const updateCreatedRecord = async (batchNumber, newData)  => {
     lastTestDateCell.textContent = newDate;
     const resultImage = recordData['mainRow'].childNodes[2].childNodes[0];
     if (newData['laboratoryPassed']) {
-        resultImage.src = '../images/approved.png';
+        resultImage.src = 'static/images/approved.png';
         resultImage.alt = 'Approved';
     } else {
-        resultImage.src = '../images/disapproved.png';
+        resultImage.src = 'static/images/disapproved.png';
         resultImage.alt = 'Disapproved';
     }
     const detailsElement = recordData['detailsRow'].childNodes[0].childNodes[0];

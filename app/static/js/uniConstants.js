@@ -1,11 +1,12 @@
-const mainAddress = "http://localhost:8000";
+export const mainAddress = "http://localhost:8000";
 const authMainAddress = "http://localhost:8080";
-const serviceDom = "http://localhost:5500";
-export const labPage = `${serviceDom}/screen/pages/labPage/laboratoryPage.html`;
-export const gridPage = `${serviceDom}/screen/pages/managerPage/managerPage.html`;
-export const loginPage = `${serviceDom}/screen/pages/loginPage/mainLogin.html`;
-export const usersPage = `${serviceDom}/screen/pages/usersPage/usersPage.html`;
-export const historyPage = `${serviceDom}/screen/pages/historyPage/index.html`;
+const serviceDom = "https://localhost:4444";
+export const loginPage = `${serviceDom}/`;
+export const usersPage = `${serviceDom}/users`;
+export const gridPage = `${serviceDom}/grid`;
+export const labPage = `${serviceDom}/lab`;
+export const historyPage = `${serviceDom}/history`;
+
 // TODO: We need to find some analog of `.env` for js.
 // PRESET NAMES
 export const BASIC_PMK_PLATFORM_PRESET = `pmkBasePlatform`;

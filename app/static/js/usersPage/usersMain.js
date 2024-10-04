@@ -123,10 +123,10 @@ const createUserRow = async (userData) => {
     const userStatusImage = document.createElement('img');
     userStatusImage.classList.add('user-status-image');
     if (userData['isBlocked']) {
-        userStatusImage.src = "../images/blocked.png";
+        userStatusImage.src = "static/images/blocked.png";
         userStatusImage.alt = "Blocked";
     } else {
-        userStatusImage.src = "../images/active.png";
+        userStatusImage.src = "static/images/active.png";
         userStatusImage.alt = "Active";
     }
     userStatusCell.appendChild(userStatusImage);
@@ -526,13 +526,13 @@ const updateRowData = async (currenRowData, newUserData) => {
             unblockParag.innerHTML = `Дата окончания блокировки: <b>${newUnblockData}</b>`;
             unblockButton.style.display = 'block';
             blockInput.style.display = 'none';
-            imageIcon.src = "../images/blocked.png";
+            imageIcon.src = "static/images/blocked.png";
             imageIcon.alt = "Blocked";
         } else {
             unblockParag.style.display = 'none';
             unblockButton.style.display = 'none';
             blockInput.style.display = 'flex';
-            imageIcon.src = "../images/active.png";
+            imageIcon.src = "static/images/active.png";
             imageIcon.alt = "Active";
         }
     }

@@ -1,0 +1,11 @@
+# Use the official NGINX image as a base
+FROM nginx:latest
+
+# Copy the custom NGINX configuration file
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Optional: Copy SSL certificates and Diffie-Hellman parameter if needed
+# (Assuming they are stored locally or generated as part of a build process)
+COPY ./nginx/selfsigned.crt /etc/ssl/certs/selfsigned.crt
+COPY ./nginx/selfsigned.key /etc/ssl/private/selfsigned.key
+COPY ./nginx/dhparam.pem /etc/ssl/certs/dhparam.pem

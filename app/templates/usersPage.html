@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Пользователи</title>
     <!-- Local Bootstrap CSS -->
-    <link href="../bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link href="./css/basicStyle.css" rel="stylesheet">
-    <link href="../utility/flashMessage//css/basicStyle.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='js/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='js/usersPage/css/basicStyle.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='js/utility/flashMessage/css/basicStyle.css') }}" rel="stylesheet">
 </head>
 <body>
 
@@ -32,14 +32,14 @@
     </div>
     
     <div class="button-container">
-        <button class="btn btn-secondary mt-2 fs-6" id="newUserButton"> <img class="user-status-image" src="../images/newUser.png" alt="addNewuser">Новый пользователь</button>
+        <button class="btn btn-secondary mt-2 fs-6" id="newUserButton"> <img class="user-status-image" src="{{ url_for('static', filename='images/newUser.png') }}" alt="addNewuser">Новый пользователь</button>
     </div>
     
 </div>
 
 <!-- Local Bootstrap JS -->
-<script src="../bootstrap/bootstrap.bundle.min.js"></script>
-<script type="module" src="./usersMain.js"></script>
+<script src="{{ url_for('static', filename='js/bootstrap/bootstrap.bundle.min.js')}}"></script>
+<script type="module" src="{{ url_for('static', filename='js/usersPage/usersMain.js') }}"></script>
 
 </body>
 </html>

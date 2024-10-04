@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Лаборатория</title>
     <!-- Local Bootstrap CSS -->
-    <link href="../bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link href="./css/basicStyle.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='js/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='js/labPage/css/basicStyle.css') }}" rel="stylesheet">
 </head>
 <body>
 
@@ -38,8 +38,8 @@
 </div>
 
 <!-- Local Bootstrap JS -->
-<script src="../bootstrap/bootstrap.bundle.min.js"></script>
-<script type="module" src="./laboratoryMain.js"></script>
+<script src="{{ url_for('static', filename='js/bootstrap/bootstrap.bundle.min.js')}}"></script>
+<script type="module" src="{{ url_for('static', filename='js/labPage/laboratoryMain.js') }}"></script>
 
 </body>
 </html>

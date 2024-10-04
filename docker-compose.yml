@@ -1,0 +1,19 @@
+
+services:
+  smart-screen:
+    build: ./app
+    container_name: ${SMART_SCREEN_CONTAINER_NAME}
+    expose:
+      - ${SMART_SCREEN_INSIDE_PORT}
+    restart: always
+
+  screen-nginx:
+    build: 
+      context: .
+      dockerfile: nginxDockerfile
+    container_name: ${NGINX_CONTAINER_NAME}
+    ports:
+      - ${NGINX_CONTAINER_OUTSIDE_PORT}:${NGINX_CONTAINER_INSIDE_PORT}
+    depends_on:
+      - smart-screen
+    restart: always
