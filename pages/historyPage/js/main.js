@@ -229,11 +229,14 @@ const clearElements = async (elements) => {
     }
 }
 
-const gatherOrderRowData = async (orderData, wheelstacksData) => {
+const gatherOrderRowData = async (orderData, wheelstacksData, historyData) => {
     const showData = {};
     const wheelstackId = orderData['affectedWheelStacks']['source'];
     const wheelstackData = wheelstacksData[wheelstackId];
-    const batchData = wheelstackData['batchNumber'];
+    let batchData = wheelstackData['batchNumber'];
+    if (!(batchData instanceof Object)) {
+        batchData = historyData['batchesData'][batchData]
+    }
     let columnClasses = ['batch-indicator'];
     if (!batchData['laboratoryTestDate']) {
         columnClasses.push('not-tested');
@@ -287,8 +290,12 @@ const createOrderRecords = async (historyData, targetTable, placementType, ident
     for (let orderData of ordersData) {
         const orderWheelstack = orderData['affectedWheelStacks']['source'];
         const wheelstackData = wheelstacksData[orderWheelstack];
-        const batchNumber = wheelstackData['batchNumber']['batchNumber'];
-        const displayData = await gatherOrderRowData(orderData, wheelstacksData);
+        let batchNumber = wheelstackData['batchNumber']['batchNumber'];
+        // We override it after we get it, but not when basePlatform -> grid. So == extra check
+        if (!batchNumber) {
+            batchNumber = wheelstackData['batchNumber']; 
+        }
+        const displayData = await gatherOrderRowData(orderData, wheelstacksData, historyData);
         const rowElement = await createTableRow(displayData);
         rowElement.id = orderData['_id'];
         rowElement.setAttribute('data-batch-number', batchNumber);
