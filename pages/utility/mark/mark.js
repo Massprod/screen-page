@@ -23,11 +23,11 @@ export default class AttributeMark{
             this.markInterval = null;
         }
         if (this.curTargets) {
-            this.curTargets.forEach( element => {
+            this.curTargets.forEach( element => {   
                 element.classList.remove(this.markClass);
             });   
         }
-        this.allMarked = new Set();
+        // this.allMarked = new Set();
     }
 
     async clearChanged() {
