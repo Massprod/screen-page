@@ -1,6 +1,6 @@
-export const mainAddress = "http://localhost:8000";
-const authMainAddress = "http://localhost:8080";
-const serviceDom = "https://localhost:4444";
+export const mainAddress = "https://localhost:443/api/grid";
+const authMainAddress = "https://localhost:443/api/auth";
+const serviceDom = "https://localhost:443";
 export const loginPage = `${serviceDom}/`;
 export const usersPage = `${serviceDom}/users`;
 export const gridPage = `${serviceDom}/grid`;
