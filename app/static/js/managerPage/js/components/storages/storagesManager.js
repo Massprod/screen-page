@@ -79,7 +79,7 @@ export default class StoragesManager{
     }
 
     async updateStorageRows() {
-        this.getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES}/?include_data=False`;
+        this.getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES}?include_data=False`;
         const response = await getRequest(this.getAllStoragesNoDataURL, true, true);
         this.newStoragesNoData = await response.json();
         if (0 === this.newStoragesNoData.length) {

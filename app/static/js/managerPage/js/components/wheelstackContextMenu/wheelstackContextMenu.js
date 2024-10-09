@@ -149,7 +149,7 @@ export default class WheelstackContextMenu{
                 this.extraMenuContainer.appendChild(extraElementButton);
             }
         } else {
-            const getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES}/?include_data=false`; 
+            const getAllStoragesNoDataURL = `${BACK_URLS.GET_ALL_STORAGES}?include_data=false`; 
             const response = await getRequest(getAllStoragesNoDataURL, true, true);
             const allStorages = await response.json();
             if (0 === allStorages.length) {
