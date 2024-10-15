@@ -1,4 +1,3 @@
-import { usersPage } from "../../../uniConstants.js";
 import PlacementRow from "./placementRow.js";
 
 
@@ -76,7 +75,7 @@ export default class Placement{
                 }
                 placementCell.clearBatchStatus();
                 placementCell.clearAttributes();
-                const cellData = placementData['rows'][rowId][['columns']][colId];
+                const cellData = placementData['rows'][rowId]['columns'][colId];
                 cellData['blockedBy'] = historyData['placementOrders'][cellData['blockedBy']];
                 placementCell.setElementData(cellData);
                 if (cellData['blocked']) {

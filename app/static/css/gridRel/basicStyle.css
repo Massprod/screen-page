@@ -1,12 +1,11 @@
-@import url(../js/placement/css/basicStyle.css);
-@import url(../../utility/navButton/navStyle.css);
-@import url(../../utility/cellHover/cellHover.css);
-@import url(../../utility/flashMessage/css/basicStyle.css);
-@import url(../js/ordersTable/css/basicStyle.css);
-@import url(../js/wheelstackMenu/css/basicStyle.css);
-@import url(../../utility/mark/css/basicStyle.css);
-@import url(../../utility/focusElement/css/basicStyle.css);
-@import url(../../historyPage/js/batchMenu/css/basicStyle.css);
+@import url(../../js/utility/navButton/navStyle.css);
+@import url(../../js/utility/cellHover/cellHover.css);
+@import url(../../js/utility/flashMessage/css/basicStyle.css);
+@import url(../../js/utility/mark/css/basicStyle.css);
+@import url(../../js/utility/focusElement/css/basicStyle.css);
+@import url(../gridRel/wheelstackMenu.css);
+@import url(../gridRel/batchMenu.css);
+@import url(../gridRel/ordersTable.css);
 
 
 * {
@@ -35,7 +34,7 @@ html, body {
     height: 400px; /* Same for height */
     border-bottom: 2px solid #ccccccb8;
     background-color: whitesmoke;
-    min-height: 35%;
+    min-height: 250px;
 }
 
 .main-page-bottom-container {
@@ -43,6 +42,7 @@ html, body {
     width: 100vw;
     position: relative;
     min-height: 65%;
+    background-color: whitesmoke;
 }
 /* - MAIN CONTAINERS - */
 
@@ -50,9 +50,8 @@ html, body {
 .platforms-container {
     display: block;
     min-width: 700px;
-    max-width: 45%; /* Restricting to 45% of parent container */
-    height: 100%; /* Full height of parent container */
-    border-right: 2px solid #ccccccb8;
+    max-width: 45%;
+    height: 100%;
     margin: auto;
     background-color: whitesmoke;
 }
@@ -81,14 +80,6 @@ html, body {
     flex-direction: row;
     overflow: hidden;
     background-color: whitesmoke;
-}
-
-.select-active {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
 }
 
 /* - ELEMENT CONTAINERS - */
@@ -156,21 +147,29 @@ html, body {
 /* - HISTORY SLIDER ELEMENT - */
 
 /* + BUTTONS + */
-.switch-view {
+.btn.switch-view {
     position: absolute;
     top: 2%;
     left: 1%;
-    width: 40px;
-    height: 40px;
 }
 
-.switch-view.grid {
-    top: 5%;
-    left: 3%;
-    min-height: 52px;
-    min-width: 52px;
-    z-index: 2;
+.btn.switch-view img {
+    width: 25px;
+    height: 25px;
 }
+
+.btn.switch-view.grid {
+    top: 2%;
+    right: 1%;
+    left: auto;
+    z-index: 3;
+}
+
+.btn.switch-view.grid img {
+    width: 35px;
+    height: 35px;
+}
+
 /* - BUTTONS - */
 
 /* + SELECTORS + */
@@ -318,10 +317,10 @@ html, body {
     flex-direction: row;
     position: absolute;
     bottom: 20px;
-    left: 20px;
+    left: 0px;
     right: auto;
     top: auto;
-    gap: 35px;
+    /* gap: 35px; */
     align-items: center;
     width: fit-content;
 }
@@ -330,44 +329,69 @@ html, body {
     display: flex;
     flex-direction: row;
     position: relative;
-    gap: 15px;
+    gap: 20px;
     padding: 0;
-    transform: scaleX(0);
+    left: 25px;
+    width: 0px;
     transform-origin: left;
-    transition: transform 1s ease;
-    /* transition: clip-path 1s ease; */
+    transition: width 0.4s ease-out 0s;
     overflow: hidden;
-    /* clip-path: inset(0 100% 0 0); */
 }
-
-.extra-buttons-container.expanded {
-    transform: scaleX(1);
-}
-
-/* .extra-buttons-container.expanded {
-    clip-path: inset(0 0 0 0);
-} */
 
 .extra-button {
     cursor: pointer;
-    transition: transform 0.4s ease;
+    /* transition: transform 0.4s ease; */
     opacity: 0.8 !important;
 }
 
 .extra-button:hover {
-    border: 1px dashed black !important;
-    transform: scale(1.1) translateY(-1px);
+    border: 0.5px dashed black;
+    /* transform: scale(1.05) translateY(-0.2px); */
 }
 
-.extra-button img {
-    height: 25px;
-    width: 25px;
+.extra-button.slider-button {
+    background-color: #767575;
+    cursor: pointer;
+    justify-self: end;
+    /* transition: background-color 0.3s ease; */
+    background: none;
+    border: none;
+    border-left: 2px dashed #333;
+    /* border-top-right-radius: 25%;
+    border-bottom-right-radius: 25%; */
+}
+
+.extra-button.slider-button:hover {
+    /* transform: scaleX(1.05) translateX(1px); */
+    border: none;
+    border-left: 2px dashed #333;
+}
+
+.extra-button.slider-button.expanded {
+    /* background-color: #767575; */
+    margin-left: 35px;
+}
+
+.extra-button img, .slider-button img {
+    height: 30px;
+    width: 30px;
 }
 
 @media (max-width: 1000px) {
-    .extra-button img {
+    .extra-button img, .slider-button img {
+        height: 20px;
+        width: 20px;
+    }
+
+    .switch-view img {
         height: 15px;
         width: 15px;
+    }
+    
+    .switch-view.grid img {
+        height: 20px;
+        width: 20px;
+        left: 85%;
     }
 }
 /* - SHOW | HIDE & FULLSCREEN - */
@@ -460,3 +484,30 @@ td.batch-indicator {
     background-color: rgba(79, 244, 79, 0.3);
 }
 /* -  BATCH STATUS INDICATION - */
+
+
+.spinner-container, .error-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.spinner-border {
+    width: 5rem;
+    height: 5rem;
+}
+
+/* Hide elements by default */
+.hidden {
+    display: none;
+}
+
+.cant-be-hidden {
+    display: block !important;
+}
+
+.alert {
+    margin-top: 20px;
+}

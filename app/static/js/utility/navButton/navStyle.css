@@ -15,6 +15,14 @@
     background-color: #54606c;
 }
 
+@media (max-width: 800px) {
+    .nav-button {
+        font-size: 18px;
+        padding: 10px;
+    }
+}
+
+
 /* + INSIDES + */
 
 .nav-menu {

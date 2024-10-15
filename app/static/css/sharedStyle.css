@@ -1,0 +1,48 @@
+
+/* .hidden {
+  display: none !important;
+} */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+.logo {
+  min-width: 280px;
+  min-height: 210px;
+  max-width: 40%;
+  max-height: 40%;
+  margin-top: 5%;
+}
+
+.logo.logo-login {
+  margin-top: 10%;
+}
+
+.logo.logo-grid {
+  position: absolute;
+  min-width: 480px;
+  min-height: 360px;
+  top: 6%;
+  margin-top: 0%;
+}
+
+@media (max-width: 1000px) {
+  .logo.logo-grid {
+    top: 8%;
+  }
+}

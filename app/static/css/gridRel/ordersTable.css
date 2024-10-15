@@ -1,0 +1,108 @@
+.orders-table {
+  table-layout: fixed;
+  z-index: 0;
+  width: 100%;
+  min-width: 600px;
+}
+
+.orders-table thead th {
+  top: 0;
+  position: sticky;
+  padding: 5px;
+  text-align: center;
+  justify-content: center;
+  vertical-align: middle;
+  font-weight: 650;
+  font-size: 1.1em;
+  z-index: 1000;
+  color: #fff;
+  text-transform: uppercase;
+  background: linear-gradient(to top, #444, #333);
+  cursor: pointer;
+}
+
+.orders-table tbody td {
+  padding: 15px;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 512;
+  font-size: 1.1em;
+  color: #333;
+  border-top: solid 1px #ddd;
+  word-break: break-all;
+  word-wrap: break-word;
+  border-bottom: solid 1px #ddd;
+}
+
+/* Standard rows with light/grey alternating colors */
+.orders-table tbody tr:nth-child(odd) {
+  background-color: #fffffff6; /* Very light grey */
+}
+
+.orders-table tbody tr:nth-child(even) {
+  background-color: #fbf7f7e3; /* Slightly darker light grey */
+}
+
+/* Hover effect for regular rows */
+.orders-table tbody tr:hover {
+  background-color: rgba(230, 230, 230, 1); /* Light grey on hover */
+}
+
+/* Standard row flashlight animation */
+@keyframes standardCellFlashlight {
+  0%, 100% {
+      background-color: rgba(210, 210, 210, 1);
+  }
+  25%, 75% {
+      background-color: rgba(205, 205, 205, 0.5);
+  }
+  50% {
+      background-color: rgba(200, 200, 200, 1);
+  }
+}
+
+.orders-table tbody td:hover {
+  animation: standardCellFlashlight 3s infinite ease-in-out;
+}
+
+.orders-table tbody tr.data-breaker {
+  border-top: solid 3px #979696 !important;
+  border-bottom: solid 3px #979696 !important;
+  font-weight: 750 !important;
+  color: #000 !important;
+  background-color: rgba(250, 244, 244, 0.95) !important;
+}
+
+.orders-table tbody tr.data-breaker:hover {
+  background-color: #a6a6a6 !important;
+  color: #fff !important;
+}
+
+@keyframes dataBreakerFlashlight {
+  0%, 100% {
+      background-color: rgba(225, 225, 230, 0.9); /* Bright white */
+  }
+  25%, 75% {
+      background-color: rgba(220, 220, 220, 0.7); /*   Dark gray */
+  }
+  50% {
+      background-color: rgba(215, 215, 215, 0.6); /* Darker gray */
+  }
+}
+
+.orders-table tbody tr.data-breaker td {
+  animation: dataBreakerFlashlight 4s infinite ease-in-out;
+}
+
+.orders-table-hidden {
+  display: none;
+}
+
+/* @media (max-width: 1000px) {
+  .orders-table tr:not(.data-breaker) td:nth-child(1),
+  .orders-table tr:not(.data-breaker) td:nth-child(2),
+  .orders-table tr:not(.data-breaker) th:nth-child(1),
+  .orders-table tr:not(.data-breaker) th:nth-child(2) {
+      display: none;
+  }
+} */

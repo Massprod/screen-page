@@ -10,6 +10,12 @@
     pointer-events: none;
   }
 
+@media (max-width: 1000px) {
+  .flash-messages-container {
+    max-width: 400px;
+  }
+}
+
 .flash-message {
     position: relative;
     margin: 10px 0; /* Margin to space out messages */
@@ -24,4 +30,5 @@
     transition: opacity 1s ease-out; /* Smooth transition for appearing and fading out */
     pointer-events: auto; /* Allow interaction with the message */
     word-break: break-word; /* Ensure text breaks within the width */
+    cursor: pointer;
 }

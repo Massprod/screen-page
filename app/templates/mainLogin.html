@@ -6,11 +6,14 @@
     <title>Логин</title>
     <link href="{{ url_for('static', filename='js/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='js/utility/flashMessage/css/basicStyle.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/sharedStyle.css') }}" rel="stylesheet">
 </head>
 <body>
     <div class="container text-center">
+        <!-- TODO: add class, but it's only 1element :( -->
+        <a href="https://prommashkomplekt.kz/"><img class="logo logo-login" src="{{ url_for('static', filename='images/pmk_emblem.png') }}"></a>
         <form id="userData" method="POST">
-            <div class="col-lg-5 col-md-8 col-sm-12 mx-auto mt-5 pt-5 fs-1 fw-bold">
+            <div class="col-lg-5 col-md-8 col-sm-12 mx-auto fs-1 fw-bold">
                 <label for="username">Имя</label>
                 <input name="username" type="text" class="form-control fs-5" id="username" 
                        placeholder="Имя" 

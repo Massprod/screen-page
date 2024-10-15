@@ -26,3 +26,8 @@ def lab():
 @main.route('/history')
 def history():
     return render_template('historyPage.html')
+
+@main.route('/rebuild')
+def rebuild():
+    return render_template('rebuildGridPage.html')
+

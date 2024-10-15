@@ -98,7 +98,7 @@
     display: none;
 }
 
-/* @media (max-width: 1600px) {
+/* @media (max-width: 1000px) {
     .orders-table tr:not(.data-breaker) td:nth-child(1),
     .orders-table tr:not(.data-breaker) td:nth-child(2),
     .orders-table tr:not(.data-breaker) th:nth-child(1),

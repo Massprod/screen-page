@@ -1,6 +1,11 @@
-export const mainAddress = "/api/grid";
-const authMainAddress = "/api/auth";
-const serviceDom = "";
+// export const mainAddress = "/api/grid";
+// const authMainAddress = "/api/auth";
+// const serviceDom = "";
+// TEST local
+export const mainAddress = "http://localhost:8000/api/grid";
+const authMainAddress = "http://localhost:8080/api/auth";
+const serviceDom = "http://localhost:5000";
+
 export const loginPage = `${serviceDom}/`;
 export const usersPage = `${serviceDom}/users`;
 export const gridPage = `${serviceDom}/grid`;
@@ -11,6 +16,10 @@ export const historyPage = `${serviceDom}/history`;
 // PRESET NAMES
 export const BASIC_PMK_PLATFORM_PRESET = `pmkBasePlatform`;
 export const BASIC_PMK_GRID_PRESET = `pmkGrid`;
+export const PLACEMENT_TYPES = {
+    BASE_PLAFTORM: 'basePlatform',
+    GRID: 'grid',
+}
 // ------
 export const BACK_URL  = {
     POST_BATCH_STATUS_UPDATE: `${mainAddress}/batch_number/update_laboratory_status`,
@@ -34,6 +43,10 @@ export const BACK_URL  = {
     GET_HISTORY_RECORD: `${mainAddress}/history/record`,
     GET_WHEELSTACK_RECORD: `${mainAddress}/wheelstacks/id`,
     GET_WHEEL_DATA_OBJECT_ID: `${mainAddress}/wheels/object_id`,
+    GET_GRID_STATE: `${mainAddress}/grid`,
+    GET_GRID_STATE_BY_NAME: `${mainAddress}/grid/name`,
+    GET_PLATFORM_STATE: `${mainAddress}/platform`,
+    GET_PLATFORM_STATE_BY_NAME: `${mainAddress}/platform/name`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';
@@ -178,9 +191,34 @@ export const NAV_BUTTONS = {
     ],
 };
 
+// UPDATE INTERVALS
+export const GRID_PLACEMENT_INTERVAL = 225;
+
 // BASIC ORDER NAMES
 export const ORDER_MOVE_TO_PROCESSING = "moveToProcessing";
 export const ORDER_MOVE_TO_REJECTED = "moveToRejected";
 export const ORDER_MOVE_TO_LABORATORY = 'moveToLaboratory';
 export const ORDER_MOVE_WHOLE_STACK = 'moveWholeStack';
 export const ORDER_MOVE_TO_STORAGE = 'moveToStorage';
+
+// SOME CONSTANTS
+export const ORDERS_TABLE_BREAKSIZE = 1000;
+
+// FLASH MESSAGE COLORS
+export const BASIC_INFO_MESSAGE_PRESET = {
+    message: '',
+    color: '#ffffff',           // White text color
+    backgroundColor: '#17a2b8', // Cyan-blue for informational background
+    fontSize: '12px',           // Default font size
+    fontFamily: 'Arial, sans-serif', // Default font family
+    duration: 1250              // Duration in milliseconds
+};
+
+export const BASIC_INFO_MESSAGE_WARNING = {
+    message: '',
+    color: '#000000',           // Black text color for visibility
+    backgroundColor: '#ffc107', // Yellow background for warning
+    fontSize: '12px',           // Default font size
+    fontFamily: 'Arial, sans-serif', // Default font family
+    duration: 1500              // Duration in milliseconds
+}
