@@ -11,6 +11,9 @@ export default class FocusMark{
     }
     
     higlightElement(element, highlightTime = 5000) {
+        if (!element) {
+            return;
+        }
         if (this.focusElement) {
             this.clearHighlight(this.focusElement);
         }

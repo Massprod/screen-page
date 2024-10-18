@@ -1,6 +1,6 @@
 
 
-export const combineObjectsData = (combined, toGather = []) => {
+export const combineObjectsData = (combined, toGather = [], toIgnore = []) => {
   toGather.forEach( objectToCombine => {
     Object.keys(objectToCombine).forEach( record => {
       if (record in combined) {
@@ -11,7 +11,22 @@ export const combineObjectsData = (combined, toGather = []) => {
   })
   Object.keys(combined).forEach( record => {
     let notPresent = true;
+    let ignore = false;
     for (let bank of toGather) {
+      // TODO: think about rebuilding banks.
+      for (let ignore of toIgnore) {
+        const ignoreStorage = toIgnore[0];
+        const ignoreKey = toIgnore[1];
+        if (record in ignoreStorage[ignoreKey]) {
+          ignore = true;
+          notPresent = false;
+          break;
+        }
+      }
+      if (ignore) {
+        break;
+      }
+      // ---
       if (record in bank) {
         notPresent = false;
         break;
@@ -21,6 +36,7 @@ export const combineObjectsData = (combined, toGather = []) => {
       delete combined[record];
     }
   })
+  
 }
 
 
@@ -43,6 +59,34 @@ export const combineSetsData = (combined, toGather = []) => {
     }
     if (notPresent) {
       combined.delete(record);
+    }
+  })
+}
+
+
+export const updateSetBank = (dataBank, newData) => {
+  newData.forEach( element => {
+    if (!(dataBank.has(element))) {
+      dataBank.add(element);
+    }
+  })
+  dataBank.forEach( element => {
+    if (!(newData.has(element))) {
+      dataBank.delete(element);
+    }
+  })
+}
+
+
+export const updateObjBank = (dataBank, newData) => {
+  Object.keys(newData).forEach( element => {
+    if (!(element in dataBank)) {
+      dataBank[element] = newData[element];
+    }
+  })
+  Object.keys(dataBank).forEach( element => {
+    if (!(element in newData)) {
+      delete dataBank[element];
     }
   })
 }

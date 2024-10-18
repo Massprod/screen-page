@@ -28,7 +28,7 @@ import {
 } from "../utility/roleCookies.js";
 import NavigationButton from "../utility/navButton/navButton.js";
 import { getRequest, patchRequest, postRequest } from "../utility/basicRequests.js";
-import convertISOToCustomFormat from "../utility/convertToIso.js";
+import { convertISOToCustomFormat } from "../utility/convertToIso.js";
 import flashMessage from "../utility/flashMessage/flashMessage.js";
 import {
     createChangeRoleForm,

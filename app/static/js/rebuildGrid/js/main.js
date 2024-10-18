@@ -19,14 +19,29 @@ import {
   GRID_PLACEMENT_INTERVAL,
   PLACEMENT_TYPES,
   BASIC_INFO_MESSAGE_WARNING,
+  UPDATE_BATCHES_DATA_INTERVAL,
+  UPDATE_DATA_BANKS_INTERVAL,
+  UPDATE_ORDERS_DATA_INTERVAL,
+  BASIC_ATTRIBUTES,
+  BATCH_STATUS_CLASSES,
 } from "../../uniConstants.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import { getRequest } from "../../utility/basicRequests.js";
 import { selectPlacementButtonAction} from "../../gridRel/placement/placementRel.js";
 import Placement from "../../gridRel/placement/placement.js";
 import ZoomAndDrag from "../../utility/zoomDrag.js";
-import { combineObjectsData, combineSetsData } from "../../utility/dataManip.js";
+import {
+  combineObjectsData,
+  combineSetsData,
+  updateSetBank,
+  updateObjBank,
+} from "../../utility/dataManip.js";
 import { createErrorElement, createLoadSpinner } from "../../utility/errorMessages.js";
+import CellHoverCoordinate from "../../utility/cellHover/cellHoverCoordinate.js";
+import { createOrderRecord } from "../../gridRel/ordersTable/orderRecords.js";
+import { createBatchMenu } from "../../gridRel/batchMenu/batchMenu.js";
+import AttributeMark from "../../utility/mark/mark.js";
+import FocusMark from "../../utility/focusElement/focusElement.js";
 
 
 // + BAD PRESET +
@@ -54,67 +69,133 @@ const navButton = new NavigationButton(
     navPosition, roleNavButtons, clearCookies,
 )
 // ---
+//  + HOVER COORD +
+const hoverCoord = new CellHoverCoordinate('placement-cell');
+//  - HOVER COORD -
 // - BAD PRESET -
 
 
 // + DATA BANKS +
-// TODO: Think about combining then together, because separated is simpler to use.
-//       But it's kinda, mehhh.
 // GRID
 var gridWheels = new Set();
 var gridWheelstacks = {};
 var gridBatches = {};
 var gridOrders = {};
+// --- 
 // PLATFORM
 var platformWheels = new Set();
 var platformWheelstacks = {};
 var platformBatches = {};
 var platformOrders = {};
-
+// ---
+// COMBINED
 var _allWheels = new Set();
 var _allWheelstacks = {};
 var _allBatches = {};
 var _allOrders = {};
+// ---
+// NOT YET PRESENT
+var _notYetPresent = {
+  'wheelstacks': {},
+  'batches': {},
+}
+
+const pruneObject = (objectToPrune = {}, objectsToCheck = []) => {
+  Object.keys(objectToPrune).forEach( element => {
+    for (let toCheck of objectsToCheck) {
+      if (element in toCheck) {
+        delete objectToPrune[element];
+      }
+    }
+  })
+}
+// TODO: Rebuild without interval?
+setInterval( () => {
+  pruneObject(_notYetPresent['batches'], [platformBatches, gridBatches]);
+  pruneObject(_notYetPresent['wheelstacks'], [platformWheelstacks, gridWheelstacks]);
+}, 1000);
+// ---
+
+
+// + MAINTAIN ORDERS DATA +
+const maintainOrdersData = () => {
+  Object.keys(_allOrders).forEach( async (orderId) => {
+    if (_allOrders[orderId] === false) {
+      const dataURL = `${BACK_URL.GET_ORDER_BY_ID}/${orderId}?active_orders=true&completed_orders=false&canceled_orders=false`;
+      const dataResp = await getRequest(dataURL, true, true);
+      const orderData = await dataResp.json();
+      _allOrders[orderId] = orderData;
+    };
+  });
+}
+setInterval( () => {
+  maintainOrdersData();
+}, UPDATE_ORDERS_DATA_INTERVAL);
+// - MAINTAIN ORDERS DATA -
+
+// + MAINTAIN BATCHES DATA +
+const maintainBatchesData = async (initial = false) => {
+  Object.keys(_allBatches).forEach(async batchId => {
+    const dataURL = `${BACK_URL.GET_BATCH_DATA}/${batchId}`;    
+    const dataResp = await getRequest(dataURL, true, true);
+    const batchData = await dataResp.json();
+    if (batchId in _allBatches) {
+      const oldDate = _allBatches[batchId]['laboratoryTestDate'];
+      // if ((oldDate && oldDate < batchData['laboratoryTestDate']) || initial) {
+      //   updateBatchElements(batchData);
+      // }
+      // TODO: redo creation of cells and everything that depends, because it's too much loops.
+      updateBatchElements(batchData);
+    }
+    _allBatches[batchId] = batchData;
+  })
+}
+
+setInterval( () => {
+  maintainBatchesData();
+}, UPDATE_BATCHES_DATA_INTERVAL);
+
+// + MAINTAIN BATCH ELEMENTS +
+const updateBatchElements = (batchData) => {
+  const allElements = document.querySelectorAll(`[data-batch-number="${batchData['batchNumber']}"]`);
+  allElements.forEach( element => {
+    if ('TR' === element.tagName) {
+      element = element.querySelector('#batchNumber');
+    }
+    let newClass = BATCH_STATUS_CLASSES.NOT_TESTED;
+    if (batchData['laboratoryPassed']) {
+      newClass = BATCH_STATUS_CLASSES.PASSED;
+    } else if (!batchData['laboratoryPassed'] && batchData['laboratoryTestDate']) {
+      newClass = BATCH_STATUS_CLASSES.NOT_PASSED;
+    } else {
+      newClass = BATCH_STATUS_CLASSES.NOT_TESTED;
+    }
+    for (let [key, value] of Object.entries(BATCH_STATUS_CLASSES)) {
+      if (value !== newClass) {
+        element.classList.remove(value);
+      } else {
+        element.classList.add(value);
+      }
+    }
+  })
+}
+// - MAINTAIN BATCH ELEMENTS -
+
+// - MAINTAIN BATCHES DATA -
 
 // CRINGE UPDATE
 setInterval(() => {
   combineSetsData(_allWheels, [platformWheels, gridWheels]);
-  combineObjectsData(_allWheelstacks, [platformWheelstacks, gridWheelstacks]);
+  combineObjectsData(_allWheelstacks, [platformWheelstacks, gridWheelstacks], [_notYetPresent, 'wheelstacks']);
   // TODO: BATCHES can change state == always loopin and updating their state 24/7 every 200ms or smth.
   //   Doubt there's going to be more than 20 batches, so 20 requests within 200ms is 100% fine.
-  combineObjectsData(_allBatches, [platformBatches, gridBatches]);
+  combineObjectsData(_allBatches, [platformBatches, gridBatches], [_notYetPresent, 'batches']);
   // TODO: add indicator of getting a new data records.
   //  Or better store all new record references and create a new Order records for each of them (in case of orders)
   combineObjectsData(_allOrders, [platformOrders, gridOrders]);
-}, 200);
+}, UPDATE_DATA_BANKS_INTERVAL);
 // ---
 
-
-const updateSetBank = (dataBank, newData) => {
-  newData.forEach( element => {
-    if (!(dataBank.has(element))) {
-      dataBank.add(element);
-    }
-  })
-  dataBank.forEach( element => {
-    if (!(newData.has(element))) {
-      dataBank.delete(element);
-    }
-  })
-}
-
-const updateObjBank = (dataBank, newData) => {
-  Object.keys(newData).forEach( element => {
-    if (!(element in dataBank)) {
-      dataBank[element] = newData[element];
-    }
-  })
-  Object.keys(dataBank).forEach( element => {
-    if (!(element in newData)) {
-      delete dataBank[element];
-    }
-  })
-}
 
 const updateBanksFromPlacement = async (placementData, placementType) => {
   const newWheels = new Set();
@@ -143,7 +224,7 @@ const updateBanksFromPlacement = async (placementData, placementType) => {
     updateObjBank(gridBatches, newBatches);
     updateObjBank(gridOrders, newOrders);
     gridWheelstacks = allWheelstacks;
-  } else if (PLACEMENT_TYPES.BASE_PLAFTORM === placementType) {
+  } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
     updateSetBank(platformWheels, newWheels);
     updateObjBank(platformBatches, newBatches);
     updateObjBank(platformOrders, newOrders);
@@ -156,6 +237,7 @@ const hideClass = 'hidden';
 
 const platformsContainer = document.getElementById('platformsContainer');
 const ordersContainer = document.getElementById('ordersTableContainer');
+const ordersTableBody = ordersContainer.querySelector('#ordersTableBody');
 
 const topContainer = document.getElementById('topContainer');
 const botContainer = document.getElementById('botContainer');
@@ -165,16 +247,22 @@ const ordersViewBut = document.getElementById('ordersVis');
 const gridFullBut = document.getElementById('gridFull');
 
 // + ORDERS ADJUSTMENT +
-window.addEventListener('resize', event => {
-  adjustOrderColumns();
-})
+// window.addEventListener('resize', event => {
+//   adjustOrderColumns();
+// })
 
 const adjustOrderColumns = () => {
   const curWidth = ordersContainer.getBoundingClientRect().width;
   const ordersTable = ordersContainer.querySelector('#ordersTable');
   if (ORDERS_TABLE_BREAKSIZE > curWidth) {
+    // BATCH + ID 
+    // const cellsToHide = ordersTable.querySelectorAll(
+    //   'tr td:nth-child(1), tr td:nth-child(2), th:nth-child(1), th:nth-child(2)'
+    // );
+
+    // TIME
     const cellsToHide = ordersTable.querySelectorAll(
-      'tr td:nth-child(1), tr td:nth-child(2), th:nth-child(1), th:nth-child(2)'
+      'tr td:nth-child(5), th:nth-child(5)'
     );
     cellsToHide.forEach( cell => {
       cell.classList.add('orders-table-hidden');
@@ -237,7 +325,7 @@ const setGridFullscreen = (elements) => {
       element.classList.add(hideClass);
     }
   }
-  adjustOrderColumns()
+  // adjustOrderColumns()
   if (fullScreen) {
     changeButImg(gridFullBut, exitFullScreenImg);
   } else {
@@ -259,7 +347,7 @@ const triggerGridFullscreen = (elements) => {
     topContainer.classList.remove(hideClass);
     changeButImg(gridFullBut, setFullScreenImg);
   }
-  adjustOrderColumns();
+  // adjustOrderColumns();
 }
 
 // + PLATFORM VIEW CHANGE +
@@ -328,29 +416,32 @@ gridFullBut.addEventListener('click', event => {
 // - VIEW CHANGE -
 
 // + PLACEMENT UPDATE +
-const updatePlacement = async (placement) => {
+const updatePlacement = async (placement, newId) => {
   let dataURL = '';
   let placementType = placement.placementType;
   if (PLACEMENT_TYPES.GRID === placementType) {
-    dataURL = `${BACK_URL.GET_GRID_STATE}/${placement.placementId}?includeWheelstacks=true`;
-  } else if (PLACEMENT_TYPES.BASE_PLAFTORM === placementType) {
-    dataURL = `${BACK_URL.GET_PLATFORM_STATE}/${placement.placementId}?includeWheelstacks=true`;
+    dataURL = `${BACK_URL.GET_GRID_STATE}/${newId}?includeWheelstacks=true`;
+  } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
+    dataURL = `${BACK_URL.GET_PLATFORM_STATE}/${newId}?includeWheelstacks=true`;
   }
   const dataResp = await getRequest(dataURL, false, true);
   // TODO: Error handling
   const newData = await dataResp.json()
-  if (platformSelectActive && PLACEMENT_TYPES.GRID == placement.placementType) {
-    const newPlatforms = new Set(newData['assignedPlatforms']);
-    if (0 === newPlatforms.size) {
+  if (platformSelectActive && PLACEMENT_TYPES.GRID === placement.placementType) {
+    const newPlatformsData = newData['assignedPlatforms'] ?? [];
+    if (0 === newPlatformsData.length) {
       clearAvailPlatforms(
         platformsContainer, platformSelectRelated,
         platformSelector, true, true
       )
     } else {
-      for (let platform of newPlatforms) {
-        if (!(availPlatforms.has(platform))) {
+      for (let record of newPlatformsData) {
+        const platformName = record['platformName'];
+        const platformId = record['platformId'];
+        if (!(platformId in availPlatforms)) {      
+          console.log('update');
           updateAvailPlatforms(
-            newPlatforms, platformsContainer,
+            newPlatformsData, platformsContainer,
             platformSelectRelated, platformSelector 
           );
           break;
@@ -358,13 +449,13 @@ const updatePlacement = async (placement) => {
       }
     }
   }
-  placement.updatePlacement(newData);
   updateBanksFromPlacement(newData, placementType);
+  placement.updatePlacement(newData);
 }
 // - PLACEMENT UPDATE -
 
 // + GRID SELECTION +
-const createOption = async (optionValue, optionName, selected) => {
+const createOption = async (optionValue, optionName, selected = false) => {
   const newOption = document.createElement('option');
   newOption.value = optionValue
   newOption.textContent = optionName.charAt(0).toUpperCase() + optionName.slice(1);
@@ -393,14 +484,19 @@ const updateAvailGrids = async (container, selectRelated, selector) => {
     container.appendChild(errorEl);
     return;
   }
-  availGrids = await gridsReq.json();
+  const newGridsData = await gridsReq.json();
+  availGrids = {};
+  for (let gridData of newGridsData) {
+    availGrids[gridData['_id']] = gridData;
+  }
   selector.innerHTML = '';
-  availGrids.forEach( async (record) => {
+  Object.keys(availGrids).forEach( async (gridId) => {
+    const gridData = availGrids[gridId];
     const optionValue = {
-      '_id': record['_id'],
-      'presetId': record['preset'],
+      '_id': gridData['_id'],
+      'presetId': gridData['preset'],
     }
-    const newOption = await createOption(JSON.stringify(optionValue), record['name']);
+    const newOption = await createOption(JSON.stringify(optionValue), gridData['name']);
     selector.appendChild(newOption);
   })
   selectRelated.forEach( element => {
@@ -410,8 +506,8 @@ const updateAvailGrids = async (container, selectRelated, selector) => {
 
 const gridsSelectInputGroup = botContainer.querySelector('#gridSelectInputGroup');
 const gridsSelector = botContainer.querySelector('#gridsSelector');
-var availGrids = [];
-var availPlatforms = new Set([]);
+var availGrids = {};
+var availPlatforms = {};
 
 // + GRID BUILD +
 const gridsViewButton = botContainer.querySelector('#switchViewGrid');
@@ -425,6 +521,7 @@ gridsViewButton.addEventListener('click', async event => {
     gridActiveElements.forEach(element => {
       element.classList.remove('hidden');
     })
+    gridSelectActive = false;
   } else {
     gridSelectActive = true;
     await updateAvailGrids(
@@ -455,11 +552,12 @@ const gridInactiveElements = new Set([gridsContainer]);
 const selectGridButton = botContainer.querySelector('#selectGrid');
 selectGridButton.addEventListener('click', async event => {
   // TODO: Errors handle, what if we're not getting correct preset data?
-  await selectPlacementButtonAction(
+  const placementId = await selectPlacementButtonAction(
     gridsSelector, gridPlacement, gridActiveElements, gridInactiveElements,
     gridView, gridsViewButton, true
   )
   gridSelectActive = false;
+  setPlatformToSelect();
   if (gridPlacementUpdateInterval) {
     clearInterval(gridPlacementUpdateInterval);
     gridPlacementUpdateInterval = null;
@@ -468,7 +566,8 @@ selectGridButton.addEventListener('click', async event => {
     if (gridSelectActive) {
       return;
     }
-    await updatePlacement(gridPlacement);
+    // console.log('Grid-ActiveUpd');
+    await updatePlacement(gridPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL)
 })
 // - GRID BUILD -
@@ -478,7 +577,7 @@ selectGridButton.addEventListener('click', async event => {
 var platformView = false;
 var platformSelectActive = true;
 var platformPlacementUpdateInterval = null;
-const platformPlacement = new Placement(PLACEMENT_TYPES.BASE_PLAFTORM);
+const platformPlacement = new Placement(PLACEMENT_TYPES.BASE_PLATFORM);
 platformsContainer.appendChild(platformPlacement.element);
 const platformViewButton = platformsContainer.querySelector('#switchViewPlatform'); 
 const platformSelectInputGroup = platformsContainer.querySelector('#platformSelectInputGroup');
@@ -499,7 +598,7 @@ const clearAvailPlatforms = async (container, showElements, selector, closeView 
     }
   })
   selector.innerHTML = '';
-  availPlatforms = new Set([]);
+  availPlatforms = {};
   const emptyValue = 'emptyList';
   const emptyName = 'Нет привязанных платформ';
   const emptyOption = await createOption(emptyValue, emptyName);
@@ -521,28 +620,37 @@ const clearAvailPlatforms = async (container, showElements, selector, closeView 
 }
 
 const updateAvailPlatforms = async (
-  newPlatforms, container,
-  selectRelated, selector) => {
-  const loadSpinner = createLoadSpinner('platformsSpinner');
-  availPlatforms = newPlatforms;
+  newPlatformsData, container,
+  selectRelated, selector
+) => {
+  availPlatforms = {};
+  for (let platformData of newPlatformsData) {
+    availPlatforms[platformData['platformId']] = platformData;
+  }
+  
   container.childNodes.forEach( child => {
     if (1 === child.nodeType) {
       child.classList.add('hidden');
     }
   });
+  const loadSpinner = createLoadSpinner('platformsSpinner');
   container.appendChild(loadSpinner);
   selector.innerHTML = '';
-  if (0 === availPlatforms.size) {
+  const availPlatformIds = Object.keys(availPlatforms);
+  if (0 === availPlatformIds.length) {
     clearAvailPlatforms(selector, false, true)
     forcePlatformClosedView();
   } else {
-    availPlatforms.forEach( async (record) => {
+    availPlatformIds.forEach( async (platformId) => {
+      const platformName = availPlatforms[platformId]['platformName'];
       const optionValue = {
-        'name': record,
-      }
-      const newOption = await createOption(JSON.stringify(optionValue), record);
+        'name': platformName,
+      };
+      const newOption = await createOption(
+        JSON.stringify(optionValue), platformName
+      );
       selector.appendChild(newOption);
-    })
+    });
   }
   selectRelated.forEach( element => {
     element.classList.remove('hidden');
@@ -550,7 +658,6 @@ const updateAvailPlatforms = async (
   loadSpinner.remove();
   selectPlatformButtonContainer.classList.remove('hidden');
 }
-
 
 const platformActiveElements = new Set(
   [platformPlacement.element, platformViewButton]
@@ -561,7 +668,7 @@ const platformInActiveElements = new Set(
 );
 
 selectPlatformButton.addEventListener('click', async (event) => {
-  await selectPlacementButtonAction(
+  const placementId = await selectPlacementButtonAction(
     platformSelector, platformPlacement, platformActiveElements, platformInActiveElements,
     platformView, platformViewButton, false
   )
@@ -574,11 +681,21 @@ selectPlatformButton.addEventListener('click', async (event) => {
     if (platformSelectActive) {
       return;
     }
-    await updatePlacement(platformPlacement);
+    // console.log('Plat-activeUpd');
+    await updatePlacement(platformPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL);
 })
 
-platformViewButton.addEventListener('click', (event) => {
+
+const setPlatformToSelect = () => {
+  platformSelectInputGroup.classList.remove('hidden');
+  platformPlacement.element.classList.add('hidden');
+  platformViewButton.classList.add('hidden');
+  platformSelectActive = true;
+}
+
+
+const platformViewSwitch = (hideSwitch = false) => {
   platformSelectActive = !platformSelectActive;
   if (platformSelectActive) {
     platformSelectInputGroup.classList.remove('hidden');
@@ -587,13 +704,436 @@ platformViewButton.addEventListener('click', (event) => {
     platformSelectInputGroup.classList.add('hidden');
     platformPlacement.element.classList.remove('hidden');
   }
+  if (hideSwitch) {
+    platformViewButton.classList.add('hidden');
+  }
+}
+
+
+platformViewButton.addEventListener('click', (event) => {
+  platformViewSwitch(false);
 })
 // - PLATFORM SELECTION -
 
 setInterval( () => {
-  console.log('gridWheels', gridWheels.size);
-  console.log('platformWheels', platformWheels.size)
-  console.log('gridWheelstacks', Object.keys(gridWheelstacks).length);
-  console.log('platformWheelstacks', Object.keys(platformWheelstacks).length);
-  console.log('platformOrders', Object.keys(platformOrders).length);
-}, 5500)
+  // console.log('gridWheels', gridWheels.size);
+  // console.log('platformWheels', platformWheels.size)
+  // console.log('gridWheelstacks', Object.keys(gridWheelstacks).length);
+  // console.log('platformWheelstacks', Object.keys(platformWheelstacks).length);
+  // console.log('platformOrders', Object.keys(platformOrders).length);
+  // console.log('batchesData', _allBatches);
+  // console.log('currentOrders', _allOrders);
+}, 4500)
+
+// 
+
+// + ORDERS TABLE +
+var createdOrderRecords = {};
+var orderRecordsUpdating = false;
+// ADJUST ON OPENING
+// adjustOrderColumns();
+// ---
+const pruneOutdatedOrders = () => {
+  if (gridSelectActive) {
+    return;
+  }
+  Object.keys(createdOrderRecords).forEach( orderId => {
+    if (orderId in _allOrders) {
+      return;
+    }
+    createdOrderRecords[orderId].remove();
+    delete createdOrderRecords[orderId];
+  })
+}
+
+const pruneOrdersInterval = setInterval( () => {
+  pruneOutdatedOrders();
+}, 100)
+
+const maintainOrderRecords = async () => {
+  // If another update is in progress or gridSelectActive is true, return early
+  if (orderRecordsUpdating || gridSelectActive) {
+    return;
+  }
+  
+  // Set orderRecordsUpdating to true to indicate the process is running
+  orderRecordsUpdating = true;
+
+  const promises = [];  // Array to hold all createOrderRecord promises
+
+  for (let [orderId, orderData] of Object.entries(_allOrders)) {
+    if (orderId in createdOrderRecords || orderData === false) {
+      continue;
+    }
+    // console.log('currentGridId', gridPlacement.placementId);
+    // console.log(orderData);
+    // console.log('---------------------');
+    // if ((orderData['destination']['placementId']) !== gridPlacement.placementId) {
+    //   return;
+    // }
+
+    let sourceWheelstackData = null;
+    const sourceWheelstackId = orderData['affectedWheelStacks']['source'];
+    if (sourceWheelstackId) {
+      sourceWheelstackData = _allWheelstacks[sourceWheelstackId];
+    }
+
+    // TODO: when we add Merge, we will need to add `destWheelstacks` coverage.
+    let destWheelstackData = null;
+    const destWheelstackId = orderData['affectedWheelStacks']['destination'];
+    if (destWheelstackId) {
+      destWheelstackData = _allWheelstacks[destWheelstackId];
+    }
+
+    // TODO: ADD something to cull this requests.
+    //  Because this elements not yet present in a GRID, and platform where they're not Chosen.
+    //  So, we forced to get this data to correctly show ORDER_DATA, but we can save it somewhere for reuse and clear later.
+    //  Fine for, now because we need to use it combined anyway.
+    // Order to move from platform, so wheelstack is not yet in a bank, because this platform not actively chosen.
+    let sourceNotPresent = false;
+    if (!sourceWheelstackData && sourceWheelstackId) {
+      sourceNotPresent = true;
+      sourceWheelstackData = _notYetPresent['wheelstacks'][sourceWheelstackId];
+      if (!sourceWheelstackData) {
+        const sourceWheelstackDataURL = `${BACK_URL.GET_WHEELSTACK_RECORD}/${sourceWheelstackId}`;
+        const sourceWheelstackDataResp = await getRequest(sourceWheelstackDataURL, true, true);
+        sourceWheelstackData = await sourceWheelstackDataResp.json();
+        _notYetPresent['wheelstacks'][sourceWheelstackId] = sourceWheelstackData;
+        _allWheelstacks[sourceWheelstackId] = sourceWheelstackData;
+        // console.log('wheelstackDownloaded');
+      }
+    }
+    if (!sourceWheelstackData) {
+      continue;
+    }
+    const batchNumber = sourceWheelstackData['batchNumber'];
+    let batchData = _allBatches[batchNumber];
+    if (!batchData && sourceNotPresent) {
+      batchData = _notYetPresent['batches'][batchNumber];
+      if (!batchData) {
+        const batchDataUrl = `${BACK_URL.GET_BATCH_DATA}/${batchNumber}`; 
+        const batchResp = await getRequest(batchDataUrl, true, true);
+        batchData = await batchResp.json();
+        _notYetPresent['batches'][batchData['batchNumber']] = batchData;
+        _allBatches[batchData['batchNumber']] = batchData;
+        // console.log('batchDownloaded');
+      }
+    }
+    if (!batchData) {
+      continue;
+    }
+
+    const curWidth = ordersContainer.getBoundingClientRect().width;
+    // const hideColumns = ORDERS_TABLE_BREAKSIZE > curWidth;
+
+    // Create order element asynchronously and store the promise
+    const placementBanks = {'grids': availGrids, 'platforms': availPlatforms};
+    const orderPromise = createOrderRecord(orderData, batchData, placementBanks)
+      .then(orderElement => {
+        assignBatchMenu(orderElement);
+        orderElementAssignFocusEls(orderElement);
+        ordersTableBody.appendChild(orderElement);
+        createdOrderRecords[orderId] = orderElement;
+      })
+      .catch(error => {
+        console.error(`Error creating order for ${orderId}:`, error);
+      });
+
+    promises.push(orderPromise);  // Add each promise to the array
+  }
+
+  // Wait for all createOrderRecord promises to resolve
+  await Promise.all(promises).catch(error => {
+    console.error('Error maintaining order records:', error);
+  });
+
+  // Once all operations are done, set orderRecordsUpdating to false
+  orderRecordsUpdating = false;
+};
+
+
+let orderRecordsUpdateInterval = setInterval( () => {
+  maintainOrderRecords();
+}, 100);
+// - ORDERS TABLE -
+
+
+// + FOCUS RELATED +
+// + BATCH MARKER +
+const batchMarker = new AttributeMark('batch-mark');
+const batchMarkTrigger = (targetValue, markTimeout = 90) => {
+  if (targetValue && '' !== targetValue.trim()) {
+    batchMarker.clearMarking();
+    batchMarker.setRules(BASIC_ATTRIBUTES.BATCH_NUMBER, targetValue);
+    batchMarker.markTargets(true, markTimeout);
+  }
+}
+// - BATCH MARKER -
+var focusSequence = false;
+var gridFocusMark = new FocusMark('focus-target'); // default class
+var secondGridFocusMark = new FocusMark('second-focus-target');
+var platformFocusMark = new FocusMark('focus-target');  // default class
+
+
+// + MOVE TO DIFF +
+const orderElementAssignFocusEls= (orderElement) => {
+  const orderId = orderElement.id;
+  const orderData = _allOrders[orderId];
+  if (!orderData) {
+    orderElement.remove();
+    console.error('Canceled creation of `orderRow` no data in bank `_allOrders`');
+    return;
+  }
+  
+  let sourceOrderFocusMessage = `Сфокусирован <b>ИСХОДНЫЙ</b> элемент участвующий в заказе <b>${orderData['_id']}</b>`;
+  let sequenceMessage = `Сфокусирован элемент участвующий в заказе <b>${orderData['_id']}</b>`;
+  let destOrderFocusMessage = `Сфокусирован <b>КОНЕЧНЫЙ</b> элемент участвующий в заказе <b>${orderData['_id']}</b>`;
+  let sourceTargetElement = null;
+  let sourceTargetElementId = null;
+  let destTargetElement = null;
+  let destTargetElementId = null;
+  let sequenceTargets = [];
+  
+  // TODO: WTF is this? Refactor this InduStuff/
+  const sourceOrderElement = orderElement.querySelector('#source');
+  if (sourceOrderElement) {
+    const sourcePlacementId = orderData['source']['placementId'];
+    const sourcePlacementType = orderData['source']['placementType'];
+    const sourceRow = orderData['source']['rowPlacement'];
+    const sourceCol = orderData['source']['columnPlacement'];
+    if (PLACEMENT_TYPES.GRID === sourcePlacementType) {
+      sourceTargetElementId = `${sourceRow}|${sourceCol}`; 
+      assignGridSequenceFocus(
+        sourceOrderElement,
+        [{
+          'elementId': sourceTargetElementId,
+          'container': gridContainer,
+          'onlyHighlight': true,
+          'placementId': sourcePlacementId,
+          'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[sourcePlacementId]['name']}</b>`,
+        }],
+        [gridFocusMark],
+        sourceOrderFocusMessage,
+        0,
+        0,
+      );
+      sequenceTargets.push(
+        {
+          'elementId': sourceTargetElementId,
+          'container': gridContainer,
+          'onlyHighlight': false,
+          'placementId': sourcePlacementId,
+          'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[sourcePlacementId]['name']}</b>`,
+        }
+      );
+    } else if (PLACEMENT_TYPES.BASE_PLATFORM === sourcePlacementType) {
+      sourceTargetElementId = `${sourceRow}|${sourceCol}`;
+      // assignFocus(
+      //   sourceOrderElement, sourceTargetElementId, platformsContainer, platformFocusMark, sourceOrderFocusMessage
+      // );
+      assignGridSequenceFocus(
+        sourceOrderElement,
+        [{
+          'elementId': sourceTargetElementId,
+          'container': platformsContainer,
+          'onlyHighlight': true,
+          'placementId': sourcePlacementId,
+          'errorMessage': `Не активен вид выбранного элемента: <b>${availPlatforms[sourcePlacementId]['platformName']}</b>`,
+        }],
+        [platformFocusMark],
+        sourceOrderFocusMessage,
+        0,
+        0,
+      )
+      sequenceTargets.push(
+        {
+          'elementId': sourceTargetElementId,
+          'container': platformsContainer,
+          'onlyHighlight': true,
+          'placementId': sourcePlacementId,
+          'errorMessage': `Не активен вид выбранного элемента: <b>${availPlatforms[sourcePlacementId]['platformName']}</b>`,
+        }
+      );
+    }
+  }
+  
+  const destOrderElement = orderElement.querySelector('#destination');
+  if (destOrderElement) {
+    const destinationPlacementId = orderData['destination']['placementId'];
+    const destinationPlacementType = orderData['destination']['placementType'];
+    const destinationRow = orderData['destination']['rowPlacement'];
+    const destinationCol = orderData['destination']['columnPlacement'];
+    if (PLACEMENT_TYPES.GRID === destinationPlacementType) {
+      destTargetElementId = `${destinationRow}|${destinationCol}`;
+      assignGridSequenceFocus(
+        destOrderElement,
+        [{
+          'elementId': destTargetElementId,
+          'container': gridContainer,
+          'onlyHighlight': false,
+          'placementId': destinationPlacementId,
+          'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[destinationPlacementId]['name']}</b>`,
+        }],
+        [gridFocusMark, secondGridFocusMark],
+        destOrderFocusMessage,
+        0,
+        0,
+      );
+      sequenceTargets.push(
+        {
+          'elementId': destTargetElementId,
+          'container': gridContainer,
+          'onlyHighlight': false,
+          'placementId': destinationPlacementId,
+          'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[destinationPlacementId]['name']}</b>`,
+        }
+      );
+    }
+  }
+  const orderTypeElement = orderElement.querySelector('#orderType');
+  assignGridSequenceFocus(
+    orderTypeElement,
+    sequenceTargets,
+    [gridFocusMark, secondGridFocusMark],
+    sequenceMessage,
+  );
+}
+
+const assignFocus = (element, target, targetContainer, focusClass, message, callTimeout = 0) => {
+  element.addEventListener('click', event => {
+    if (focusSequence) {
+          flashMessage.show({
+              'message': `Подождите отображения эпизода прошлого заказа`,
+              'color': 'red',
+              'duration': 800,
+          })
+          return;
+      }
+      const targetElement = targetContainer.querySelector(`#${CSS.escape(target)}`);
+      console.log(targetContainer);
+      if (!targetElement || targetElement.classList.contains('placement-cell-empty')) {
+        return;
+      }
+      setTimeout( () => {
+          focusClass.higlightElement(targetElement);
+          flashMessage.show({
+              'message': message,
+              'color': '#013565',
+              'duration': 1000,
+          });
+      }, callTimeout)
+  })
+}
+
+const assignGridSequenceFocus = (element, targets, focusers, message, callTimeout = 1500, sequenceCooldown = 2500) => {
+  // TODO: REBUILD THIS MONSTROSITY LATER. :)
+  element.addEventListener('click', event => {
+    if (focusSequence) {
+      flashMessage.show({
+        'message': `Подождите отображения эпизода прошлого заказа`,
+        'color': 'red',
+        'duration': 800,
+      })
+      return;
+    }
+    focusSequence = true;
+    let highlightTime = 5000;
+    for (let index = 0; index < targets.length; index += 1) {
+      const targetData = targets[index];
+      const targetElementId = targetData['elementId'];
+      const targetContainer = targetData['container'];
+      const onlyHighlight = targetData['onlyHighlight'];
+      const errorMessage = targetData['errorMessage'];
+      const targetElement = targetContainer.querySelector(`#${CSS.escape(targetElementId)}`);
+      if (!targetElement) {
+        flashMessage.show({
+          'message': errorMessage,
+          'color': 'red',
+          'duration': 1500,
+        });
+        continue;
+      }
+      const targetPlacementId = targetData['placementId'];
+      // +++ test
+      const placementContainer = targetElement.parentElement.parentElement;
+      // console.log(placementContainer.id);
+      // console.log('targetContId', targetPlacementId);
+      if (placementContainer.id !== targetPlacementId) {
+        console.log(placementContainer);
+        flashMessage.show({
+          'message': errorMessage,
+          'color': 'red',
+          'duration': 1500,
+        });
+        continue;
+      }
+      // test ---
+      setTimeout( () => {
+        // targets.length - index == we need to end focusing whole sequence at the same time.
+        // callTimeout * (targets.length - index) == time we need
+        // console.log(sequenceCooldown + (targets.length - index) * callTimeout);
+        if (1 !== targets.length) {
+          highlightTime = sequenceCooldown + (targets.length - index) * callTimeout;
+        }
+        if (onlyHighlight) {
+          focusers[index].higlightElement(targetElement, highlightTime);
+        } else {
+          // console.log(targetContainer);
+          const newTranslationData = focusers[index].centerElementInContainer(
+            targetContainer.childNodes[0], targetContainer, targetElement, highlightTime
+          );
+          zoomer.translation.x = newTranslationData['newX'];
+          zoomer.translation.y = newTranslationData['newY'];
+          zoomer.translation.scale = newTranslationData['newScale'];
+        }
+        // flashMessage.show({
+        //   'message': `${message}`,
+        //   'color': '#013565',
+        //   'duration': 1000,
+        // })
+      }, callTimeout * index);
+    }
+    setTimeout( () => {
+      focusSequence = false;
+    }, (highlightTime + 200) * (targets.length - 1));
+  })
+}
+// - MOVE TO DIFF -
+
+// - FOCUS RELATED -
+
+
+// + CONTEXT MENUS +
+
+const assignBatchMenu = (orderElement) => {
+  const batchTd = orderElement.querySelector('#batchNumber');
+  const batchNumber = orderElement.getAttribute(BASIC_ATTRIBUTES.BATCH_NUMBER);
+  // + MARKER +
+  batchTd.addEventListener('click', async event => {
+    if (batchNumber === batchMarker.targetValue) {
+      batchMarker.clearMarking();
+      return;
+    }
+    batchMarkTrigger(batchNumber, 10);
+  })
+  // - MARKER -
+  const batchData = _allBatches[batchNumber];
+  if (!batchData) {
+    orderElement.remove();
+    return;
+  }
+  batchTd.addEventListener('contextmenu', async event => {
+    event.preventDefault();
+    await createBatchMenu(
+      event, batchTd, batchData, batchMarker, _allBatches
+    );
+  })
+}
+// - CONTEXT MENUS -
+
+setInterval( () => {
+//   console.log(_allOrders);
+  console.log('GRIDS', availGrids);
+  console.log('PLATFORMS', availPlatforms);
+}, 5500);
+

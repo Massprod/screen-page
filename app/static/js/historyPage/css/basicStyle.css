@@ -330,23 +330,14 @@ html, body {
     display: flex;
     flex-direction: row;
     position: relative;
-    gap: 15px;
+    gap: 20px;
     padding: 0;
-    transform: scaleX(0);
+    left: 25px;
+    width: fit-content;
     transform-origin: left;
-    transition: transform 1s ease;
-    /* transition: clip-path 1s ease; */
+    transition: width 0.4s ease-out 0s;
     overflow: hidden;
-    /* clip-path: inset(0 100% 0 0); */
 }
-
-.extra-buttons-container.expanded {
-    transform: scaleX(1);
-}
-
-/* .extra-buttons-container.expanded {
-    clip-path: inset(0 0 0 0);
-} */
 
 .extra-button {
     cursor: pointer;

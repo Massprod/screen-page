@@ -1,5 +1,5 @@
 import { batchMarker } from "../main.js";
-import convertISOToCustomFormat from "../../../utility/convertToIso.js";
+import { convertISOToCustomFormat } from "../../../utility/convertToIso.js";
 import updateMenuPosition from "../../../utility/adjustContainerPosition.js";
 
 

@@ -4,7 +4,7 @@ import {
     GRID_NAME,
     LABORATORY_NAME,
 } from "../../constants.js";
-import convertISOToCustomFormat from "../../../../utility/convertToIso.js";
+import { convertISOToCustomFormat } from "../../../../utility/convertToIso.js";
 import { gridManager, platformManager } from "../../mainScript.js";
 import { createProRejOrderBulk } from "../../../../utility/ordersCreation.js";
 import { getCookie } from "../../../../utility/roleCookies.js";

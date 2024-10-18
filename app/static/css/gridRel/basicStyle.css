@@ -311,16 +311,16 @@ html, body {
     animation: shake 0.3s ease;
 }
 
+
 /* + SHOW | HIDE & FULLSCREEN + */
 .extra-bot-container {
     display: flex;
     flex-direction: row;
     position: absolute;
-    bottom: 20px;
-    left: 0px;
+    bottom: 2%;
+    left: 0%;
     right: auto;
     top: auto;
-    /* gap: 35px; */
     align-items: center;
     width: fit-content;
 }

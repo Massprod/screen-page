@@ -18,7 +18,7 @@
   position: absolute;
   transform-origin: top left;
   transform: translate(0px, 0px) scale(0.9);
-  transition: transform 0.1s ease;
+  transition: transform 0.5s ease;
   will-change: transform;
   padding: 350px;
   gap: 25px;
@@ -144,7 +144,7 @@
 /* - PLACEMENT CELL - */
 
 /* + BATCH INDICATOR + */
-.placement-cell.batch-not-passed {
+.placement-cell.not-passed {
   background-image: conic-gradient(
       from 105deg,
       rgb(239, 4, 4) 0deg,
@@ -154,7 +154,7 @@
   );
 }
 
-.placement-cell.batch-not-tested {
+.placement-cell.not-tested {
   background-image: conic-gradient(
               from 105deg,
               rgb(249, 247, 182) 0deg,
@@ -164,7 +164,7 @@
           );
 }
 
-.placement-cell.batch-passed {
+.placement-cell.passed {
   background-image: conic-gradient(
       from 105deg,
       rgb(79, 244, 79) 0deg,

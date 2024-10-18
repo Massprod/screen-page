@@ -1,4 +1,4 @@
-export default function convertISOToCustomFormat(
+export function convertISOToCustomFormat(
     isoDate,
     withBreaker = false,
     convertToLocalTimezone = false,

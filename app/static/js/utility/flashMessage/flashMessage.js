@@ -89,9 +89,9 @@ class FlashMessage {
     setTimeout(() => {
       flashMessage.style.opacity = '0';
       flashMessage.addEventListener('transitionend', () => {
-        if (flashMessage.parentNode) {
-          this.flashMessagesContainer.removeChild(flashMessage);
-        }
+        if (flashMessage.isConnected) {
+          flashMessage.remove();
+        }  
       }, { once: true });
     }, duration);
   }

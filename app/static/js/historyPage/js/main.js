@@ -18,7 +18,7 @@ import CellHoverCoordinate from "../../utility/cellHover/cellHoverCoordinate.js"
 import ZoomAndDrag from "../../utility/zoomDrag.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import { getISOFormatUTC, convertToUTC, convertUTCToLocal } from "../../utility/timeConvert.js";
-import convertISOToCustomFormat from "../../utility/convertToIso.js";
+import { convertISOToCustomFormat } from "../../utility/convertToIso.js";
 import { createPlacementRecord, createTableRow } from "./ordersTable/ordersTable.js";
 import BasicSearcher from '../../utility/search/basicSearcher.js';
 import AttributeMark from '../../utility/mark/mark.js';
@@ -127,6 +127,7 @@ const assignPlatformFocus = (element, target, focusClass, message, callTimeout =
 const assignGridSequenceFocus = (element, targets, focusContainer, focusers, message, callTimeout = 1500, sequenceCooldown = 2500) => {
     // TODO: REBUILD THIS MONSTROSITY LATER.
     element.addEventListener('click', event => {
+        console.log('123');
         if (focusSequence) {
             flashMessage.show({
                 'message': `Подождите отображения эпизода прошлого заказа`,

@@ -16,10 +16,55 @@ export const historyPage = `${serviceDom}/history`;
 // PRESET NAMES
 export const BASIC_PMK_PLATFORM_PRESET = `pmkBasePlatform`;
 export const BASIC_PMK_GRID_PRESET = `pmkGrid`;
+// + NAMES +
+export const EXTRA_ELEMENT_NAME = 'extra';
+
 export const PLACEMENT_TYPES = {
-    BASE_PLAFTORM: 'basePlatform',
+    BASE_PLATFORM: 'basePlatform',
     GRID: 'grid',
+    STORAGE: 'storage',
+    LABORATORY: 'laboratory',
 }
+
+export const BATCH_STATUS_CLASSES = {
+    NOT_PASSED: 'not-passed',
+    PASSED: 'passed',
+    NOT_TESTED: 'not-tested',
+}
+
+export const PLACEMENT_TYPES_TRANSLATE = {
+    "grid": "Приямок",
+    "basePlatform": "Челнок",
+    'storage': "Хранилище",
+    'laboratory': "Лаборатория",
+};
+
+// BASIC ORDER NAMES
+export const ORDER_MOVE_TO_PROCESSING = "moveToProcessing";
+export const ORDER_MOVE_TO_REJECTED = "moveToRejected";
+export const ORDER_MOVE_TO_LABORATORY = 'moveToLaboratory';
+export const ORDER_MOVE_WHOLE_STACK = 'moveWholeStack';
+export const ORDER_MOVE_TO_STORAGE = 'moveToStorage';
+
+export const ORDER_TYPES_TRANSLATE_TABLE = {
+    "moveWholeStack": "Перемещение<br>в приямке",
+    "moveTopWheel": "Перенос верхнего колеса",
+    "moveToLaboratory": "Лаборатория",
+    "mergeWheelStacks": "Объединение стопок",
+    "moveToProcessing": "Обработка",
+    "moveToRejected": "Отказ",
+    "moveToStorage": "Хранилище",
+}
+
+// - NAMES -
+// + BASIC ATTRIBUTES +
+export const BASIC_ATTRIBUTES = {
+    BATCH_NUMBER: 'data-batch-number',
+    WHEELS: 'data-wheels',
+    BLOCKING_ORDER: 'data-blocking-order',
+}
+// - BASIC ATTRIBUTES -
+
 // ------
 export const BACK_URL  = {
     POST_BATCH_STATUS_UPDATE: `${mainAddress}/batch_number/update_laboratory_status`,
@@ -35,11 +80,11 @@ export const BACK_URL  = {
     PATCH_AUTH_CHANGE_ROLE: `${authMainAddress}/users/change_role`,
     POST_AUTH_REGISTER_USER: `${authMainAddress}/users/register`,
     GET_PRESET_DATA_BY_NAME: `${mainAddress}/presets/by_name`,
+    GET_PRESET_DATA: `${mainAddress}/presets/by_id`,
     GET_PLACEMENT_HISTORY: `${mainAddress}/history/all`,
     GET_PLATFORMS: `${mainAddress}/platform/all`,
     GET_GRIDS: `${mainAddress}/grid/all`,
     GET_PLACEMENT_DATA: `${mainAddress}/`,
-    GET_PRESET_DATA: `${mainAddress}/presets/by_id`,
     GET_HISTORY_RECORD: `${mainAddress}/history/record`,
     GET_WHEELSTACK_RECORD: `${mainAddress}/wheelstacks/id`,
     GET_WHEEL_DATA_OBJECT_ID: `${mainAddress}/wheels/object_id`,
@@ -47,6 +92,8 @@ export const BACK_URL  = {
     GET_GRID_STATE_BY_NAME: `${mainAddress}/grid/name`,
     GET_PLATFORM_STATE: `${mainAddress}/platform`,
     GET_PLATFORM_STATE_BY_NAME: `${mainAddress}/platform/name`,
+    GET_ORDER_BY_ID: `${mainAddress}/orders/order`,
+    GET_STORAGE: `${mainAddress}/storages`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';
@@ -191,15 +238,12 @@ export const NAV_BUTTONS = {
     ],
 };
 
-// UPDATE INTERVALS
-export const GRID_PLACEMENT_INTERVAL = 225;
+// GRID PAGE UPDATE INTERVALS
+export const GRID_PLACEMENT_INTERVAL = 250;
+export const UPDATE_BATCHES_DATA_INTERVAL = 500;
+export const UPDATE_DATA_BANKS_INTERVAL = 100;
+export const UPDATE_ORDERS_DATA_INTERVAL = 250;
 
-// BASIC ORDER NAMES
-export const ORDER_MOVE_TO_PROCESSING = "moveToProcessing";
-export const ORDER_MOVE_TO_REJECTED = "moveToRejected";
-export const ORDER_MOVE_TO_LABORATORY = 'moveToLaboratory';
-export const ORDER_MOVE_WHOLE_STACK = 'moveWholeStack';
-export const ORDER_MOVE_TO_STORAGE = 'moveToStorage';
 
 // SOME CONSTANTS
 export const ORDERS_TABLE_BREAKSIZE = 1000;

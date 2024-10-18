@@ -106,7 +106,6 @@ class ZoomAndDrag {
       const currentTouchDistance = this.getTouchDistance(event.touches);
       const scaleRatio = currentTouchDistance / this.initialTouchDistance;
       this.scale = Math.max(this.minScale, Math.min(this.maxScale, this.initialScale * scaleRatio));
-      console.log("Pinch zoom triggered"); // Add console log here
       this.updateTransform(true); // Indicate that this is a zoom operation
     }
   }

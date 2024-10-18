@@ -3,7 +3,7 @@ import {
     patchRequest,
 } from "../utility/basicRequests.js";
 import { getShiftedFromCurrent} from "../utility/timeConvert.js";
-import convertISOToCustomFormat from "../utility/convertToIso.js";
+import { convertISOToCustomFormat } from "../utility/convertToIso.js";
 import {
     AUTH_COOKIE_NAME,
     BACK_URL,

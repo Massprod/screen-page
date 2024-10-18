@@ -1,4 +1,6 @@
 // import { createWheelstackMenu, createBlockedCellMenu } from "../wheelstackMenu/wheelstackMenu.js";
+import { BATCH_STATUS_CLASSES } from "../../uniConstants.js";
+import { BASIC_ATTRIBUTES } from "../../uniConstants.js";
 
 
 export default class PlacementCell {
@@ -81,9 +83,11 @@ export default class PlacementCell {
         this.element.classList.add('placement-cell-empty');
     }
 
-    setAsElement() {
+    setAsElement(clearText = false) {
         this.clearElementData();
-        this.element.innerHTML = '';
+        if (clearText) {
+            this.element.innerHTML = '';
+        };
         this.element.classList.remove('placement-cell-empty');
         this.element.classList.remove('placement-cell-whitespace');
     }
@@ -91,23 +95,30 @@ export default class PlacementCell {
     blockState(blockedBy = null) {
         this.element.classList.add('blocked');
         if (blockedBy) {
-            if (this.element.getAttribute('data-blocking-order') !== blockedBy) {
-                this.element.setAttribute('data-blocking-order', blockedBy);
+            if (this.element.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER) !== blockedBy) {
+                this.element.setAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER, blockedBy);
             }
         }
     }
 
     unblockState() {
         this.element.classList.remove('blocked');
+        if (this.element.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER)) {
+            this.element.removeAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER);
+        }
     }
 
     clearBatchStatus() {
-        this.element.classList.remove('batch-not-tested', 'batch-passed', 'batch-not-passed')
+        Object.values(BATCH_STATUS_CLASSES).forEach( batchClass => {
+            this.element.classList.remove(batchClass);
+        })
     }
 
     clearAttributes(ignored = new Set()) {
         const dataAttributes = [
-            'data-batch-number', 'data-wheels', 'data-blocking-order'
+            BASIC_ATTRIBUTES.BATCH_NUMBER,
+            BASIC_ATTRIBUTES.WHEELS,
+            BASIC_ATTRIBUTES.BLOCKING_ORDER,
         ];
         dataAttributes.forEach( element => {
             if (ignored.has(element)) {

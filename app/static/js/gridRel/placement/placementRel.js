@@ -5,7 +5,7 @@ import { getRequest } from "../../utility/basicRequests.js";
 
 export const getPlacementData = async (placementInd, placementType, useName = false) => {
   let dataURL = null;
-  if (PLACEMENT_TYPES.BASE_PLAFTORM === placementType) {
+  if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
     if (useName) {
       dataURL = `${BACK_URL.GET_PLATFORM_STATE_BY_NAME}`
     } else {
@@ -24,10 +24,10 @@ export const getPlacementData = async (placementInd, placementType, useName = fa
   return respData;
 }
 
-
 export const selectPlacementButtonAction = async (
   selectorElement, placement, showElements,
-  hideElements, viewState, viewButton, useIdentifiers) => {
+  hideElements, viewState, viewButton, useIdentifiers
+) => {
   if (!selectorElement.value) {
       flashMessage.show({
           'message': 'Выберите расположение',
@@ -45,15 +45,13 @@ export const selectPlacementButtonAction = async (
     placementId = optionValue['_id'];
     presetId = optionValue['presetId'];
   }
-  await preparePlacement(placementId, presetId, placement, useIdentifiers);
+  await preparePlacement(presetId, placement, useIdentifiers);
   await switchView(hideElements, showElements);
   viewButton.classList.remove('hidden');
-  return !viewState;
+  return placementId;
 }
 
-
-export const preparePlacement = async (placementId, presetId, placement, useIdentifiers) => {
-  placement.placementId = placementId;
+export const preparePlacement = async (presetId, placement, useIdentifiers) => {
   const presetDataURL = `${BACK_URL.GET_PRESET_DATA}/${presetId}`;
   const response = await getRequest(presetDataURL, true, true);
   const presetData = await response.json();

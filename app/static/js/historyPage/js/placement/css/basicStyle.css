@@ -84,6 +84,14 @@
     font-size: 5em;
 }
 
+@media (max-width: 1000px) {
+    .placement-cell.baseplatform-cell {
+        height: 110px;
+        width: 110px;
+        font-size: 4em;
+    }
+}
+
 .placement-cell.identifier-cell {
     background-color: whitesmoke;
     border: none;

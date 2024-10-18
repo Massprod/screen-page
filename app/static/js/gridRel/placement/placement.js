@@ -1,4 +1,5 @@
 import PlacementRow from "./placementRow.js";
+import { BASIC_ATTRIBUTES } from "../../uniConstants.js";
 
 
 export default class Placement{
@@ -54,29 +55,25 @@ export default class Placement{
       throw new Error('Placement doesnt have build preset. First create a preset to populate with data.')
     }
     const newPlacementData = placementData;
-    if (this.placementId !== newPlacementData['_id']) {
-      return;
-    }
-    const presetId = newPlacementData['preset'];
-    if (this.presetId && this.presetId !== presetId) {
+    // if (this.placementId !== newPlacementData['_id']) {
+    //   return;
+    // }
+    const newPresetId = newPlacementData['preset'];
+    if (this.presetId && this.presetId !== newPresetId) {
       throw new Error(`Incorrect placementData for used in this Placement preset.
                         Currently used presetId == ${this.presetId}.
                         Rebuild Placement according to a new presetId or use correct placement Data`);
     }
-    // TODO: We have async loops and `updateInterval`.
-    //   So, some loops are not finished when we try to update with a new data.
-    //   And I don't see any way of stopping them, they override `placementId` and cells with previous data...
-    //   We can ignore unchanged wheelstacks but, we still will loop and update cells.
-    //   Which is not too bad, but we could be ignoring this, if there's was a way to abrupt everything and start new update.
-    // if (this.placementData
-    //     && this.placementId === newPlacementData['_id']
-    //      && this.placementData['lastChange'] >= newPlacementData['lastChange']) {
-    //   return;
-    // }
-    if (this.placementId !== this.element.id) {
+    if (this.placementData
+        && this.placementId === newPlacementData['_id']
+         && this.placementData['lastChange'] >= newPlacementData['lastChange']) {
+        return;
+    }
+    if (this.placementId !== newPlacementData['_id']) {
+      this.placementId = newPlacementData['_id'];
       this.element.id = this.placementId;
     }
-    const ignoredEmptyAtt = new Set(['data-blocking-order']);
+    const ignoredEmptyAtt = new Set([BASIC_ATTRIBUTES.BLOCKING_ORDER]);
     this.placementData = newPlacementData;
     this.placementExtraRows = newPlacementData['extra'];
     this.placementData['rowsOrder'].forEach( rowId => {
@@ -88,13 +85,6 @@ export default class Placement{
         }
         const cellData = this.placementData['rows'][rowId]['columns'][colId];
         if (cellData['wheelStack']) {
-          if (placementCell.elementData && cellData['wheelStack'] === placementCell.elementData['_id']) {
-            const newDataChange = this.placementData['wheelstacksData'][cellData['wheelStack']]['lastChange'];
-            const currentChange = placementCell.elementData['lastChange'];
-            if (newDataChange <= currentChange) {
-              return;
-            }
-          }
           if (cellData['blocked']) {
             placementCell.blockState(cellData['blockedBy']);
           } else {
@@ -104,19 +94,20 @@ export default class Placement{
           // TODO: REPLACE LATER
           const wheelstackData = this.placementData['wheelstacksData'][cellData['wheelStack']];
           placementCell.setElementData(wheelstackData);
-          let numWheels = wheelstackData['wheels'].length;
-          placementCell.element.innerHTML = '';
-          placementCell.element.innerHTML = `${numWheels}`;
+          let numWheels = `${wheelstackData['wheels'].length}`;
+          if (placementCell.element.innerHTML !== numWheels) {
+            placementCell.element.innerHTML = `${numWheels}`;
+          }
           // + BATCH  IND +
           const batchNumber = wheelstackData['batchNumber'];
-          placementCell.element.setAttribute('data-batch-number', batchNumber);
+          placementCell.element.setAttribute(BASIC_ATTRIBUTES.BATCH_NUMBER, batchNumber);
           // - BATCH IND -
           // + WHEEL IND +
           let wheelIndString = '';
           for (let wheelId of wheelstackData['wheels']) {
             wheelIndString = wheelIndString !== '' ? `${wheelIndString};${wheelId}` : `${wheelId}`;
           }
-          placementCell.element.setAttribute('data-wheels', wheelIndString);
+          placementCell.element.setAttribute(BASIC_ATTRIBUTES.WHEELS, wheelIndString);
           // - WHEEL IND -
           // ---
         } else {
