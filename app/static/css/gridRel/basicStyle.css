@@ -3,9 +3,10 @@
 @import url(../../js/utility/flashMessage/css/basicStyle.css);
 @import url(../../js/utility/mark/css/basicStyle.css);
 @import url(../../js/utility/focusElement/css/basicStyle.css);
-@import url(../gridRel/wheelstackMenu.css);
-@import url(../gridRel/batchMenu.css);
-@import url(../gridRel/ordersTable.css);
+@import url(./wheelstackMenu.css);
+@import url(./batchMenu.css);
+@import url(./ordersTable.css);
+@import url(./orderMenu.css);
 
 
 * {
@@ -510,4 +511,42 @@ td.batch-indicator {
 
 .alert {
     margin-top: 20px;
+}
+
+
+.btn.process {
+    background-color: #3b6652; /* Dark, muted green */
+    color: white; /* White text */
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+}
+
+.btn.process:hover {
+    background-color: #324d43; /* Slightly darker green on hover */
+    transform: scale(1.02); /* Subtle zoom effect */
+}
+
+.btn.reject {
+    background-color: #7a2e2e; /* Dark, muted red */
+    color: white; /* White text */
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+}
+
+.btn.reject:hover {
+    background-color: #632323; /* Slightly darker red on hover */
+    transform: scale(1.02); /* Subtle zoom effect */
+}
+
+/* Optional: Add a softer, more business-like styling */
+.btn.process, .btn.reject {
+    padding: 8px 18px; /* Adjust padding for a refined button */
+    border-radius: 4px; /* Slightly rounded corners */
+    font-weight: 600; /* Semi-bold text for emphasis */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+.btn.process:focus, .btn.reject:focus {
+    outline: none; /* Remove outline */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.15); /* Slightly enhanced shadow on focus */
 }

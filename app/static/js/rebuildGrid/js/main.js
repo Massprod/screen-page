@@ -42,6 +42,8 @@ import { createOrderRecord } from "../../gridRel/ordersTable/orderRecords.js";
 import { createBatchMenu } from "../../gridRel/batchMenu/batchMenu.js";
 import AttributeMark from "../../utility/mark/mark.js";
 import FocusMark from "../../utility/focusElement/focusElement.js";
+import { createProRejOrderBulk } from "../../utility/ordersCreation.js";
+import { createOrderMenu } from "../../gridRel/orderMenu/orderMenu.js";
 
 
 // + BAD PRESET +
@@ -439,7 +441,6 @@ const updatePlacement = async (placement, newId) => {
         const platformName = record['platformName'];
         const platformId = record['platformId'];
         if (!(platformId in availPlatforms)) {      
-          console.log('update');
           updateAvailPlatforms(
             newPlatformsData, platformsContainer,
             platformSelectRelated, platformSelector 
@@ -549,6 +550,8 @@ const gridActiveElements = new Set([
 ])
 const gridInactiveElements = new Set([gridsContainer]);
 
+
+// + REMOVE SELECTORS +
 const selectGridButton = botContainer.querySelector('#selectGrid');
 selectGridButton.addEventListener('click', async event => {
   // TODO: Errors handle, what if we're not getting correct preset data?
@@ -570,6 +573,7 @@ selectGridButton.addEventListener('click', async event => {
     await updatePlacement(gridPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL)
 })
+// + REMOVE SELECTORS +
 // - GRID BUILD -
 // - GRID SELECTION -
 
@@ -831,6 +835,8 @@ const maintainOrderRecords = async () => {
     const orderPromise = createOrderRecord(orderData, batchData, placementBanks)
       .then(orderElement => {
         assignBatchMenu(orderElement);
+        const batchTd = orderElement.querySelector('#batchNumber')
+        assignOrderMenu(orderElement, orderData, [batchTd]);
         orderElementAssignFocusEls(orderElement);
         ordersTableBody.appendChild(orderElement);
         createdOrderRecords[orderId] = orderElement;
@@ -901,59 +907,61 @@ const orderElementAssignFocusEls= (orderElement) => {
     const sourcePlacementType = orderData['source']['placementType'];
     const sourceRow = orderData['source']['rowPlacement'];
     const sourceCol = orderData['source']['columnPlacement'];
-    if (PLACEMENT_TYPES.GRID === sourcePlacementType) {
-      sourceTargetElementId = `${sourceRow}|${sourceCol}`; 
-      assignGridSequenceFocus(
-        sourceOrderElement,
-        [{
-          'elementId': sourceTargetElementId,
-          'container': gridContainer,
-          'onlyHighlight': true,
-          'placementId': sourcePlacementId,
-          'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[sourcePlacementId]['name']}</b>`,
-        }],
-        [gridFocusMark],
-        sourceOrderFocusMessage,
-        0,
-        0,
-      );
-      sequenceTargets.push(
-        {
-          'elementId': sourceTargetElementId,
-          'container': gridContainer,
-          'onlyHighlight': false,
-          'placementId': sourcePlacementId,
-          'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[sourcePlacementId]['name']}</b>`,
-        }
-      );
-    } else if (PLACEMENT_TYPES.BASE_PLATFORM === sourcePlacementType) {
-      sourceTargetElementId = `${sourceRow}|${sourceCol}`;
-      // assignFocus(
-      //   sourceOrderElement, sourceTargetElementId, platformsContainer, platformFocusMark, sourceOrderFocusMessage
-      // );
-      assignGridSequenceFocus(
-        sourceOrderElement,
-        [{
-          'elementId': sourceTargetElementId,
-          'container': platformsContainer,
-          'onlyHighlight': true,
-          'placementId': sourcePlacementId,
-          'errorMessage': `Не активен вид выбранного элемента: <b>${availPlatforms[sourcePlacementId]['platformName']}</b>`,
-        }],
-        [platformFocusMark],
-        sourceOrderFocusMessage,
-        0,
-        0,
-      )
-      sequenceTargets.push(
-        {
-          'elementId': sourceTargetElementId,
-          'container': platformsContainer,
-          'onlyHighlight': true,
-          'placementId': sourcePlacementId,
-          'errorMessage': `Не активен вид выбранного элемента: <b>${availPlatforms[sourcePlacementId]['platformName']}</b>`,
-        }
-      );
+    if ('extra' !== sourceRow) {
+      if (PLACEMENT_TYPES.GRID === sourcePlacementType) {
+        sourceTargetElementId = `${sourceRow}|${sourceCol}`; 
+        assignGridSequenceFocus(
+          sourceOrderElement,
+          [{
+            'elementId': sourceTargetElementId,
+            'container': gridContainer,
+            'onlyHighlight': true,
+            'placementId': sourcePlacementId,
+            'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[sourcePlacementId]['name']}</b>`,
+          }],
+          [gridFocusMark],
+          sourceOrderFocusMessage,
+          0,
+          0,
+        );
+        sequenceTargets.push(
+          {
+            'elementId': sourceTargetElementId,
+            'container': gridContainer,
+            'onlyHighlight': false,
+            'placementId': sourcePlacementId,
+            'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[sourcePlacementId]['name']}</b>`,
+          }
+        );
+      } else if (PLACEMENT_TYPES.BASE_PLATFORM === sourcePlacementType) {
+        sourceTargetElementId = `${sourceRow}|${sourceCol}`;
+        // assignFocus(
+        //   sourceOrderElement, sourceTargetElementId, platformsContainer, platformFocusMark, sourceOrderFocusMessage
+        // );
+        assignGridSequenceFocus(
+          sourceOrderElement,
+          [{
+            'elementId': sourceTargetElementId,
+            'container': platformsContainer,
+            'onlyHighlight': true,
+            'placementId': sourcePlacementId,
+            'errorMessage': `Не активен вид выбранного элемента: <b>${availPlatforms[sourcePlacementId]['platformName']}</b>`,
+          }],
+          [platformFocusMark],
+          sourceOrderFocusMessage,
+          0,
+          0,
+        )
+        sequenceTargets.push(
+          {
+            'elementId': sourceTargetElementId,
+            'container': platformsContainer,
+            'onlyHighlight': true,
+            'placementId': sourcePlacementId,
+            'errorMessage': `Не активен вид выбранного элемента: <b>${availPlatforms[sourcePlacementId]['platformName']}</b>`,
+          }
+        );
+      }
     }
   }
   
@@ -963,31 +971,33 @@ const orderElementAssignFocusEls= (orderElement) => {
     const destinationPlacementType = orderData['destination']['placementType'];
     const destinationRow = orderData['destination']['rowPlacement'];
     const destinationCol = orderData['destination']['columnPlacement'];
-    if (PLACEMENT_TYPES.GRID === destinationPlacementType) {
-      destTargetElementId = `${destinationRow}|${destinationCol}`;
-      assignGridSequenceFocus(
-        destOrderElement,
-        [{
-          'elementId': destTargetElementId,
-          'container': gridContainer,
-          'onlyHighlight': false,
-          'placementId': destinationPlacementId,
-          'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[destinationPlacementId]['name']}</b>`,
-        }],
-        [gridFocusMark, secondGridFocusMark],
-        destOrderFocusMessage,
-        0,
-        0,
-      );
-      sequenceTargets.push(
-        {
-          'elementId': destTargetElementId,
-          'container': gridContainer,
-          'onlyHighlight': false,
-          'placementId': destinationPlacementId,
-          'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[destinationPlacementId]['name']}</b>`,
-        }
-      );
+    if ('extra' !== destinationRow) {
+      if (PLACEMENT_TYPES.GRID === destinationPlacementType) {
+        destTargetElementId = `${destinationRow}|${destinationCol}`;
+        assignGridSequenceFocus(
+          destOrderElement,
+          [{
+            'elementId': destTargetElementId,
+            'container': gridContainer,
+            'onlyHighlight': false,
+            'placementId': destinationPlacementId,
+            'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[destinationPlacementId]['name']}</b>`,
+          }],
+          [gridFocusMark, secondGridFocusMark],
+          destOrderFocusMessage,
+          0,
+          0,
+        );
+        sequenceTargets.push(
+          {
+            'elementId': destTargetElementId,
+            'container': gridContainer,
+            'onlyHighlight': false,
+            'placementId': destinationPlacementId,
+            'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[destinationPlacementId]['name']}</b>`,
+          }
+        );
+      }
     }
   }
   const orderTypeElement = orderElement.querySelector('#orderType');
@@ -1010,7 +1020,6 @@ const assignFocus = (element, target, targetContainer, focusClass, message, call
           return;
       }
       const targetElement = targetContainer.querySelector(`#${CSS.escape(target)}`);
-      console.log(targetContainer);
       if (!targetElement || targetElement.classList.contains('placement-cell-empty')) {
         return;
       }
@@ -1104,6 +1113,49 @@ const assignGridSequenceFocus = (element, targets, focusers, message, callTimeou
 
 
 // + CONTEXT MENUS +
+const assignMoveProRejButton = async (batchMenu, moveSelector, processing = true) => {
+  const everyWhereToggle = batchMenu.querySelector('#selectFromEverywhere');
+  const fromEverywhere = everyWhereToggle.checked;
+  const idField = batchMenu.querySelector('#idField');
+  const batchNumber = idField.getAttribute(BASIC_ATTRIBUTES.BATCH_NUMBER);
+  const elementData = {
+    'batchNumber': batchNumber,
+    'placement': {
+      'placementId': gridPlacement.placementId,
+      'type': gridPlacement.placementType,
+    },
+  };
+  await createProRejOrderBulk(
+    elementData, moveSelector.value, processing,
+    gridPlacement.placementId, fromEverywhere
+  )
+}
+
+// + BATCH MENU +
+const assignBatchExpandableButtons = async (batchMenu) => {
+  // + populateSelector +
+  const moveSelector = batchMenu.querySelector('#batchMenuMoveSelector');
+  for (let [elementName, elementData] of Object.entries(gridPlacement.placementExtraRows)) {
+    if ('laboratory' === elementData['type']) {
+      continue;
+    }
+    const newOption = await createOption(elementName, elementName);
+    moveSelector.appendChild(newOption);
+  }
+  // - populateSelector -
+  
+  // + assignButtons +
+  const processingButton = batchMenu.querySelector('#moveToProcess');
+  processingButton.addEventListener('click', async event => {
+    assignMoveProRejButton(batchMenu, moveSelector, true);
+  });
+  const rejectButton = batchMenu.querySelector('#moveToReject');
+  rejectButton.addEventListener('click', async event => {
+    assignMoveProRejButton(batchMenu, moveSelector, false);
+  })
+  // - assignButtons -
+}
+
 
 const assignBatchMenu = (orderElement) => {
   const batchTd = orderElement.querySelector('#batchNumber');
@@ -1124,11 +1176,25 @@ const assignBatchMenu = (orderElement) => {
   }
   batchTd.addEventListener('contextmenu', async event => {
     event.preventDefault();
-    await createBatchMenu(
+    const batchMenu = await createBatchMenu(
       event, batchTd, batchData, batchMarker, _allBatches
     );
+    assignBatchExpandableButtons(batchMenu);
+  });
+}
+// - BATCH MENU -
+// + ORDER MENU +
+const assignOrderMenu = (orderElement, orderData, ignoredElements = []) => {
+  orderElement.addEventListener('contextmenu', async event => {
+    if (ignoredElements.includes(event.target)) {
+      return;
+    }
+    event.preventDefault();
+    createOrderMenu(event, orderElement, orderData, true);
   })
 }
+
+// - ORDER MENU -
 // - CONTEXT MENUS -
 
 setInterval( () => {
@@ -1136,4 +1202,3 @@ setInterval( () => {
   console.log('GRIDS', availGrids);
   console.log('PLATFORMS', availPlatforms);
 }, 5500);
-

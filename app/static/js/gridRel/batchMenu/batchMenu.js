@@ -50,6 +50,54 @@ const createRecord = async (recordData) => {
 }
 
 
+const createMoveExpandable = async () => {
+  const expandableData = {
+    'id': 'expField',
+    'innerHTML': "",
+    'classes': ['expandable'],
+  }
+  const expandableRecord = await createRecord(expandableData);
+  
+  const fullToggle = document.createElement('input');
+  fullToggle.id = 'selectFromEverywhere';
+  fullToggle.type = 'checkbox';
+  fullToggle.classList.add('full-toggle');
+  const fullToggleLable = document.createElement('label');
+  fullToggleLable.classList.add('text-muted', 'small', 'position-absolute', 'full-toggle-label');
+  fullToggleLable.innerHTML = 'Отовсюду';
+  expandableRecord.appendChild(fullToggle);
+  expandableRecord.appendChild(fullToggleLable);
+  
+  const selectContainer = document.createElement('div');
+  selectContainer.classList.add('d-flex', 'flex-column', 'align-items-center', 'mt-4');
+
+  const selector = document.createElement('select');
+  selector.id = 'batchMenuMoveSelector';
+  selector.classList.add('form-select', 'w-75', 'mb-2');
+  selectContainer.appendChild(selector);
+
+  const buttonsContainer = document.createElement('div');
+  buttonsContainer.id = 'batchMenuMoveButtons';
+  buttonsContainer.classList.add('d-flex', 'flex-row', 'align-items-center', 'gap-3', 'mt-2');
+  selectContainer.appendChild(buttonsContainer); 
+
+  const processingButton = document.createElement('button');
+  processingButton.id = 'moveToProcess';
+  processingButton.innerHTML = 'Обработка';
+  processingButton.classList.add('btn', 'process');
+  buttonsContainer.appendChild(processingButton);
+
+  const rejectButton = document.createElement('button');
+  rejectButton.id = 'moveToReject';
+  rejectButton.innerHTML = 'Отказ'
+  rejectButton.classList.add('btn', 'reject');
+  buttonsContainer.appendChild(rejectButton);
+
+  expandableRecord.appendChild(selectContainer);
+  return expandableRecord;
+}
+
+
 export const createBatchMenu = async (
   event, openerElement, batchData, batchMarker, dataBank
 ) => {
@@ -69,6 +117,7 @@ export const createBatchMenu = async (
     'attributes': {
       'data-batch-number': batchNumber,
     },
+    'classes': ['expand-ind'],
   };
   const batchIdRecord = await createRecord(idData);
   batchIdRecord.addEventListener('click', event => {
@@ -82,6 +131,19 @@ export const createBatchMenu = async (
   })
   batchRecords.appendChild(batchIdRecord);
   // - ID FIELD -
+  // + EXPANDABLE MOVE +
+  const expandableRecord = await createMoveExpandable();
+  batchRecords.appendChild(expandableRecord);
+  batchIdRecord.addEventListener('click', event => {
+    if (batchIdRecord.classList.contains('open')) {
+      batchIdRecord.classList.remove('open');
+      expandableRecord.classList.remove('open');
+    } else {
+      batchIdRecord.classList.add('open');
+      expandableRecord.classList.add('open');
+    }
+  })
+  // - EXPANDABLE MOVE -
   // + STATUS FIELD +
   let status = '';
   let statusClasses = ['batch-indicator'];

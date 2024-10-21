@@ -101,3 +101,61 @@
   font-weight: 600; /* Lighter font weight for data */
   color: #444; /* Slightly lighter color for data */
 }
+
+
+.expand-ind {
+  position: relative;
+}
+
+
+.expand-ind::after {
+  content: '';
+  position: absolute;
+  bottom: 0px; /* Positioning the triangle below the container */
+  left: 50%; /* Centering horizontally */
+  transform: translateX(-50%); /* Ensuring it's centered */
+  border-width: 6px 14px; /* Adjust size */
+  border-style: solid;
+  border-color: #333 transparent transparent transparent; /* Top color defines the triangle color */
+  transition: border-color 0.3s ease;
+}
+
+.expand-ind.open::after {
+  border-color: transparent transparent #333 transparent;
+}
+
+
+.batch-menu li.expandable {
+  padding: 0;
+  position: relative;
+  background-color: rgb(225, 225, 230);
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: height 0.4s ease, opacity 0.4s ease;
+  border: none;
+  width: 100%;
+}
+
+.batch-menu li.expandable.open {
+  height: 150px;
+  opacity: 1;
+  padding: 12px;
+}
+
+
+/* EXPANDABLE INSIDES */
+.full-toggle {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.full-toggle-label {
+  top: 5px;
+  right: 40px;
+}
+

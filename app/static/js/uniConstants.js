@@ -16,6 +16,12 @@ export const historyPage = `${serviceDom}/history`;
 // PRESET NAMES
 export const BASIC_PMK_PLATFORM_PRESET = `pmkBasePlatform`;
 export const BASIC_PMK_GRID_PRESET = `pmkGrid`;
+
+// + REMOVE SELECTORS +
+export const USED_PMK_GRID_NAME = 'pmkGrid1';
+export const USED_PLATFORN_NAME = 'pmkBase1';
+// - REMOVE SELECTORS -
+
 // + NAMES +
 export const EXTRA_ELEMENT_NAME = 'extra';
 
@@ -50,10 +56,20 @@ export const ORDER_TYPES_TRANSLATE_TABLE = {
     "moveWholeStack": "Перемещение<br>в приямке",
     "moveTopWheel": "Перенос верхнего колеса",
     "moveToLaboratory": "Лаборатория",
-    "mergeWheelStacks": "Объединение стопок",
+    "mergeWheelStacks": "Объединение стоп",
     "moveToProcessing": "Обработка",
     "moveToRejected": "Отказ",
     "moveToStorage": "Хранилище",
+}
+
+export const EXTRA_ORDER_TYPES_TRANSLATE_TABLE = {
+    'moveWholeStack': 'Перемещение в приямке',
+    'moveTopWheel': 'Перенос верхнего колеса',
+    'moveToLaboratory': 'Перенос колеса<br>в лабораторию',
+    'mergeWheelStacks': 'Объединение стоп',
+    'moveToProcessing': 'Перенос в обработку',
+    'moveToRejected': 'Перенос в отказ',
+    'moveToStorage': 'Перенос в хранилище',
 }
 
 // - NAMES -
@@ -62,6 +78,7 @@ export const BASIC_ATTRIBUTES = {
     BATCH_NUMBER: 'data-batch-number',
     WHEELS: 'data-wheels',
     BLOCKING_ORDER: 'data-blocking-order',
+    ORDER_TYPE: 'data-order-type',
 }
 // - BASIC ATTRIBUTES -
 
@@ -94,6 +111,8 @@ export const BACK_URL  = {
     GET_PLATFORM_STATE_BY_NAME: `${mainAddress}/platform/name`,
     GET_ORDER_BY_ID: `${mainAddress}/orders/order`,
     GET_STORAGE: `${mainAddress}/storages`,
+    POST_COMPLETE_ORDER: `${mainAddress}/orders/complete`,
+    POST_CANCEL_ORDER: `${mainAddress}/orders/cancel`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';
