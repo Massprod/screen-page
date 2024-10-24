@@ -18,10 +18,10 @@ const focusTableOrder = async (orderId) => {
         })
         return;
     }
-    flashMessage.show({
-        'message': `Выделен заказ: ${orderId}`,
-        'duration': 1000,
-    })
+    // flashMessage.show({
+    //     'message': `Выделен заказ: ${orderId}`,
+    //     'duration': 1000,
+    // })
     targetRow.scrollIntoView({
         behavior: 'smooth',
         block: 'center'
@@ -29,10 +29,10 @@ const focusTableOrder = async (orderId) => {
     targetRow.classList.add('basic-focus');
     setTimeout( () => {
         targetRow.classList.remove('basic-focus');
-        flashMessage.show({
-            'message': `Снято выделение заказа: ${orderId}`,
-            'duration': 1500,
-        })
+        // flashMessage.show({
+        //     'message': `Снято выделение заказа: ${orderId}`,
+        //     'duration': 1500,
+        // })
     }, 2000)
 }
 

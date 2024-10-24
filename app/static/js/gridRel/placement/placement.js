@@ -24,7 +24,8 @@ export default class Placement{
     } else if ('basePlatform' === this.placementType) {
       this.element.className = 'placement-base-platform-container';
     }
-    this.element.addEventListener('context-menu', event => {
+    this.element.classList.add('no-select');
+    this.element.addEventListener('contextmenu', event => {
       event.preventDefault();
     })
   }
@@ -67,8 +68,10 @@ export default class Placement{
     if (this.placementData
         && this.placementId === newPlacementData['_id']
          && this.placementData['lastChange'] >= newPlacementData['lastChange']) {
+        console.log('NOT CHANGED PLACEMENT');
         return;
     }
+    console.log('UPDATING PLACEMENT');
     if (this.placementId !== newPlacementData['_id']) {
       this.placementId = newPlacementData['_id'];
       this.element.id = this.placementId;
@@ -91,7 +94,6 @@ export default class Placement{
             placementCell.unblockState();
           }
           placementCell.setAsElement();
-          // TODO: REPLACE LATER
           const wheelstackData = this.placementData['wheelstacksData'][cellData['wheelStack']];
           placementCell.setElementData(wheelstackData);
           let numWheels = `${wheelstackData['wheels'].length}`;
@@ -104,7 +106,8 @@ export default class Placement{
           // - BATCH IND -
           // + WHEEL IND +
           let wheelIndString = '';
-          for (let wheelId of wheelstackData['wheels']) {
+          for (let wheelObjectId of wheelstackData['wheels']) {
+            const wheelId = placementData['wheelsData'][wheelObjectId]['wheelId'];
             wheelIndString = wheelIndString !== '' ? `${wheelIndString};${wheelId}` : `${wheelId}`;
           }
           placementCell.element.setAttribute(BASIC_ATTRIBUTES.WHEELS, wheelIndString);
@@ -116,6 +119,7 @@ export default class Placement{
           if (cellData['blocked']) {
             placementCell.clearAttributes(ignoredEmptyAtt);
             placementCell.blockState(cellData['blockedBy']);
+            // + BLOCKED BY + 
           } else {
             placementCell.unblockState();
             placementCell.clearAttributes();

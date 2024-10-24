@@ -197,7 +197,6 @@ export async function createProRejOrderBulk(elementData, extraElement, processin
         'method': 'POST',
         'body': JSON.stringify(createOrderBody),
     }
-    console.log(args);
     const resp = await postRequest(createOrderURL, false, true, args);
     await checkProRejOrderResponse(resp);
 }

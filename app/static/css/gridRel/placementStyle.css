@@ -174,3 +174,12 @@
   );
 }
 /* - BATCH INDICATOR - */
+
+.placement-cell.move-possible {
+  background-color: #0d7bf091 !important;
+}
+
+
+.placement-cell.active-move-select {
+  background-color: #5205c691 !important;
+}

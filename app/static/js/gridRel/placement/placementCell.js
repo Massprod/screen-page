@@ -51,6 +51,9 @@ export default class PlacementCell {
 
     setElementData(elementData) {
         this.elementData = elementData;
+        // + WHEELSTACK ID +
+        this.element.setAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID, elementData['_id']);
+        // - WHEELSTACK ID -
     }
 
     clearElementData() {
@@ -93,6 +96,7 @@ export default class PlacementCell {
     }
 
     blockState(blockedBy = null) {
+        this.element.classList.remove('move-possible');  // cringe
         this.element.classList.add('blocked');
         if (blockedBy) {
             if (this.element.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER) !== blockedBy) {
@@ -119,6 +123,7 @@ export default class PlacementCell {
             BASIC_ATTRIBUTES.BATCH_NUMBER,
             BASIC_ATTRIBUTES.WHEELS,
             BASIC_ATTRIBUTES.BLOCKING_ORDER,
+            BASIC_ATTRIBUTES.WHEELSTACK_ID,
         ];
         dataAttributes.forEach( element => {
             if (ignored.has(element)) {

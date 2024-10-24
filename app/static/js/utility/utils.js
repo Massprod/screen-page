@@ -61,3 +61,14 @@ export function validateUsername(
     }
     return true;
 }
+
+
+export const createOption = async (optionValue, optionName, selected = false) => {
+  const newOption = document.createElement('option'); 
+  newOption.value = optionValue
+  newOption.textContent = optionName.charAt(0).toUpperCase() + optionName.slice(1);
+  if (selected) {
+		newOption.selected = true;
+	}
+	return newOption;
+}

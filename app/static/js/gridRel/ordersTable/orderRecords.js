@@ -8,6 +8,39 @@ import {
   BASIC_ATTRIBUTES,
 } from "../../uniConstants.js";
 import { getRequest } from "../../utility/basicRequests.js";
+import flashMessage from "../../utility/flashMessage/flashMessage.js";
+
+
+export const focusTableOrder = async (orderId, focusTable) => {
+  if (!focusTable) {
+    return;
+  }
+  const targetRow = focusTable.querySelector(`tbody #${CSS.escape(orderId)}`);
+  if (!targetRow) {
+    flashMessage.show({
+      'message': `В таблице не найден заказ с номером: ${orderId}`,
+      'color': 'red',
+      'duration': 1000,
+    })
+    return;
+  }
+  flashMessage.show({
+    'message': `Выделен заказ: ${orderId}`,
+    'duration': 1000,
+  })
+  targetRow.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center'
+  });
+  targetRow.classList.add('basic-focus');
+  setTimeout( () => {
+    targetRow.classList.remove('basic-focus');
+    flashMessage.show({
+      'message': `Снято выделение заказа: ${orderId}`,
+      'duration': 1500,
+    })
+  }, 2000)
+}
 
 
 export const createPlacementRecord = async (placementData, placementBanks) => {
@@ -16,12 +49,13 @@ export const createPlacementRecord = async (placementData, placementBanks) => {
   const placementRow = placementData['rowPlacement'];
   const placementCol = placementData['columnPlacement'];
   let placementRecord = "";
+  // + REMOVE SELECTORS +
   if (PLACEMENT_TYPES.GRID === placementType) {
     placementRecord += `<b>${placementBanks['grids'][placementId]['name']}</b><br>`;
   } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
     placementRecord += `<b>${placementBanks['platforms'][placementId]['platformName']}</b><br>`;
   }
-
+  // + REMOVE SELECTORS +
   if (placementCol === PLACEMENT_TYPES.LABORATORY) {
       placementRecord += `<b>${PLACEMENT_TYPES_TRANSLATE[placementCol]}</b>`;
   } else if (placementRow === EXTRA_ELEMENT_NAME) {

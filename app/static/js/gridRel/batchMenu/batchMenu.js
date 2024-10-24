@@ -20,7 +20,7 @@ const assignCloser = async (openerElement, menuElement) => {
   document.body.addEventListener('touchstart', mainCloser);
 
   let checkInterval = setInterval(() => {
-    if (!openerElement.isConnected) {
+    if (!openerElement.isConnected || !menuElement.isConnected) {
       mainCloser(null);  // empty event
       clearInterval(checkInterval);
       checkInterval = null;
@@ -127,7 +127,7 @@ export const createBatchMenu = async (
     }
     batchMarker.clearMarking();
     batchMarker.setRules('data-batch-number', batchNumber);
-    batchMarker.markTargets(true);
+    batchMarker.markTargets(true, 5);
   })
   batchRecords.appendChild(batchIdRecord);
   // - ID FIELD -

@@ -1,9 +1,9 @@
 
 
-export const combineObjectsData = (combined, toGather = [], toIgnore = []) => {
+export const combineObjectsData = (combined, toGather = [], toIgnore = [], overRide = false) => {
   toGather.forEach( objectToCombine => {
     Object.keys(objectToCombine).forEach( record => {
-      if (record in combined) {
+      if (record in combined && !overRide) {
         return;
       }
       combined[record] = objectToCombine[record];

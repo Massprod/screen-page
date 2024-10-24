@@ -55,7 +55,7 @@ export const preparePlacement = async (presetId, placement, useIdentifiers) => {
   const presetDataURL = `${BACK_URL.GET_PRESET_DATA}/${presetId}`;
   const response = await getRequest(presetDataURL, true, true);
   const presetData = await response.json();
-  placement.buildPreset(presetData, useIdentifiers); 
+  placement.buildPreset(presetData, useIdentifiers);
 }
 
 export const switchView = async (activeElements, inActiveElements) => {

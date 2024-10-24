@@ -44,6 +44,7 @@ import AttributeMark from "../../utility/mark/mark.js";
 import FocusMark from "../../utility/focusElement/focusElement.js";
 import { createProRejOrderBulk } from "../../utility/ordersCreation.js";
 import { createOrderMenu } from "../../gridRel/orderMenu/orderMenu.js";
+import { createWheelstackMenu } from "../../gridRel/wheelstackMenu/wheelstackMenu.js";
 
 
 // + BAD PRESET +
@@ -79,19 +80,19 @@ const hoverCoord = new CellHoverCoordinate('placement-cell');
 
 // + DATA BANKS +
 // GRID
-var gridWheels = new Set();
+var gridWheels = {};
 var gridWheelstacks = {};
 var gridBatches = {};
 var gridOrders = {};
 // --- 
 // PLATFORM
-var platformWheels = new Set();
+var platformWheels = {};
 var platformWheelstacks = {};
 var platformBatches = {};
 var platformOrders = {};
 // ---
 // COMBINED
-var _allWheels = new Set();
+var _allWheels = {};
 var _allWheelstacks = {};
 var _allBatches = {};
 var _allOrders = {};
@@ -187,8 +188,8 @@ const updateBatchElements = (batchData) => {
 
 // CRINGE UPDATE
 setInterval(() => {
-  combineSetsData(_allWheels, [platformWheels, gridWheels]);
-  combineObjectsData(_allWheelstacks, [platformWheelstacks, gridWheelstacks], [_notYetPresent, 'wheelstacks']);
+  combineObjectsData(_allWheels, [platformWheels, gridWheels]);
+  combineObjectsData(_allWheelstacks, [platformWheelstacks, gridWheelstacks], [_notYetPresent, 'wheelstacks'], true);
   // TODO: BATCHES can change state == always loopin and updating their state 24/7 every 200ms or smth.
   //   Doubt there's going to be more than 20 batches, so 20 requests within 200ms is 100% fine.
   combineObjectsData(_allBatches, [platformBatches, gridBatches], [_notYetPresent, 'batches']);
@@ -200,19 +201,16 @@ setInterval(() => {
 
 
 const updateBanksFromPlacement = async (placementData, placementType) => {
-  const newWheels = new Set();
   const newBatches = {};
   const newOrders = {};
   const allWheelstacks = placementData['wheelstacksData'];
+  const allWheels = placementData['wheelsData'];
   for (let row in placementData['rows']) {
     for (let col in placementData['rows'][row]['columns']) {
       const cellData = placementData['rows'][row]['columns'][col];
       const wheelstackId = cellData['wheelStack'];
       if (wheelstackId) {
         const wheelstackData = allWheelstacks[wheelstackId];
-        for (let wheelId of wheelstackData['wheels']) {
-          newWheels.add(wheelId);
-        }
         newBatches[wheelstackData['batchNumber']] = false;
       }
       const orderId = cellData['blockedBy'];
@@ -222,15 +220,15 @@ const updateBanksFromPlacement = async (placementData, placementType) => {
     }
   }
   if (PLACEMENT_TYPES.GRID === placementType) {
-    updateSetBank(gridWheels, newWheels);
     updateObjBank(gridBatches, newBatches);
     updateObjBank(gridOrders, newOrders);
-    gridWheelstacks = allWheelstacks;
+    gridWheelstacks = allWheelstacks ?? {};
+    gridWheels = allWheels ?? {};
   } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
-    updateSetBank(platformWheels, newWheels);
     updateObjBank(platformBatches, newBatches);
     updateObjBank(platformOrders, newOrders);
-    platformWheelstacks = allWheelstacks;
+    platformWheelstacks = allWheelstacks ?? {};
+    platformWheels = allWheels ?? {};
   }
 }
 // - DATA BANKS -
@@ -418,17 +416,45 @@ gridFullBut.addEventListener('click', event => {
 // - VIEW CHANGE -
 
 // + PLACEMENT UPDATE +
+const placementChanged = async (placement) => {
+  let placementType = placement.placementType;
+  let checkURL = '';
+  if (PLACEMENT_TYPES.GRID === placementType) {
+    checkURL = `${BACK_URL.GET_GRID_LAST_CHANGE}/${placement.placementId}`;
+  } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
+    checkURL = `${BACK_URL.GET_PLATFORM_LAST_CHANGE}/${placement.placementId}`;
+  }
+  const checkResp = await getRequest(checkURL, true, true);
+  const checkData = await checkResp.json();
+  if (placement.placementData['lastChange'] < checkData['lastChange']) {
+    return true;
+  }
+  return false;
+}
+
+
 const updatePlacement = async (placement, newId) => {
   let dataURL = '';
   let placementType = placement.placementType;
+  // + PING FOR CHANGES +
+  if (placement.placementId === newId) {
+    if (!(await placementChanged(placement))) {
+      return;
+    };
+  };
+  // - PING FOR CHANGES - 
   if (PLACEMENT_TYPES.GRID === placementType) {
-    dataURL = `${BACK_URL.GET_GRID_STATE}/${newId}?includeWheelstacks=true`;
+    dataURL = `${BACK_URL.GET_GRID_STATE}/${newId}?includeWheelstacks=true&includeWheels=true`;
   } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
-    dataURL = `${BACK_URL.GET_PLATFORM_STATE}/${newId}?includeWheelstacks=true`;
+    dataURL = `${BACK_URL.GET_PLATFORM_STATE}/${newId}?includeWheelstacks=true&includeWheels=true`;
   }
+  const startTime = performance.now();
   const dataResp = await getRequest(dataURL, false, true);
   // TODO: Error handling
   const newData = await dataResp.json()
+  const endTime = performance.now()
+  updateBanksFromPlacement(newData, placementType);
+  placement.updatePlacement(newData);
   if (platformSelectActive && PLACEMENT_TYPES.GRID === placement.placementType) {
     const newPlatformsData = newData['assignedPlatforms'] ?? [];
     if (0 === newPlatformsData.length) {
@@ -450,8 +476,6 @@ const updatePlacement = async (placement, newId) => {
       }
     }
   }
-  updateBanksFromPlacement(newData, placementType);
-  placement.updatePlacement(newData);
 }
 // - PLACEMENT UPDATE -
 
@@ -559,6 +583,10 @@ selectGridButton.addEventListener('click', async event => {
     gridsSelector, gridPlacement, gridActiveElements, gridInactiveElements,
     gridView, gridsViewButton, true
   )
+  // TODO: Maybe change it.
+  const gridCells = gridContainer.querySelectorAll('.placement-cell, .grid-cell');
+  assignWheelstackMenus(gridCells, gridPlacement, gridPlacement);
+  // ---
   gridSelectActive = false;
   setPlatformToSelect();
   if (gridPlacementUpdateInterval) {
@@ -569,7 +597,6 @@ selectGridButton.addEventListener('click', async event => {
     if (gridSelectActive) {
       return;
     }
-    // console.log('Grid-ActiveUpd');
     await updatePlacement(gridPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL)
 })
@@ -676,6 +703,8 @@ selectPlatformButton.addEventListener('click', async (event) => {
     platformSelector, platformPlacement, platformActiveElements, platformInActiveElements,
     platformView, platformViewButton, false
   )
+  const platformCells = platformsContainer.querySelectorAll('.placement-cell, .baseplatform-cell');
+  assignWheelstackMenus(platformCells, gridPlacement, platformPlacement);
   platformSelectActive = false;
   if (platformPlacementUpdateInterval) {
     clearInterval(platformPlacementUpdateInterval);
@@ -685,7 +714,6 @@ selectPlatformButton.addEventListener('click', async (event) => {
     if (platformSelectActive) {
       return;
     }
-    // console.log('Plat-activeUpd');
     await updatePlacement(platformPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL);
 })
@@ -718,18 +746,6 @@ platformViewButton.addEventListener('click', (event) => {
   platformViewSwitch(false);
 })
 // - PLATFORM SELECTION -
-
-setInterval( () => {
-  // console.log('gridWheels', gridWheels.size);
-  // console.log('platformWheels', platformWheels.size)
-  // console.log('gridWheelstacks', Object.keys(gridWheelstacks).length);
-  // console.log('platformWheelstacks', Object.keys(platformWheelstacks).length);
-  // console.log('platformOrders', Object.keys(platformOrders).length);
-  // console.log('batchesData', _allBatches);
-  // console.log('currentOrders', _allOrders);
-}, 4500)
-
-// 
 
 // + ORDERS TABLE +
 var createdOrderRecords = {};
@@ -915,7 +931,7 @@ const orderElementAssignFocusEls= (orderElement) => {
           [{
             'elementId': sourceTargetElementId,
             'container': gridContainer,
-            'onlyHighlight': true,
+            'onlyHighlight': false,
             'placementId': sourcePlacementId,
             'errorMessage': `Не активен вид выбранного элемента: <b>${availGrids[sourcePlacementId]['name']}</b>`,
           }],
@@ -1068,7 +1084,6 @@ const assignGridSequenceFocus = (element, targets, focusers, message, callTimeou
       // console.log(placementContainer.id);
       // console.log('targetContId', targetPlacementId);
       if (placementContainer.id !== targetPlacementId) {
-        console.log(placementContainer);
         flashMessage.show({
           'message': errorMessage,
           'color': 'red',
@@ -1132,7 +1147,7 @@ const assignMoveProRejButton = async (batchMenu, moveSelector, processing = true
 }
 
 // + BATCH MENU +
-const assignBatchExpandableButtons = async (batchMenu) => {
+export const assignBatchExpandableButtons = async (batchMenu) => {
   // + populateSelector +
   const moveSelector = batchMenu.querySelector('#batchMenuMoveSelector');
   for (let [elementName, elementData] of Object.entries(gridPlacement.placementExtraRows)) {
@@ -1185,20 +1200,49 @@ const assignBatchMenu = (orderElement) => {
 // - BATCH MENU -
 // + ORDER MENU +
 const assignOrderMenu = (orderElement, orderData, ignoredElements = []) => {
+  // CONTEXTMENU
   orderElement.addEventListener('contextmenu', async event => {
+    event.preventDefault();
     if (ignoredElements.includes(event.target)) {
       return;
     }
-    event.preventDefault();
     createOrderMenu(event, orderElement, orderData, true);
   })
 }
-
 // - ORDER MENU -
+const assignWheelstackMenus = (cells, placement, sourcePlacement) => [
+  cells.forEach( cell => {
+    if (cell.hasWheelstackMenuAssigned) {
+      return;
+    }
+    cell.addEventListener('click', (event) => {
+      event.preventDefault();
+      const wheelstackMenu = createWheelstackMenu(
+        event,
+        cell, 
+        {
+          'wheelstacks': _allWheelstacks,
+          'orders': _allOrders,
+          'wheels': _allWheels,
+          'batches': _allBatches,
+        },
+        {
+          'batchMarker': batchMarker,
+        },
+        ordersTableBody,
+        placement,
+        sourcePlacement
+      );
+      cell.hasWheelstackMenuAssigned = wheelstackMenu;
+    })
+  })
+]
 // - CONTEXT MENUS -
 
 setInterval( () => {
 //   console.log(_allOrders);
-  console.log('GRIDS', availGrids);
-  console.log('PLATFORMS', availPlatforms);
+//   console.log('GRIDS', availGrids);
+//   console.log('PLATFORMS', availPlatforms);
+  // console.log('WHEELS_LENGTH', Object.keys(_allWheels).length);
+  // console.log('WHEELS', _allWheels);
 }, 5500);

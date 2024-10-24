@@ -5,7 +5,7 @@
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-  width: 300px;
+  width: 275px;
   z-index: 10000;
   visibility: hidden;
   opacity: 0;
@@ -31,6 +31,8 @@
   padding: 0;
   margin: 0;
   border: 2px solid black;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
 }
 
 .wheelstack-menu li {
@@ -38,7 +40,7 @@
   text-align: center;
   border-top: 2px dashed black;
   background-color: white;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   transition: background-color 0.2s ease;
 }
 
@@ -51,7 +53,7 @@
 }
 
 .wheelstack-menu li:hover {
-  font-size: 1.55rem;
+  font-size: 1.22rem;
   transition: font-size 0.3s ease;
   background-color: #94d79b;
 }
@@ -71,8 +73,8 @@
 /* First item gets no top border */
 .wheelstack-menu li:first-child {
   border-top: none;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
+  /* border-top-left-radius: 6px;
+  border-top-right-radius: 6px; */
 }
 
 .wheelstack-menu li:last-child {
@@ -96,7 +98,7 @@
 }
 
 .info-record:hover {
-  font-size: 1.17rem;
+  font-size: 1.18rem;
   transition: font-size 0.3s ease;
 }
 
@@ -115,30 +117,85 @@
   color: #721c24;
 }
 
-/* 2x2 grid for buttons */
+
 .wheelstack-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
   gap: 10px;
-  padding: 10px;
-  border-top: 1px solid #ddd;
+  padding: 12px;
+  min-height: 120px;
+  place-items: center;
 }
 
 .wheelstack-buttons button {
-  background-color: #333;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 12px;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  font-size: 1.4rem;
+  font-size: 1.15rem;
 }
 
-/* Dynamic button hover */
-.wheelstack-buttons button:hover {
-  background-color: #555;
+.wheelstack-buttons button.return-view {
+  top: 1%;
+  left: 1%;
+  position: absolute;
+  max-width: 30px;
+  max-height: 30px;
+  padding: 0;
+  margin: 0;
+}
+
+.wheelstack-buttons button.return-view img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  background-color: none;
+}
+
+.batch-checkbox {
+  position: absolute;
+  top: 1%;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+}
+
+.batch-checkbox-label {
+  position: absolute;
+  top: 1%;
+  right: 35px;
+}
+
+.form-select.centered {
+  text-align-last: center;
+}
+
+.wheelstack-menu li.expandable {
+  padding: 0;
+  position: relative;
+  background-color: rgb(225, 225, 230);
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: height 0.3s ease, opacity 0.2s ease;
+  border: none;
+  width: 100%;
+}
+
+.wheelstack-menu li.expandable.open {
+  height: 50px;
+  opacity: 1;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.wheelstack-menu li.expandable.open.clicked {
+  background-color: #21b6c1;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transition: background-color 0.01s ease, box-shadow 0.01s ease transform 0.4 ease;
   transform: translateY(-1px);
-  font-size: 1.41rem;
+}
+
+
+.wheelstack-menu li.expandable.open:hover {
+  background-color: rgb(215, 215, 220); /* Slightly darker background */
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
 }

@@ -1,5 +1,5 @@
 import updateMenuPosition from "../../utility/adjustContainerPosition.js";
-import { EXTRA_ORDER_TYPES_TRANSLATE_TABLE, BASIC_INFO_MESSAGE_WARNING, BACK_URL } from "../../uniConstants.js";
+import { EXTRA_ORDER_TYPES_TRANSLATE_TABLE, BASIC_INFO_MESSAGE_WARNING, BACK_URL, BASIC_ATTRIBUTES } from "../../uniConstants.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import { postRequest } from "../../utility/basicRequests.js";
 
@@ -22,7 +22,7 @@ const updateOrderStatus = async (orderId, complete = true) => {
       const errorMessage = BASIC_INFO_MESSAGE_WARNING;
       errorMessage.message = `Ошибка при обновлении статуса заказа: ${response.statusText}`;
       flashMessage.show(errorMessage);
-        throw new Error(`Error while updating orderStatus ${response.statusText}. URL = ${url}`);
+        throw new Error(`Error while updating orderStatus ${response.statusText}. URL = ${updateURL}`);
     }
     return response
   } catch (error) {
@@ -92,7 +92,9 @@ const assignCloser = async (openerElement, menuElement) => {
   document.body.addEventListener('touchstart', mainCloser);
 
   let checkInterval = setInterval(() => {
-    if (!openerElement.isConnected) {
+    // TODO: we need universal closer with customisable options.
+    const elementOrder = openerElement.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER)
+    if ((!openerElement.isConnected || !menuElement.isConnected) || (elementOrder !== menuElement.id)) {
       mainCloser(null);  // empty event
       clearInterval(checkInterval);
       checkInterval = null;
@@ -181,7 +183,7 @@ export const createOrderMenu = async (
   cancelButton.classList.add('btn', 'reject');
   cancelButton.addEventListener('click', event => {
     const result = updateOrderStatus(orderId, false);
-    if (result) {
+    if (result && removableOpener) {
       openerElement.remove();
     }
   })
@@ -194,5 +196,5 @@ export const createOrderMenu = async (
   document.body.appendChild(menu);
   assignCloser(openerElement, menu);
   updateMenuPosition(event, menu);
-
+  return menu;
 }
