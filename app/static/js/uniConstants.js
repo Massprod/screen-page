@@ -1,10 +1,7 @@
-// export const mainAddress = "/api/grid";
-// const authMainAddress = "/api/auth";
-// const serviceDom = "";
-// TEST local
-export const mainAddress = "http://localhost:8000/api/grid";
-const authMainAddress = "http://localhost:8080/api/auth";
-const serviceDom = "http://localhost:5000";
+export const mainAddress = "/api/grid";
+const authMainAddress = "/api/auth";
+const serviceDom = "";
+
 
 export const loginPage = `${serviceDom}/`;
 export const usersPage = `${serviceDom}/users`;
@@ -58,7 +55,7 @@ export const ORDER_TYPES_TRANSLATE_TABLE = {
     "moveToLaboratory": "Лаборатория",
     "mergeWheelStacks": "Объединение стоп",
     "moveToProcessing": "Обработка",
-    "moveToRejected": "Отказ",
+    "moveToRejected": "Несоответствующая",
     "moveToStorage": "Хранилище",
 }
 
@@ -68,7 +65,7 @@ export const EXTRA_ORDER_TYPES_TRANSLATE_TABLE = {
     'moveToLaboratory': 'Перенос колеса<br>в лабораторию',
     'mergeWheelStacks': 'Объединение стоп',
     'moveToProcessing': 'Перенос в обработку',
-    'moveToRejected': 'Перенос в отказ',
+    'moveToRejected': 'Перенос в несоответствующую',
     'moveToStorage': 'Перенос в хранилище',
 }
 
@@ -79,6 +76,7 @@ export const BASIC_ATTRIBUTES = {
     WHEELS: 'data-wheels',
     BLOCKING_ORDER: 'data-blocking-order',
     ORDER_TYPE: 'data-order-type',
+    WHEELSTACK_ID: 'data-wheelstack-id',
 }
 // - BASIC ATTRIBUTES -
 
@@ -113,6 +111,8 @@ export const BACK_URL  = {
     GET_STORAGE: `${mainAddress}/storages`,
     POST_COMPLETE_ORDER: `${mainAddress}/orders/complete`,
     POST_CANCEL_ORDER: `${mainAddress}/orders/cancel`,
+    GET_GRID_LAST_CHANGE: `${mainAddress}/grid/change_time`,
+    GET_PLATFORM_LAST_CHANGE: `${mainAddress}/platform/change_time`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';
@@ -258,11 +258,11 @@ export const NAV_BUTTONS = {
 };
 
 // GRID PAGE UPDATE INTERVALS
-export const GRID_PLACEMENT_INTERVAL = 250;
-export const UPDATE_BATCHES_DATA_INTERVAL = 500;
-export const UPDATE_DATA_BANKS_INTERVAL = 100;
-export const UPDATE_ORDERS_DATA_INTERVAL = 250;
-
+export const GRID_PLACEMENT_INTERVAL = 300;
+export const UPDATE_BATCHES_DATA_INTERVAL = 300;
+export const UPDATE_DATA_BANKS_INTERVAL = 200;
+export const UPDATE_ORDERS_DATA_INTERVAL = 200;
+export const WHEELSTACK_MENU_UPDATE_INTERVAL = 30;
 
 // SOME CONSTANTS
 export const ORDERS_TABLE_BREAKSIZE = 1000;

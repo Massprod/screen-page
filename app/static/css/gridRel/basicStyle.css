@@ -318,7 +318,7 @@ html, body {
     display: flex;
     flex-direction: row;
     position: absolute;
-    bottom: 2%;
+    bottom: 10%;
     left: 0%;
     right: auto;
     top: auto;
@@ -530,6 +530,7 @@ td.batch-indicator {
     background-color: #7a2e2e; /* Dark, muted red */
     color: white; /* White text */
     border: none;
+    width: 50%;
     transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
 }
 
@@ -549,4 +550,11 @@ td.batch-indicator {
 .btn.process:focus, .btn.reject:focus {
     outline: none; /* Remove outline */
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.15); /* Slightly enhanced shadow on focus */
+}
+
+.no-select {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }

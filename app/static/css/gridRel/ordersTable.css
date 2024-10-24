@@ -22,11 +22,11 @@
 }
 
 .orders-table tbody td {
-  padding: 15px;
+  padding: 2.5px;
   text-align: center;
   vertical-align: middle;
   font-weight: 512;
-  font-size: 1.1em;
+  font-size: 1em;
   color: #333;
   border-top: solid 1px #ddd;
   word-break: break-all;
@@ -98,11 +98,8 @@
   display: none;
 }
 
-/* @media (max-width: 1000px) {
-  .orders-table tr:not(.data-breaker) td:nth-child(1),
-  .orders-table tr:not(.data-breaker) td:nth-child(2),
-  .orders-table tr:not(.data-breaker) th:nth-child(1),
-  .orders-table tr:not(.data-breaker) th:nth-child(2) {
-      display: none;
-  }
-} */
+@media (max-height: 1000px) {
+  .orders-table tbody td {
+    font-size: 0.6em;
+  }  
+}

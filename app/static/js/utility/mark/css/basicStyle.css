@@ -43,7 +43,7 @@
 }
 
 .batch-mark:hover {
-    background-color: rgba(245, 245, 245, 1) !important; /* Soft grey for hover */
+    background-color: rgba(245, 245, 245, 1); /* Soft grey for hover */
 }
 
 @keyframes batchMarkFlashlight {
