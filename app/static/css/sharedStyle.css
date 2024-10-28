@@ -46,3 +46,16 @@
     top: 8%;
   }
 }
+
+@keyframes blink {
+  0% { background-color: transparent; }
+  25% { background-color: rgba(255, 0, 0, 0.2); } /* Adjust color and opacity as needed */
+  50% { background-color: rgba(255, 0, 0, 0.4); }
+  75% { background-color: rgba(255, 0, 0, 0.2); }
+  100% { background-color: transparent; }
+}
+
+/* Apply blink animation for delete effect */
+.delete-blink {
+  animation: blink 1s ease-in-out infinite;
+}

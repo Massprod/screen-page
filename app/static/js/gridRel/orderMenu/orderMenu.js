@@ -1,7 +1,15 @@
 import updateMenuPosition from "../../utility/adjustContainerPosition.js";
-import { EXTRA_ORDER_TYPES_TRANSLATE_TABLE, BASIC_INFO_MESSAGE_WARNING, BACK_URL, BASIC_ATTRIBUTES } from "../../uniConstants.js";
+import {
+  EXTRA_ORDER_TYPES_TRANSLATE_TABLE,
+  BASIC_INFO_MESSAGE_WARNING, BACK_URL,
+  BASIC_ATTRIBUTES,
+  USER_ROLE_COOKIE_NAME,
+  OPERATOR_ROLE,
+  ORDERS_TABLE_ELEMENT_REMOVE_INDICATOR
+} from "../../uniConstants.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import { postRequest } from "../../utility/basicRequests.js";
+import { getCookie } from "../../utility/roleCookies.js";
 
 
 
@@ -94,7 +102,8 @@ const assignCloser = async (openerElement, menuElement) => {
   let checkInterval = setInterval(() => {
     // TODO: we need universal closer with customisable options.
     const elementOrder = openerElement.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER)
-    if ((!openerElement.isConnected || !menuElement.isConnected) || (elementOrder !== menuElement.id)) {
+    if ((!openerElement.isConnected || !menuElement.isConnected)
+          || (elementOrder !== menuElement.id && openerElement.tagName !== 'TR')) {
       mainCloser(null);  // empty event
       clearInterval(checkInterval);
       checkInterval = null;
@@ -123,6 +132,15 @@ const createRecord = async (recordData) => {
   return record;
 }
 
+const removeOpener = (openerElement) => {
+  openerElement.classList.add('delete-blink');
+  setTimeout( () => {
+    if (openerElement) {
+      openerElement.remove();
+    };
+  }, ORDERS_TABLE_ELEMENT_REMOVE_INDICATOR);
+}
+
 
 export const createOrderMenu = async (
   event, openerElement, orderData, removableOpener = true
@@ -130,7 +148,14 @@ export const createOrderMenu = async (
   if (!orderData) {
     return;
   }
-  console.log(orderData);
+  if (openerElement.classList.contains('delete-blink')) {
+    const showMessage = BASIC_INFO_MESSAGE_WARNING;
+    showMessage.message = 'Заказ <b>ВЫПОЛНЕН</b>.<br>Дождитесь окончания индикации удаления.';
+    showMessage.duration = 800;
+    flashMessage.show(showMessage);
+    return;
+  }
+  let activeUserRole = await getCookie(USER_ROLE_COOKIE_NAME);
   const menu = document.createElement('div');
   const orderId = orderData['_id'];
   menu.id = orderId;
@@ -161,35 +186,36 @@ export const createOrderMenu = async (
   menuRecords.appendChild(typeRecord);
   // - TYPE FIELD -
   // + BUTTONS FIELD +
-  
-  const buttonsContainer = document.createElement('li');
-  buttonsContainer.classList.add('d-flex', 'flex-row', 'align-items-center', 'justify-content-center', 'gap-3');
-  
-  const completeButton = document.createElement('button');
-  completeButton.id = 'completeOrder';
-  completeButton.innerHTML = 'Выполнить';
-  completeButton.classList.add('btn', 'process');
-  completeButton.addEventListener('click', event => {
-    const result = updateOrderStatus(orderId, true); 
-    if (result) {
-      openerElement.remove();
-    };
-  });
-  buttonsContainer.appendChild(completeButton);
+  if (OPERATOR_ROLE !== activeUserRole) {
+    const buttonsContainer = document.createElement('li');
+    buttonsContainer.classList.add('d-flex', 'flex-row', 'align-items-center', 'justify-content-center', 'gap-3');
+    
+    const completeButton = document.createElement('button');
+    completeButton.id = 'completeOrder';
+    completeButton.innerHTML = 'Выполнить';
+    completeButton.classList.add('btn', 'process');
+    completeButton.addEventListener('click', event => {
+      const result = updateOrderStatus(orderId, true);
+      if (result && removableOpener) {
+        removeOpener(openerElement);
+      };
+    });
+    buttonsContainer.appendChild(completeButton);
 
-  const cancelButton = document.createElement('button');
-  cancelButton.id = 'cancelOrder';
-  cancelButton.innerHTML = 'Отменить';
-  cancelButton.classList.add('btn', 'reject');
-  cancelButton.addEventListener('click', event => {
-    const result = updateOrderStatus(orderId, false);
-    if (result && removableOpener) {
-      openerElement.remove();
-    }
-  })
-  buttonsContainer.appendChild(cancelButton);
+    const cancelButton = document.createElement('button');
+    cancelButton.id = 'cancelOrder';
+    cancelButton.innerHTML = 'Отменить';
+    cancelButton.classList.add('btn', 'reject');
+    cancelButton.addEventListener('click', event => {
+      const result = updateOrderStatus(orderId, false);
+      if (result && removableOpener) {
+        removeOpener(openerElement);
+      };
+    });
+    buttonsContainer.appendChild(cancelButton);
 
-  menuRecords.appendChild(buttonsContainer);
+    menuRecords.appendChild(buttonsContainer);
+  }
   // - BUTTONS FIELD -
   menu.appendChild(menuRecords);
   menu.classList.add('show');

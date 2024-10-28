@@ -5,6 +5,8 @@ import {
   PLACEMENT_TYPES,
   WHEELSTACK_MENU_UPDATE_INTERVAL,
   ORDER_MOVE_TO_LABORATORY,
+  USER_ROLE_COOKIE_NAME,
+  OPERATOR_ROLE,
 } from "../../uniConstants.js";
 import updateMenuPosition from "../../utility/adjustContainerPosition.js";
 import { createBatchMenu } from "../batchMenu/batchMenu.js";
@@ -14,6 +16,7 @@ import { focusTableOrder } from "../ordersTable/orderRecords.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import { createLaboratoryOrderGrid, createOrderMoveWholestackFromBaseGrid, createProRejOrderBulk, createProRejOrderGrid } from "../../utility/ordersCreation.js";
 import { createOption } from "../../utility/utils.js";
+import { getCookie } from "../../utility/roleCookies.js";
 
 
 const menuCloser = async (event, openerElement, menuElement, subMenus, boundCloser, force = false) => {
@@ -130,6 +133,19 @@ const createWheelRecord = async (wheelData, blocked = false) => {
 }
 
 
+const updateWheelRecord = async (wheelRecord, wheelData, blocked = false) => {
+  wheelRecord.id = wheelData['_id'];
+  wheelRecord.classList.remove('blocked');
+  if (blocked) {
+    wheelRecord.classList.add('blocked');
+    wheelRecord.title = `Ожидает переноса в лабораторию`;
+  };
+  wheelRecord.textContent = wheelData['wheelId'];
+  wheelRecord.setAttribute(BASIC_ATTRIBUTES.WHEELS, wheelData['wheelId']);
+  return wheelRecord;
+}
+
+
 const clearWheelRecord = async (wheelElement) => {
   wheelElement.classList.remove('blocked', 'expand-ind');
   wheelElement.classList.add('empty-record');
@@ -230,6 +246,7 @@ var wheelstackData = null;
 var wheelstackId = null;
 var selectRelated = [];
 var blockedRelated = [];
+var activeUserRole = null;
 // --
 export const createWheelstackMenu = async (
   event, openerElement, dataBanks = {}, markers = {}, ordersTable = null, placement, sourcePlacement) => {
@@ -251,6 +268,9 @@ export const createWheelstackMenu = async (
     }
     return;
   }
+  // + USER ROLE +
+  activeUserRole = await getCookie(USER_ROLE_COOKIE_NAME);
+  // - USER ROLE -
   blockingOrderId = openerElement.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER);
   if (blockingOrderId) {
     blockingOrderData = dataBanks['orders'][blockingOrderId];
@@ -272,7 +292,7 @@ export const createWheelstackMenu = async (
           event, openerElement, blockingOrderData, false
         );
       }
-    }
+    };
     return;
   }
   const wheelsData = dataBanks['wheels'];
@@ -285,228 +305,228 @@ export const createWheelstackMenu = async (
   // TODO: complete rebuild :)
   // + MOVE FIELD +
   let clearMarks = null
-  // if (!wheelstackData['blocked']) {
-    // + FIRST MOVE CONTAINER +
-    // + MOVE INSIDE BUTTON +
-  const moveButtonsField = document.createElement('div');
-  if (wheelstackData['blocked']) {
-    moveButtonsField.classList.add('d-none');
-  }
-  selectRelated.push(moveButtonsField);
-  moveButtonsField.classList.add('wheelstack-buttons');
-  moveButtonsField.id = 'moveActionsField';
-  const moveInsideButton = document.createElement('button');
-  moveInsideButton.classList.add('btn', 'btn-dark', 'd-none', 'w-100');
-  moveInsideButton.id = 'moveInsideButton';
-  moveInsideButton.innerHTML = 'Переместить';
-  moveButtonsField.appendChild(moveInsideButton);
-  // - MOVE INSIDE BUTTON -
-  // + MOVE OUTSIDE BUTTON +
-  const moveOutsideButton = document.createElement('button');
-  moveOutsideButton.classList.add('btn', 'btn-light', 'd-none', 'w-100');
-  moveOutsideButton.id = 'moveOutsideButton';
-  moveOutsideButton.innerHTML = 'Выгрузить';
-  moveButtonsField.appendChild(moveOutsideButton);
-  // - MOVE OUTSIDE BUTTON -
-  // + CANCEL MOVE SELECT BUTTON +
-  const cancelMoveSelectButton = document.createElement('button');
-  cancelMoveSelectButton.classList.add('btn', 'btn-danger', 'm-2', 'd-none', 'w-75', 'h-75');
-  cancelMoveSelectButton.id = 'cancelMoveSelectButton';
-  cancelMoveSelectButton.innerHTML = 'Отменить выбор';
-  moveButtonsField.appendChild(cancelMoveSelectButton);
-  // - CANCEL MOVE SELECT BUTTON -
-  // `firstStateShow` <- first button to activate
-  // `selectActiveSHow` <- cancel of move selection
-  const firstStateShow = new Set([
-    moveInsideButton, moveOutsideButton
-  ]);
-  const selectActiveShow = new Set([
-    cancelMoveSelectButton
-  ]);
-  if (moveSelectActive) {
-    showHideElements(selectActiveShow, moveButtonsField);
-  } else {
-    showHideElements(firstStateShow, moveButtonsField);
-  };
-  clearMarks = () => {
-    clearMarkEventHandlers(markEventHandlers, openerElement, [() => showHideElements(firstStateShow, moveButtonsField)]);
-  }
-  // + MOVE INSIDE ACTIONS +
-  moveInsideButton.addEventListener('click', event => {
-    if (moveSelectActive) {
-      return;
+  //  + FIRST MOVE CONTAINER +
+  //  + MOVE INSIDE BUTTON +
+  if (OPERATOR_ROLE !== activeUserRole) {
+    const moveButtonsField = document.createElement('div');
+    if (wheelstackData['blocked']) {
+      moveButtonsField.classList.add('d-none');
     }
-    showHideElements(selectActiveShow, moveButtonsField);
-    openerElement.classList.add('active-move-select')
-    
-    const markMovePossible = (placement) => {
-      moveSelectActive = true;
-      const emptyCells = placement.element.querySelectorAll('.placement-cell-empty:not(.blocked):not(.move-possible)');
-      if (0 === emptyCells.length && moveSelectActive) {
-        const markedCells = placement.element.querySelectorAll('.placement-cell.move-possible');
-        // NO new empty to mark, but we're still having some we can use.
-        if (0 !== markedCells.length) {
-          return;
-        }
-        const emptyMessage = BASIC_INFO_MESSAGE_WARNING;
-        emptyMessage.message = 'В приямке нет свободных ячеек';
-        flashMessage.show(emptyMessage);
-        clearMarks();
+    selectRelated.push(moveButtonsField);
+    moveButtonsField.classList.add('wheelstack-buttons');
+    moveButtonsField.id = 'moveActionsField';
+    const moveInsideButton = document.createElement('button');
+    moveInsideButton.classList.add('btn', 'btn-dark', 'd-none', 'w-100');
+    moveInsideButton.id = 'moveInsideButton';
+    moveInsideButton.innerHTML = 'Переместить';
+    moveButtonsField.appendChild(moveInsideButton);
+    // - MOVE INSIDE BUTTON -
+    // + MOVE OUTSIDE BUTTON +
+    const moveOutsideButton = document.createElement('button');
+    moveOutsideButton.classList.add('btn', 'btn-light', 'd-none', 'w-100');
+    moveOutsideButton.id = 'moveOutsideButton';
+    moveOutsideButton.innerHTML = 'Выгрузить';
+    moveButtonsField.appendChild(moveOutsideButton);
+    // - MOVE OUTSIDE BUTTON -
+    // + CANCEL MOVE SELECT BUTTON +
+    const cancelMoveSelectButton = document.createElement('button');
+    cancelMoveSelectButton.classList.add('btn', 'btn-danger', 'm-2', 'd-none', 'w-75', 'h-75');
+    cancelMoveSelectButton.id = 'cancelMoveSelectButton';
+    cancelMoveSelectButton.innerHTML = 'Отменить выбор';
+    moveButtonsField.appendChild(cancelMoveSelectButton);
+    // - CANCEL MOVE SELECT BUTTON -
+    // `firstStateShow` <- first button to activate
+    // `selectActiveSHow` <- cancel of move selection
+    const firstStateShow = new Set([
+      moveInsideButton, moveOutsideButton
+    ]);
+    const selectActiveShow = new Set([
+      cancelMoveSelectButton
+    ]);
+    if (moveSelectActive) {
+      showHideElements(selectActiveShow, moveButtonsField);
+    } else {
+      showHideElements(firstStateShow, moveButtonsField);
+    };
+    clearMarks = () => {
+      clearMarkEventHandlers(markEventHandlers, openerElement, [() => showHideElements(firstStateShow, moveButtonsField)]);
+    }
+    // + MOVE INSIDE ACTIONS +
+    moveInsideButton.addEventListener('click', event => {
+      if (moveSelectActive) {
         return;
       }
-      const createMoveOrder = (element) => {
-        return (event) => {
-          if (element.classList.contains('move-possible') && moveSelectActive) {
-            let [destinationRow, destinationCol ] = element.id.split('|');;
-            const destinationData = {
-              'destinationId': placement.placementId,
-              'destinationType': placement.placementType,
-              'destinationRow': destinationRow,
-              'destinationCol': destinationCol,
-            }
-            createOrderMoveWholestackFromBaseGrid(wheelstackData, destinationData);
-            clearMarks();
+      showHideElements(selectActiveShow, moveButtonsField);
+      openerElement.classList.add('active-move-select')
+      
+      const markMovePossible = (placement) => {
+        moveSelectActive = true;
+        const emptyCells = placement.element.querySelectorAll('.placement-cell-empty:not(.blocked):not(.move-possible)');
+        if (0 === emptyCells.length && moveSelectActive) {
+          const markedCells = placement.element.querySelectorAll('.placement-cell.move-possible');
+          // NO new empty to mark, but we're still having some we can use.
+          if (0 !== markedCells.length) {
+            return;
           }
-        }
-      }
-
-      emptyCells.forEach(element => {
-        if (element.classList.contains('move-possible')) {
+          const emptyMessage = BASIC_INFO_MESSAGE_WARNING;
+          emptyMessage.message = 'В приямке нет свободных ячеек';
+          flashMessage.show(emptyMessage);
+          clearMarks();
           return;
         }
-        const moveOrderHandler = createMoveOrder(element);
-        element.classList.add('move-possible');
-        markEventHandlers.set(
-          element, {
-            'click': moveOrderHandler
-          });
-        element.addEventListener('click', moveOrderHandler);
-      })
-    };
+        const createMoveOrder = (element) => {
+          return (event) => {
+            if (element.classList.contains('move-possible') && moveSelectActive) {
+              let [destinationRow, destinationCol ] = element.id.split('|');;
+              const destinationData = {
+                'destinationId': placement.placementId,
+                'destinationType': placement.placementType,
+                'destinationRow': destinationRow,
+                'destinationCol': destinationCol,
+              }
+              createOrderMoveWholestackFromBaseGrid(wheelstackData, destinationData);
+              clearMarks();
+            }
+          }
+        }
 
-    moveMarkUpdateInterval = setInterval( () => {
-      markMovePossible(placement);
-      const openerWheelstackId = openerElement.getAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID);
-      // SAME for closing menu
-      const openerBlockingOrder = openerElement.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER);
-      if (wheelstackId !== openerWheelstackId || openerBlockingOrder) {
+        emptyCells.forEach(element => {
+          if (element.classList.contains('move-possible')) {
+            return;
+          }
+          const moveOrderHandler = createMoveOrder(element);
+          element.classList.add('move-possible');
+          markEventHandlers.set(
+            element, {
+              'click': moveOrderHandler
+            });
+          element.addEventListener('click', moveOrderHandler);
+        })
+      };
+
+      moveMarkUpdateInterval = setInterval( () => {
+        markMovePossible(placement);
+        const openerWheelstackId = openerElement.getAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID);
+        // SAME for closing menu
+        const openerBlockingOrder = openerElement.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER);
+        if (wheelstackId !== openerWheelstackId || openerBlockingOrder) {
+          clearMarks();
+        }
+      }, 100);
+      // cancelMoveSelect
+      let lastTapTimeMoveSelect = 0;
+      const cancelDblClickTouchHandler = (event) => {
+        const currentTime = new Date().getTime();
+        const tapInterval = currentTime - lastTapTimeMoveSelect;
+        if (tapInterval < 275 && tapInterval > 0) {
+          clearMarks();
+        }
+        lastTapTimeMoveSelect = currentTime;
+      };
+      const cancelDblClickHandler = (event) => {
         clearMarks();
-      }
-    }, 100);
-    // cancelMoveSelect
-    let lastTapTimeMoveSelect = 0;
-    const cancelDblClickTouchHandler = (event) => {
-      const currentTime = new Date().getTime();
-      const tapInterval = currentTime - lastTapTimeMoveSelect;
-      if (tapInterval < 275 && tapInterval > 0) {
-        clearMarks();
-      }
-      lastTapTimeMoveSelect = currentTime;
-    };
-    const cancelDblClickHandler = (event) => {
+      };
+      markEventHandlers.set(
+        document, {
+          'touchstart': cancelDblClickTouchHandler,
+          'dblclick': cancelDblClickHandler,
+        });
+      document.addEventListener('touchstart', cancelDblClickTouchHandler);
+      document.addEventListener('dblclick', cancelDblClickHandler);
+    });
+    // - MOVE INSIDE ACTIONS -
+    // + CANCEL MOVE SELECT ACTIONS +
+    cancelMoveSelectButton.addEventListener('click', event => {
       clearMarks();
-    };
-    markEventHandlers.set(
-      document, {
-        'touchstart': cancelDblClickTouchHandler,
-        'dblclick': cancelDblClickHandler,
-      });
-    document.addEventListener('touchstart', cancelDblClickTouchHandler);
-    document.addEventListener('dblclick', cancelDblClickHandler);
-  });
-  // - MOVE INSIDE ACTIONS -
-  // + CANCEL MOVE SELECT ACTIONS +
-  cancelMoveSelectButton.addEventListener('click', event => {
-    clearMarks();
-  });
-  // - CANCEL MOVE SELECT ACTIONS -
-  // - FIRST MOVE CONTAINER -
-  menu.appendChild(moveButtonsField);
-  // + MOVE OUTSIDE BUTTONS +
-  //  + RETURN SELECT VIEW +
-  const moveOutsideReturnButton = document.createElement('button');
-  moveOutsideReturnButton.id = 'returnView';
-  moveOutsideReturnButton.classList.add('d-none', 'return-view', 'btn', 'btn-light');
-  const moveOutsideButtonImg = document.createElement('img');
-  moveOutsideButtonImg.src = '/static/images/cancelBut.png';
-  moveOutsideButtonImg.alt = 'Вернуть выбор способа переноса';
-  moveOutsideReturnButton.appendChild(moveOutsideButtonImg);
-  moveOutsideReturnButton.addEventListener('click', event => {
-    showHideElements(firstStateShow, moveButtonsField);
-  })
-  moveButtonsField.appendChild(moveOutsideReturnButton);
-  //  + OUTSIDE ELEMENT SELECTOR +
-  const moveOutsideSelector = document.createElement('select');
-  moveOutsideSelector.classList.add('d-none', 'form-select', 'centered', 'w-50', 'm-2', 'fs-5', 'h-75', 'mt-4');
-  for (let extraEl of Object.keys(placement.placementExtraRows)) {
-    if ( PLACEMENT_TYPES.LABORATORY === extraEl) {
-      continue;
+    });
+    // - CANCEL MOVE SELECT ACTIONS -
+    // - FIRST MOVE CONTAINER -
+    menu.appendChild(moveButtonsField);
+    // + MOVE OUTSIDE BUTTONS +
+    //  + RETURN SELECT VIEW +
+    const moveOutsideReturnButton = document.createElement('button');
+    moveOutsideReturnButton.id = 'returnView';
+    moveOutsideReturnButton.classList.add('d-none', 'return-view', 'btn', 'btn-light');
+    const moveOutsideButtonImg = document.createElement('img');
+    moveOutsideButtonImg.src = '/static/images/cancelBut.png';
+    moveOutsideButtonImg.alt = 'Вернуть выбор способа переноса';
+    moveOutsideReturnButton.appendChild(moveOutsideButtonImg);
+    moveOutsideReturnButton.addEventListener('click', event => {
+      showHideElements(firstStateShow, moveButtonsField);
+    })
+    moveButtonsField.appendChild(moveOutsideReturnButton);
+    //  + OUTSIDE ELEMENT SELECTOR +
+    const moveOutsideSelector = document.createElement('select');
+    moveOutsideSelector.classList.add('d-none', 'form-select', 'centered', 'w-50', 'm-2', 'fs-5', 'h-75', 'mt-4');
+    for (let extraEl of Object.keys(placement.placementExtraRows)) {
+      if ( PLACEMENT_TYPES.LABORATORY === extraEl) {
+        continue;
+      }
+      const newOption = await createOption(extraEl, extraEl);
+      moveOutsideSelector.appendChild(newOption);
     }
-    const newOption = await createOption(extraEl, extraEl);
-    moveOutsideSelector.appendChild(newOption);
+    moveButtonsField.appendChild(moveOutsideSelector);
+    //  - OUTSIDE ELEMENT SELECTOR -
+    //  + OUTSIDE BATCH CHECKBOX +
+    const batchCheckbox = document.createElement('input');
+    batchCheckbox.id = 'selectWholeBatch';
+    batchCheckbox.type = 'checkbox';
+    batchCheckbox.classList.add('d-none', 'batch-checkbox', );
+    moveButtonsField.appendChild(batchCheckbox);
+    const batchCheckboxLabel = document.createElement('label');
+    batchCheckboxLabel.classList.add('d-none', 'text-muted', 'small', 'batch-checkbox-label')
+    batchCheckboxLabel.innerHTML = 'Выбор всей партии';
+    moveButtonsField.appendChild(batchCheckboxLabel);
+    //  - OUTSIDE BATCH CHECKBOX -
+    const moveOutsideButtonsContainer = document.createElement('div');
+    moveOutsideButtonsContainer.classList.add('d-none', 'w-100', 'h-100', 'd-flex', 'flex-row', 'align-items-center', 'gap-2');
+    //  + OUTSIDE PROCESS BUTTON +
+    const moveOutsideMoveProcess = document.createElement('button');
+    moveOutsideMoveProcess.classList.add('btn', 'process', 'fs-6', 'w-50', 'h-100', 'p-1', 'm-1');
+    moveOutsideMoveProcess.innerHTML = 'Обработка';
+    const creationHandler = async (process) => {
+      const destElement = moveOutsideSelector.value;
+      const destId = placement.placementId;
+      if (batchCheckbox && batchCheckbox.checked) {
+        await createProRejOrderBulk(
+          wheelstackData, destElement, process, destId, false
+        );
+      } else {
+        await createProRejOrderGrid(
+          wheelstackData, destElement, process, destId
+        );
+      }
+    }
+    moveOutsideMoveProcess.addEventListener('click', event => {
+      creationHandler(true)
+    })
+    moveOutsideButtonsContainer.appendChild(moveOutsideMoveProcess);
+    const moveOutsideMoveReject = document.createElement('button');
+    moveOutsideMoveReject.classList.add('btn', 'reject', 'fs-6', 'w-50', 'h-100', 'p-1', 'm-1');
+    moveOutsideMoveReject.innerHTML = 'Отказ';
+    moveOutsideMoveReject.addEventListener('click', event => {
+      creationHandler(false)
+    })
+    moveOutsideButtonsContainer.appendChild(moveOutsideMoveReject);
+    //  - OUTSIDE PROCESS BUTTON -
+    moveButtonsField.appendChild(moveOutsideButtonsContainer);
+    const moveOutsideActiveShow = new Set([
+      moveOutsideReturnButton, moveOutsideSelector,
+      moveOutsideButtonsContainer, batchCheckbox, batchCheckboxLabel
+    ]);
+    moveOutsideButton.addEventListener('click', event => {
+      if (PLACEMENT_TYPES.GRID !== sourcePlacement.placementType) {
+        const showMes = BASIC_INFO_MESSAGE_WARNING;
+        showMes.message = '<b>Выгрузка с платформ запрещена</b><br>Сначало перенесите стопу в <b>Приямок</b>';
+        showMes.duration = 3000;
+        flashMessage.show(showMes);
+        return;
+      }
+      showHideElements(moveOutsideActiveShow, moveButtonsField);
+    });
+    // - MOVE OUTSIDE BUTTONS -
+    // - MOVE FIELD -
   }
-  moveButtonsField.appendChild(moveOutsideSelector);
-  //  - OUTSIDE ELEMENT SELECTOR -
-  //  + OUTSIDE BATCH CHECKBOX +
-  const batchCheckbox = document.createElement('input');
-  batchCheckbox.id = 'selectWholeBatch';
-  batchCheckbox.type = 'checkbox';
-  batchCheckbox.classList.add('d-none', 'batch-checkbox', );
-  moveButtonsField.appendChild(batchCheckbox);
-  const batchCheckboxLabel = document.createElement('label');
-  batchCheckboxLabel.classList.add('d-none', 'text-muted', 'small', 'batch-checkbox-label')
-  batchCheckboxLabel.innerHTML = 'Выбор всей партии';
-  moveButtonsField.appendChild(batchCheckboxLabel);
-  //  - OUTSIDE BATCH CHECKBOX -
-  const moveOutsideButtonsContainer = document.createElement('div');
-  moveOutsideButtonsContainer.classList.add('d-none', 'w-100', 'h-100', 'd-flex', 'flex-row', 'align-items-center', 'gap-2');
-  //  + OUTSIDE PROCESS BUTTON +
-  const moveOutsideMoveProcess = document.createElement('button');
-  moveOutsideMoveProcess.classList.add('btn', 'process', 'fs-6', 'w-50', 'h-100', 'p-1', 'm-1');
-  moveOutsideMoveProcess.innerHTML = 'Обработка';
-  const creationHandler = async (process) => {
-    const destElement = moveOutsideSelector.value;
-    const destId = placement.placementId;
-    if (batchCheckbox && batchCheckbox.checked) {
-      await createProRejOrderBulk(
-        wheelstackData, destElement, process, destId, false
-      );
-    } else {
-      await createProRejOrderGrid(
-        wheelstackData, destElement, process, destId
-      );
-    }
-  }
-  moveOutsideMoveProcess.addEventListener('click', event => {
-    creationHandler(true)
-  })
-  moveOutsideButtonsContainer.appendChild(moveOutsideMoveProcess);
-  const moveOutsideMoveReject = document.createElement('button');
-  moveOutsideMoveReject.classList.add('btn', 'reject', 'fs-6', 'w-50', 'h-100', 'p-1', 'm-1');
-  moveOutsideMoveReject.innerHTML = 'Отказ';
-  moveOutsideMoveReject.addEventListener('click', event => {
-    creationHandler(false)
-  })
-  moveOutsideButtonsContainer.appendChild(moveOutsideMoveReject);
-  //  - OUTSIDE PROCESS BUTTON -
-  moveButtonsField.appendChild(moveOutsideButtonsContainer);
-  const moveOutsideActiveShow = new Set([
-    moveOutsideReturnButton, moveOutsideSelector,
-    moveOutsideButtonsContainer, batchCheckbox, batchCheckboxLabel
-  ]);
-  moveOutsideButton.addEventListener('click', event => {
-    if (PLACEMENT_TYPES.GRID !== sourcePlacement.placementType) {
-      const showMes = BASIC_INFO_MESSAGE_WARNING;
-      showMes.message = '<b>Выгрузка с платформ запрещена</b><br>Сначало перенесите стопу в <b>Приямок</b>';
-      showMes.duration = 3000;
-      flashMessage.show(showMes);
-      return;
-    }
-    showHideElements(moveOutsideActiveShow, moveButtonsField);
-  });
-  // - MOVE OUTSIDE BUTTONS -
-  // - MOVE FIELD -
-  // }
   // + ORDER BLOCK FIELD +
   // TODO: refactor this cringe fiesta with `if`, but for now all I care is to set updating.
   let orderText = 'empty'
@@ -563,7 +583,9 @@ export const createWheelstackMenu = async (
     let batchMenu = await createBatchMenu(
         event, batchRecord, batchData, markers['batchMarker'], dataBanks['batches'] 
     )
-    assignBatchExpandableButtons(batchMenu);
+    if (OPERATOR_ROLE !== activeUserRole) {
+      assignBatchExpandableButtons(batchMenu);
+    }
     menus['batchMenu'] = batchMenu
   })
   menu.appendChild(batchRecord);
@@ -587,22 +609,18 @@ export const createWheelstackMenu = async (
     wheelsList.appendChild(wheelRecord);
     if (!wheelData || blockingOrderId) {
       continue;
-    }
-    const expElement = wheelRecordAssignExpandable(wheelRecord);
-    labMoveHandler(expElement, wheelstackData, wheelObjectId, placement.placementId);
-    wheelsList.appendChild(expElement);
-    wheelRecord.addEventListener('click', event => {
-      changeExpandableStatus([wheelRecord, expElement]);
-    })
+    };
+    if (PLACEMENT_TYPES.BASE_PLATFORM !== sourcePlacement.placementType && OPERATOR_ROLE !== activeUserRole) {
+      const expElement = wheelRecordAssignExpandable(wheelRecord);
+      wheelRecord.addEventListener('click', event => {
+        changeExpandableStatus([wheelRecord, expElement]);
+      });
+      labMoveHandler(expElement, wheelstackData, wheelObjectId, placement.placementId);
+      wheelsList.appendChild(expElement);
+    };
   }
   menu.appendChild(wheelsList);
   // - WHEELS -
-  
-  // EXTRA CLOSERS WHEN UPDATING
-  // forceMenuClose(null, true);
-  // clearMarks();
-  // ---
-  
   assignCloser(openerElement, menu, menus);
   document.body.appendChild(menu);
   updateMenuPosition(event, menu);
@@ -613,6 +631,7 @@ export const createWheelstackMenu = async (
       menu,
       dataBanks,
       placement,
+      sourcePlacement,
     );  
   }, WHEELSTACK_MENU_UPDATE_INTERVAL);
   return menu;
@@ -636,11 +655,9 @@ const switchMoveBlocked = (blocked = false) => {
   });
 }
 
-const updateMenu = async (openerElement, wheelstackMenu, dataBanks, placement) => {
-  // console.log('updatingMenu');
-  // console.log(wheelstackMenu);
-  // console.log(dataBanks);
-  // console.log('OPENER', openerElement.id);
+const updateMenu = async (
+  openerElement, wheelstackMenu, dataBanks, placement, sourcePlacement
+) => {
   const openerWheelstackId = openerElement.getAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID);
   if (!openerElement || !openerElement.isConnected || openerWheelstackId !== wheelstackMenu.id) {
     forceMenuClose(null, true);
@@ -654,7 +671,10 @@ const updateMenu = async (openerElement, wheelstackMenu, dataBanks, placement) =
     showMes.duration = 3000;
     flashMessage.show(showMes);
     return;
-  }
+  };
+  // If it's blocked, only option we're going to have is to show what's blocking it. And which wheel is blocked.
+  // When block will be lifted, we're going to reset wheels and show new data.
+  // So, all we care is to delete expandable and show what's blocked.
   if (wheelstackData['blocked']) {
     const newBlocked = wheelstackData['lastOrder'];
     if (blockingOrderId && newBlocked === blockingOrderId && blockingOrderData) {
@@ -690,6 +710,7 @@ const updateMenu = async (openerElement, wheelstackMenu, dataBanks, placement) =
     const newBlockTitle = 'Ожидает выполнения заказа';
     updateInfoRecord(blockOrderField, null, newBlockText, newBlockTitle, blockingOrderId);
     switchMoveBlocked(true);
+  // `wheelstack` not blocked, but we still have previoud `id` set == reset everything
   } else if (blockingOrderId) {
     blockingOrderId = null;
     blockingOrderData = null;
@@ -701,33 +722,34 @@ const updateMenu = async (openerElement, wheelstackMenu, dataBanks, placement) =
     const wheelsContainer = wheelstackMenu.querySelector('#wheelsField');
     const wheels = wheelsContainer.querySelectorAll(':not(.expandable)');
     // This one just appends `expandable` after itself.
-    const lastWheelElement = wheels[wheels.length - 1];
-    lastWheelElement.classList.remove('blocked');
-    if (wheelstackData['wheels'][0] === lastWheelElement.id) {
-      let newExpandable = wheelRecordAssignExpandable(lastWheelElement);
-      wheelsContainer.appendChild(newExpandable);
-      labMoveHandler(newExpandable, wheelstackData, lastWheelElement.id, placement.placementId);
-      lastWheelElement.addEventListener('click', event => {
-        changeExpandableStatus([lastWheelElement, newExpandable]);
-      })
-    } else {
-      clearWheelRecord(lastWheelElement);
-    };
-    for (let index = wheels.length - 2; index >= 0; index -= 1) {
-      const curWheelElId = wheels[index].id;
-      const stillExists = wheelstackData['wheels'][index - 5];
-      wheels[index].classList.remove('blocked');
-      if (stillExists === curWheelElId) {
-        newExpandable = wheelRecordAssignExpandable(wheels[index]);
-        labMoveHandler(newExpandable, wheelstackData, curWheelElId, placement.placementId);
-        wheelsContainer.insertBefore(newExpandable, wheels[index + 1]);
-        wheels[index].addEventListener('click', event => {
-          changeExpandableStatus([wheels[index], newExpandable]);
-        })
-      } else {
-        clearWheelRecord(wheels[index]);
+    // + CLEAR WHEELS +
+    for (let index = 0; index <= wheels.length - 1; index += 1) {
+      const wheelElement = wheels[5 - index];
+      const newWheelId = wheelstackData['wheels'][index];
+      wheelElement.classList.remove('blocked');
+      if (!newWheelId) {
+        clearWheelRecord(wheelElement);
+        continue;
       }
-    }
+      if (sourcePlacement.placementType !== PLACEMENT_TYPES.BASE_PLATFORM && OPERATOR_ROLE !== activeUserRole) {
+        const newExpandable = wheelRecordAssignExpandable(wheelElement);
+        wheelElement.addEventListener('click', event => {
+          changeExpandableStatus([wheelElement, newExpandable]);
+        });
+        // Last wheels, appends as extra element.
+        if (index === 0) {
+          wheelsContainer.appendChild(newExpandable);
+        } else {
+          wheelsContainer.insertBefore(newExpandable, wheels[(5 - index) + 1]);
+        };
+        labMoveHandler(newExpandable, wheelstackData, newWheelId, placement.placementId);
+      };
+      if (wheelElement.id !== newWheelId) {
+        const wheelData = dataBanks['wheels'][newWheelId];
+        updateWheelRecord(wheelElement, wheelData, false);
+      };
+    };
+    // - CLEAR WHEELS -
     switchMoveBlocked(false);
   }
 }

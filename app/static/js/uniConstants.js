@@ -138,7 +138,15 @@ export const AUTH_COOKIE_INVALID ='auth-cookie-invalid';
 export const USER_ROLE_COOKIE_NAME = 'user-role';
 export const USER_ROLE_COOKIE_BASIC_EXPIRE = 3 * 60;
 export const USER_ROLE_COOKIE_UPDATE_INTERVAL = 1 * 5 * 1000;
-export const BASIC_COOKIES = [AUTH_COOKIE_NAME, USER_ROLE_COOKIE_NAME];
+// chosen-grid-platform cookie
+// stored as `{active-user}-saved-{type} = placementId;presetId`
+export const SAVED_GRID_COOKIE_NAME = 'saved-grid';
+export const SAVED_PLATFORM_COOKIE_NAME = 'saved-platform';
+export const ACTIVE_USERNAME_COOKIE_NAME = 'active-user';
+
+export const BASIC_COOKIES = [
+    AUTH_COOKIE_NAME, USER_ROLE_COOKIE_NAME, ACTIVE_USERNAME_COOKIE_NAME
+];
 
 export const MANAGER_ROLE = 'manager';
 export const ADMIN_ROLE = 'admin';
@@ -258,14 +266,34 @@ export const NAV_BUTTONS = {
 };
 
 // GRID PAGE UPDATE INTERVALS
-export const GRID_PLACEMENT_INTERVAL = 300;
-export const UPDATE_BATCHES_DATA_INTERVAL = 300;
-export const UPDATE_DATA_BANKS_INTERVAL = 200;
-export const UPDATE_ORDERS_DATA_INTERVAL = 200;
-export const WHEELSTACK_MENU_UPDATE_INTERVAL = 30;
+export const GRID_PLACEMENT_INTERVAL = 250;
+export const UPDATE_BATCHES_DATA_INTERVAL = 250;
+export const UPDATE_DATA_BANKS_INTERVAL = 150;
+export const UPDATE_ORDERS_DATA_INTERVAL = 150;
+export const WHEELSTACK_MENU_UPDATE_INTERVAL = 20;
+export const ORDERS_TABLE_PRUNE_INTERVAL = 100;
 
+// CONST TIMERS 
+export const ORDERS_TABLE_ELEMENT_REMOVE_INDICATOR = 1600;
 // SOME CONSTANTS
 export const ORDERS_TABLE_BREAKSIZE = 1000;
+
+// + SEARCHERS SETTINGS +
+export const BASIC_BATCH_SEARCHER_OPTIONS = {
+    threshold: 0,
+    distance: 0,
+    ignoreLocation: true,
+    minMatchCharLength: 1, 
+}
+
+export const BASIC_WHEELS_SEARCHER_OPTION = {
+    threshold: 0,  // lower == stricter
+    distance: 0,     // distance between matches
+    ignoreLocation: true,  // true <- dont care about match place | false <- prioritize left-most symbols
+    minMatchCharLength: 1,
+}
+// - SEARCHERS SETTINGS -
+
 
 // FLASH MESSAGE COLORS
 export const BASIC_INFO_MESSAGE_PRESET = {
@@ -285,3 +313,5 @@ export const BASIC_INFO_MESSAGE_WARNING = {
     fontFamily: 'Arial, sans-serif', // Default font family
     duration: 1500              // Duration in milliseconds
 }
+
+

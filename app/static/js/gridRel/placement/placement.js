@@ -65,13 +65,14 @@ export default class Placement{
                         Currently used presetId == ${this.presetId}.
                         Rebuild Placement according to a new presetId or use correct placement Data`);
     }
+    // console.log('NEW_UPDATE_DATA', newPlacementData);
     if (this.placementData
         && this.placementId === newPlacementData['_id']
          && this.placementData['lastChange'] >= newPlacementData['lastChange']) {
-        console.log('NOT CHANGED PLACEMENT');
+        // console.log('NOT CHANGED PLACEMENT');
         return;
     }
-    console.log('UPDATING PLACEMENT');
+    // console.log('UPDATING PLACEMENT');
     if (this.placementId !== newPlacementData['_id']) {
       this.placementId = newPlacementData['_id'];
       this.element.id = this.placementId;

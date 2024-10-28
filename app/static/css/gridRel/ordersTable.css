@@ -13,7 +13,7 @@
   justify-content: center;
   vertical-align: middle;
   font-weight: 650;
-  font-size: 1.1em;
+  font-size: 1em;
   z-index: 1000;
   color: #fff;
   text-transform: uppercase;
@@ -99,6 +99,9 @@
 }
 
 @media (max-height: 1000px) {
+  .orders-table thead th {
+    font-size: 0.8em;
+  }
   .orders-table tbody td {
     font-size: 0.6em;
   }  

@@ -45,11 +45,11 @@
 }
 
 .wheelstack-menu li.blocked {
-  background-color: rgb(245, 100, 100);
+  background-color: rgb(245, 100, 100) !important;
 }
 
 .wheelstack-menu li.blocked:hover {
-  background-color: rgb(227, 166, 151);
+  background-color: rgb(227, 166, 151) !important;
 }
 
 .wheelstack-menu li:hover {

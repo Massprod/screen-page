@@ -1,5 +1,12 @@
-import { BACK_URL, PLACEMENT_TYPES } from "../../uniConstants.js";
+import {
+  ACTIVE_USERNAME_COOKIE_NAME,
+  BACK_URL,
+  PLACEMENT_TYPES,
+  SAVED_GRID_COOKIE_NAME,
+  SAVED_PLATFORM_COOKIE_NAME,
+} from "../../uniConstants.js";
 import { getRequest } from "../../utility/basicRequests.js";
+import { setCookie, getCookie } from "../../utility/roleCookies.js";
 
 
 
@@ -26,14 +33,14 @@ export const getPlacementData = async (placementInd, placementType, useName = fa
 
 export const selectPlacementButtonAction = async (
   selectorElement, placement, showElements,
-  hideElements, viewState, viewButton, useIdentifiers
+  hideElements, viewState, viewButton, useIdentifiers, placementNameSpan = null,
 ) => {
   if (!selectorElement.value) {
       flashMessage.show({
           'message': 'Выберите расположение',
       })
       return viewState;
-  }
+  };
   const optionValue = JSON.parse(selectorElement.value);
   let placementId = null;
   let presetId = null;
@@ -45,6 +52,21 @@ export const selectPlacementButtonAction = async (
     placementId = optionValue['_id'];
     presetId = optionValue['presetId'];
   }
+  // + PLACEMENT NAME +
+  if (placementNameSpan) {
+    let placementName = selectorElement.querySelector(`#${CSS.escape(placementId)}`);
+    placementNameSpan.innerHTML = placementName.textContent;
+  }
+  // - PLACEMENT NAME -
+  // + SAVE PLACEMENT COOKIE +
+  const placementCookie = `${placementId};${presetId}`;
+  const activeUser = await getCookie(ACTIVE_USERNAME_COOKIE_NAME);
+  if (PLACEMENT_TYPES.GRID === placement.placementType) {
+    setCookie(`${activeUser}-${SAVED_GRID_COOKIE_NAME}`, placementCookie);
+  } else if (PLACEMENT_TYPES.BASE_PLATFORM === placement.placementType) {
+    setCookie(`${activeUser}-${SAVED_PLATFORM_COOKIE_NAME}`, placementCookie);
+  };
+  // - SAVE PLACEMENT COOKIE -
   await preparePlacement(presetId, placement, useIdentifiers);
   await switchView(hideElements, showElements);
   viewButton.classList.remove('hidden');
@@ -59,6 +81,8 @@ export const preparePlacement = async (presetId, placement, useIdentifiers) => {
 }
 
 export const switchView = async (activeElements, inActiveElements) => {
+  console.log(activeElements);
+  console.log(inActiveElements);
   activeElements.forEach( element => {
       element.classList.add('hidden');
   })

@@ -1,5 +1,7 @@
 import { convertISOToCustomFormat } from "../../utility/convertToIso.js";
 import updateMenuPosition from "../../utility/adjustContainerPosition.js";
+import { OPERATOR_ROLE, USER_ROLE_COOKIE_NAME } from "../../uniConstants.js";
+import { getCookie } from "../../utility/roleCookies.js";
 
 
 const assignCloser = async (openerElement, menuElement) => {
@@ -103,7 +105,8 @@ export const createBatchMenu = async (
 ) => {
   if (!batchData) {
     return;
-  }
+  };
+  var activeUserRole = await getCookie(USER_ROLE_COOKIE_NAME);
   const menu = document.createElement('div');
   menu.id = batchData['batchNumber'];
   menu.classList.add('batch-menu');
@@ -117,7 +120,9 @@ export const createBatchMenu = async (
     'attributes': {
       'data-batch-number': batchNumber,
     },
-    'classes': ['expand-ind'],
+  };
+  if (OPERATOR_ROLE !== activeUserRole) {
+    idData['classes'] = ['expand-ind'];
   };
   const batchIdRecord = await createRecord(idData);
   batchIdRecord.addEventListener('click', event => {
@@ -132,17 +137,19 @@ export const createBatchMenu = async (
   batchRecords.appendChild(batchIdRecord);
   // - ID FIELD -
   // + EXPANDABLE MOVE +
-  const expandableRecord = await createMoveExpandable();
-  batchRecords.appendChild(expandableRecord);
-  batchIdRecord.addEventListener('click', event => {
-    if (batchIdRecord.classList.contains('open')) {
-      batchIdRecord.classList.remove('open');
-      expandableRecord.classList.remove('open');
-    } else {
-      batchIdRecord.classList.add('open');
-      expandableRecord.classList.add('open');
-    }
-  })
+  if (OPERATOR_ROLE !== activeUserRole) {
+    const expandableRecord = await createMoveExpandable();
+    batchRecords.appendChild(expandableRecord);
+    batchIdRecord.addEventListener('click', event => {
+      if (batchIdRecord.classList.contains('open')) {
+        batchIdRecord.classList.remove('open');
+        expandableRecord.classList.remove('open');
+      } else {
+        batchIdRecord.classList.add('open');
+        expandableRecord.classList.add('open');
+      }
+    });
+  };
   // - EXPANDABLE MOVE -
   // + STATUS FIELD +
   let status = '';

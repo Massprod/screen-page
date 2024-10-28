@@ -7,13 +7,12 @@ import {
 } from "../../utility/roleCookies.js";
 import {
   BASIC_INFO_MESSAGE_PRESET,
-  ORDERS_TABLE_BREAKSIZE,
   NAV_BUTTONS,
   AUTH_COOKIE_NAME,
   loginPage,
   RESTRICTED_TO_THIS_ROLE,
   USER_ROLE_COOKIE_NAME,
-  HISTORY_PAGE_ROLES,
+  GRID_PAGE_ROLES,
   USER_ROLE_COOKIE_UPDATE_INTERVAL,
   BACK_URL,
   GRID_PLACEMENT_INTERVAL,
@@ -24,6 +23,15 @@ import {
   UPDATE_ORDERS_DATA_INTERVAL,
   BASIC_ATTRIBUTES,
   BATCH_STATUS_CLASSES,
+  BASIC_BATCH_SEARCHER_OPTIONS,
+  BASIC_WHEELS_SEARCHER_OPTION,
+  BASIC_COOKIES,
+  OPERATOR_ROLE,
+  SAVED_GRID_COOKIE_NAME,
+  SAVED_PLATFORM_COOKIE_NAME,
+  ACTIVE_USERNAME_COOKIE_NAME,
+  ORDERS_TABLE_PRUNE_INTERVAL,
+  ORDERS_TABLE_ELEMENT_REMOVE_INDICATOR,
 } from "../../uniConstants.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import { getRequest } from "../../utility/basicRequests.js";
@@ -45,18 +53,19 @@ import FocusMark from "../../utility/focusElement/focusElement.js";
 import { createProRejOrderBulk } from "../../utility/ordersCreation.js";
 import { createOrderMenu } from "../../gridRel/orderMenu/orderMenu.js";
 import { createWheelstackMenu } from "../../gridRel/wheelstackMenu/wheelstackMenu.js";
+import BasicSearcher from "../../utility/search/basicSearcher.js";
 
 
 // + BAD PRESET +
 // ROLE COOKIE
 keepAuthCookieFresh(AUTH_COOKIE_NAME);
 const redirectUrl = `${loginPage}?message=${RESTRICTED_TO_THIS_ROLE}`
-const userRole = await getCookie(USER_ROLE_COOKIE_NAME);
-if (!userRole || !(userRole in HISTORY_PAGE_ROLES)) {
+const activeUserRole = await getCookie(USER_ROLE_COOKIE_NAME);
+if (!activeUserRole || !(activeUserRole in GRID_PAGE_ROLES)) {
     clearRedirect(BASIC_COOKIES, redirectUrl);
 }
 setInterval( async () => {
-    validateRoleCookie(USER_ROLE_COOKIE_NAME, HISTORY_PAGE_ROLES, redirectUrl);    
+    validateRoleCookie(USER_ROLE_COOKIE_NAME, GRID_PAGE_ROLES, redirectUrl);    
 }, USER_ROLE_COOKIE_UPDATE_INTERVAL);
 // ---
 // NAV BUTTON
@@ -66,11 +75,12 @@ const navPosition = {
     right: '3%',
     bottom: '25px',
 }
-const roleNavButtons = NAV_BUTTONS[userRole];
+const roleNavButtons = NAV_BUTTONS[activeUserRole];
 const clearCookies = [USER_ROLE_COOKIE_NAME, AUTH_COOKIE_NAME];
 const navButton = new NavigationButton(
     navPosition, roleNavButtons, clearCookies,
 )
+const activeUser = await getCookie(ACTIVE_USERNAME_COOKIE_NAME);
 // ---
 //  + HOVER COORD +
 const hoverCoord = new CellHoverCoordinate('placement-cell');
@@ -142,14 +152,7 @@ const maintainBatchesData = async (initial = false) => {
     const dataURL = `${BACK_URL.GET_BATCH_DATA}/${batchId}`;    
     const dataResp = await getRequest(dataURL, true, true);
     const batchData = await dataResp.json();
-    if (batchId in _allBatches) {
-      const oldDate = _allBatches[batchId]['laboratoryTestDate'];
-      // if ((oldDate && oldDate < batchData['laboratoryTestDate']) || initial) {
-      //   updateBatchElements(batchData);
-      // }
-      // TODO: redo creation of cells and everything that depends, because it's too much loops.
-      updateBatchElements(batchData);
-    }
+    updateBatchElements(batchData);
     _allBatches[batchId] = batchData;
   })
 }
@@ -230,6 +233,12 @@ const updateBanksFromPlacement = async (placementData, placementType) => {
     platformWheelstacks = allWheelstacks ?? {};
     platformWheels = allWheels ?? {};
   }
+  // console.log('SEARCH_UPDATE');
+  // TODO: fine for now, but we need to wait of all updates on them.
+  setTimeout( () => {
+    updateSearcherData(wheelsSearcher, Object.values(_allWheels), 'wheelId');
+    updateSearcherData(batchSearcher, Object.keys(_allBatches));
+  }, 750);
 }
 // - DATA BANKS -
 
@@ -251,29 +260,29 @@ const gridFullBut = document.getElementById('gridFull');
 //   adjustOrderColumns();
 // })
 
-const adjustOrderColumns = () => {
-  const curWidth = ordersContainer.getBoundingClientRect().width;
-  const ordersTable = ordersContainer.querySelector('#ordersTable');
-  if (ORDERS_TABLE_BREAKSIZE > curWidth) {
-    // BATCH + ID 
-    // const cellsToHide = ordersTable.querySelectorAll(
-    //   'tr td:nth-child(1), tr td:nth-child(2), th:nth-child(1), th:nth-child(2)'
-    // );
+// const adjustOrderColumns = () => {
+//   const curWidth = ordersContainer.getBoundingClientRect().width;
+//   const ordersTable = ordersContainer.querySelector('#ordersTable');
+//   if (ORDERS_TABLE_BREAKSIZE > curWidth) {
+//     // BATCH + ID 
+//     // const cellsToHide = ordersTable.querySelectorAll(
+//     //   'tr td:nth-child(1), tr td:nth-child(2), th:nth-child(1), th:nth-child(2)'
+//     // );
 
-    // TIME
-    const cellsToHide = ordersTable.querySelectorAll(
-      'tr td:nth-child(5), th:nth-child(5)'
-    );
-    cellsToHide.forEach( cell => {
-      cell.classList.add('orders-table-hidden');
-    });
-  } else {
-    const cellsToShow = ordersTable.querySelectorAll('.orders-table-hidden');
-    cellsToShow.forEach( cell => {
-      cell.classList.remove('orders-table-hidden');
-    });
-  }
-}
+//     // TIME
+//     const cellsToHide = ordersTable.querySelectorAll(
+//       'tr td:nth-child(5), th:nth-child(5)'
+//     );
+//     cellsToHide.forEach( cell => {
+//       cell.classList.add('orders-table-hidden');
+//     });
+//   } else {
+//     const cellsToShow = ordersTable.querySelectorAll('.orders-table-hidden');
+//     cellsToShow.forEach( cell => {
+//       cell.classList.remove('orders-table-hidden');
+//     });
+//   }
+// }
 // - ORDERS ADJUSTMENT -
 
 // + VIEW CHANGE +
@@ -293,26 +302,50 @@ const changeButImg = (button, newSrc) => {
 }
 
 // + VIEW BUTTONS CONTAINER +
-const viewSliderChange = (expandClass, sliderButton, container, expandedImage, standardImage) => {
+const viewSliderChange = (
+  expandClass, sliderButton, container,
+  expandedImage, standardImage, showOverflow = false, setWidth = null
+) => {
   if (sliderButton.classList.contains(expandClass)) {
     container.style.width = '0px';
     sliderButton.classList.remove(expandClass);
     changeButImg(sliderButton, standardImage);
+    container.classList.remove('show-hidden');
   } else {
     sliderButton.classList.add(expandClass);
-    container.style.width = `${container.scrollWidth}px`;
+    if (!setWidth) {
+      container.style.width = `${container.scrollWidth}px`;
+    } else {
+      container.style.width = `${setWidth}px`;
+    }
+    if (showOverflow) {
+      container.classList.add('show-hidden');
+    }
     changeButImg(sliderButton, expandedImage);
   }
 }
 
+//  + PAGE VIEW +
 const viewContainer = document.getElementById('viewButtonsContainer');
 const viewButtonsContainer = document.getElementById('viewButtons');
 const viewButtonsSlider = document.getElementById('viewSlider');
 viewButtonsSlider.addEventListener('click', event => {
   viewSliderChange(
     'expanded', viewButtonsSlider, viewButtonsContainer, leftArrow, rightArrow
-  )
+  );
 })
+//  - PAGE VIEW -
+//  + SEARCH INPUTS +
+const searchInputsViewContainer = document.getElementById('searchInputsContainer');
+const searchInputsViewButtonsContainer = document.getElementById('searchInputs');
+const searchInputsViewSlider = document.getElementById('inputsViewSlider');
+searchInputsViewSlider.addEventListener('click', event => {
+  viewSliderChange(
+    'expanded', searchInputsViewSlider, searchInputsViewButtonsContainer,
+    leftArrow, rightArrow, true, 500
+  );
+})
+//  - SEARCH INPUTS -
 // - VIEW BUTTONS CONTAINER -
 
 const setGridFullscreen = (elements) => {
@@ -442,17 +475,15 @@ const updatePlacement = async (placement, newId) => {
       return;
     };
   };
+  // console.log('PLACEMENT CHANGES', placement.placementType);
   // - PING FOR CHANGES - 
   if (PLACEMENT_TYPES.GRID === placementType) {
     dataURL = `${BACK_URL.GET_GRID_STATE}/${newId}?includeWheelstacks=true&includeWheels=true`;
   } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
     dataURL = `${BACK_URL.GET_PLATFORM_STATE}/${newId}?includeWheelstacks=true&includeWheels=true`;
   }
-  const startTime = performance.now();
   const dataResp = await getRequest(dataURL, false, true);
-  // TODO: Error handling
   const newData = await dataResp.json()
-  const endTime = performance.now()
   updateBanksFromPlacement(newData, placementType);
   placement.updatePlacement(newData);
   if (platformSelectActive && PLACEMENT_TYPES.GRID === placement.placementType) {
@@ -480,8 +511,11 @@ const updatePlacement = async (placement, newId) => {
 // - PLACEMENT UPDATE -
 
 // + GRID SELECTION +
-const createOption = async (optionValue, optionName, selected = false) => {
+const createOption = async (optionValue, optionName, selected = false, optionId = null) => {
   const newOption = document.createElement('option');
+  if (optionId) {
+    newOption.id = optionId;
+  }
   newOption.value = optionValue
   newOption.textContent = optionName.charAt(0).toUpperCase() + optionName.slice(1);
   if (selected) {
@@ -521,7 +555,7 @@ const updateAvailGrids = async (container, selectRelated, selector) => {
       '_id': gridData['_id'],
       'presetId': gridData['preset'],
     }
-    const newOption = await createOption(JSON.stringify(optionValue), gridData['name']);
+    const newOption = await createOption(JSON.stringify(optionValue), gridData['name'], false, gridData['_id']);
     selector.appendChild(newOption);
   })
   selectRelated.forEach( element => {
@@ -538,6 +572,11 @@ var availPlatforms = {};
 const gridsViewButton = botContainer.querySelector('#switchViewGrid');
 const gridsContainer = botContainer.querySelector('#gridsContainer');
 let gridSelectActive = true;
+
+// + GRID NAME SPAN +
+const gridSpanName = document.getElementById('gridNameSpan');
+const platformSpanName = document.getElementById('platformNameSpan');
+// - GRID NAME SPAN -
 
 gridsViewButton.addEventListener('click', async event => {
   topContainer.classList.add('hidden');
@@ -559,6 +598,7 @@ await updateAvailGrids(
   gridsContainer, new Set([gridsContainer, gridsSelectInputGroup]), gridsSelector
 );
 
+
 const gridContainer = botContainer.querySelector('#gridContainer');
 var gridPlacementUpdateInterval = null;
 const gridPlacement = new Placement(PLACEMENT_TYPES.GRID);
@@ -570,20 +610,18 @@ const zoomer = new ZoomAndDrag({
 var gridView = false;
 gridContainer.appendChild(gridPlacement.element);
 const gridActiveElements = new Set([
-  topContainer, gridContainer, viewContainer
+  topContainer, gridContainer, viewContainer, searchInputsViewContainer, gridSpanName
 ])
 const gridInactiveElements = new Set([gridsContainer]);
 
-
-// + REMOVE SELECTORS +
-const selectGridButton = botContainer.querySelector('#selectGrid');
-selectGridButton.addEventListener('click', async event => {
+const invokeGridSelectAction = async () => {
   // TODO: Errors handle, what if we're not getting correct preset data?
   const placementId = await selectPlacementButtonAction(
     gridsSelector, gridPlacement, gridActiveElements, gridInactiveElements,
-    gridView, gridsViewButton, true
-  )
-  // TODO: Maybe change it.
+    gridView, gridsViewButton, true, gridSpanName
+  );
+  // TODO: Maybe change it. Because we're always overriding previous action.
+  //       If preset isn't changed == we don't need to override them.
   const gridCells = gridContainer.querySelectorAll('.placement-cell, .grid-cell');
   assignWheelstackMenus(gridCells, gridPlacement, gridPlacement);
   // ---
@@ -599,8 +637,30 @@ selectGridButton.addEventListener('click', async event => {
     }
     await updatePlacement(gridPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL)
+}
+
+// + GRID COOKIE TEST +
+const gridPlacementCookie = await getCookie(`${activeUser}-${SAVED_GRID_COOKIE_NAME}`);
+if (gridPlacementCookie) {
+  var [gridPlacementId, gridPresetId] = gridPlacementCookie.split(';');
+  const savedOption = gridsSelector.querySelector(`#${CSS.escape(gridPlacementId)}`);
+  if (savedOption) {
+    savedOption.selected = true;
+    invokeGridSelectAction();
+    const restoreGridMessage = BASIC_INFO_MESSAGE_WARNING;
+    restoreGridMessage.message = `Восстановлен выбор <b>ПРИЯМКА</b> прошлой сессии: <b>${savedOption.textContent}</b><br>Для пользователя <b>${activeUser}</b>`;
+    restoreGridMessage.duration = 2000;
+    flashMessage.show(restoreGridMessage);
+  };
+};
+// - GRID COOKIE TEST -
+
+// + GRID SELECTOR +
+const selectGridButton = botContainer.querySelector('#selectGrid');
+selectGridButton.addEventListener('click', async event => {
+  await invokeGridSelectAction();
 })
-// + REMOVE SELECTORS +
+// + GRID SELECTOR +
 // - GRID BUILD -
 // - GRID SELECTION -
 
@@ -632,7 +692,7 @@ const clearAvailPlatforms = async (container, showElements, selector, closeView 
   availPlatforms = {};
   const emptyValue = 'emptyList';
   const emptyName = 'Нет привязанных платформ';
-  const emptyOption = await createOption(emptyValue, emptyName);
+  const emptyOption = await createOption(emptyValue, emptyName, false, 'emptyOption');
   selector.appendChild(emptyOption);
   if (closeView) {
     forcePlatformClosedView();
@@ -650,6 +710,14 @@ const clearAvailPlatforms = async (container, showElements, selector, closeView 
   selectPlatformButtonContainer.classList.add('hidden');
 }
 
+// + PLATFORM COOKIE TEST +
+var platformCookieInitial = false;
+var platformPlacementCookie = await getCookie(`${activeUser}-${SAVED_PLATFORM_COOKIE_NAME}`);
+if (platformPlacementCookie) {
+  platformCookieInitial = true;
+  var [savedPlatformId, savedPlatformPresetId] = platformPlacementCookie.split(';');
+};
+// - PLATFORM COOKIE TEST -
 const updateAvailPlatforms = async (
   newPlatformsData, container,
   selectRelated, selector
@@ -678,9 +746,18 @@ const updateAvailPlatforms = async (
         'name': platformName,
       };
       const newOption = await createOption(
-        JSON.stringify(optionValue), platformName
+        JSON.stringify(optionValue), platformName, false, platformId
       );
       selector.appendChild(newOption);
+      if (platformCookieInitial && platformId === savedPlatformId) {
+        newOption.selected = true;
+        invokePlatformSelectAction();
+        platformCookieInitial = false;
+        const restorePlatformMessage = BASIC_INFO_MESSAGE_WARNING;
+        restorePlatformMessage.message = `Восстановлен выбор <b>ПЛАТФОРМЫ</b> прошлой сессии <b>${platformName}</b>.<br>Для пользователя <b>${activeUser}</b>`;
+        restorePlatformMessage.duration = 2000;
+        flashMessage.show(restorePlatformMessage);
+      }
     });
   }
   selectRelated.forEach( element => {
@@ -691,17 +768,17 @@ const updateAvailPlatforms = async (
 }
 
 const platformActiveElements = new Set(
-  [platformPlacement.element, platformViewButton]
+  [platformPlacement.element, platformViewButton, platformSpanName]
 );
 
 const platformInActiveElements = new Set(
   [platformSelectInputGroup]
 );
 
-selectPlatformButton.addEventListener('click', async (event) => {
+const invokePlatformSelectAction = async () => {
   const placementId = await selectPlacementButtonAction(
     platformSelector, platformPlacement, platformActiveElements, platformInActiveElements,
-    platformView, platformViewButton, false
+    platformView, platformViewButton, false, platformSpanName
   )
   const platformCells = platformsContainer.querySelectorAll('.placement-cell, .baseplatform-cell');
   assignWheelstackMenus(platformCells, gridPlacement, platformPlacement);
@@ -716,11 +793,16 @@ selectPlatformButton.addEventListener('click', async (event) => {
     }
     await updatePlacement(platformPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL);
+}
+
+selectPlatformButton.addEventListener('click', async (event) => {
+  invokePlatformSelectAction();
 })
 
 
 const setPlatformToSelect = () => {
   platformSelectInputGroup.classList.remove('hidden');
+  platformSpanName.classList.add('hidden');
   platformPlacement.element.classList.add('hidden');
   platformViewButton.classList.add('hidden');
   platformSelectActive = true;
@@ -732,9 +814,11 @@ const platformViewSwitch = (hideSwitch = false) => {
   if (platformSelectActive) {
     platformSelectInputGroup.classList.remove('hidden');
     platformPlacement.element.classList.add('hidden');
+    platformSpanName.classList.add(hideClass);
   } else {
     platformSelectInputGroup.classList.add('hidden');
     platformPlacement.element.classList.remove('hidden');
+    platformSpanName.classList.remove(hideClass);
   }
   if (hideSwitch) {
     platformViewButton.classList.add('hidden');
@@ -761,14 +845,19 @@ const pruneOutdatedOrders = () => {
     if (orderId in _allOrders) {
       return;
     }
-    createdOrderRecords[orderId].remove();
-    delete createdOrderRecords[orderId];
-  })
-}
+    createdOrderRecords[orderId].classList.add('delete-blink');
+    setTimeout( () => {
+      if (createdOrderRecords[orderId]) {
+        createdOrderRecords[orderId].remove();
+      };
+      delete createdOrderRecords[orderId];
+    }, ORDERS_TABLE_ELEMENT_REMOVE_INDICATOR);
+  });
+};
 
 const pruneOrdersInterval = setInterval( () => {
   pruneOutdatedOrders();
-}, 100)
+}, ORDERS_TABLE_PRUNE_INTERVAL);
 
 const maintainOrderRecords = async () => {
   // If another update is in progress or gridSelectActive is true, return early
@@ -1194,7 +1283,9 @@ const assignBatchMenu = (orderElement) => {
     const batchMenu = await createBatchMenu(
       event, batchTd, batchData, batchMarker, _allBatches
     );
-    assignBatchExpandableButtons(batchMenu);
+    if (OPERATOR_ROLE !== activeUserRole) {
+      assignBatchExpandableButtons(batchMenu);
+    };
   });
 }
 // - BATCH MENU -
@@ -1238,11 +1329,125 @@ const assignWheelstackMenus = (cells, placement, sourcePlacement) => [
   })
 ]
 // - CONTEXT MENUS -
+// + SEARCH +
 
-setInterval( () => {
-//   console.log(_allOrders);
-//   console.log('GRIDS', availGrids);
-//   console.log('PLATFORMS', availPlatforms);
+//  + BATCH SEARCH +
+const batchSearchForm = document.getElementById('batchSearchForm');
+const batchSearchField = document.getElementById('batchSearchField');
+const batchResultContainer = document.getElementById('batchResults');
+const batchClearButton = document.getElementById('clearBatchSearch');
+
+const clearMarking = (marker) => {
+  // TODO: think about changing it REINDEXING isnt correct
+  //     We need to check for duplicates and update only when we get something NEW.
+  marker.clearMarking();
+}
+
+const batchMarkSubmit = (targetValue, markTimeout = 90) => {
+  if (targetValue && '' !== targetValue.trim()) {
+      batchMarker.clearMarking();
+      batchMarker.setRules('data-batch-number', targetValue);
+      batchMarker.markTargets(true, markTimeout);
+  }
+}
+
+const batchMenuOpener = async (event, openerElement, targetBatchNumber) => {
+  if (!targetBatchNumber || !_allBatches[targetBatchNumber]) {
+    return;
+  }
+  let menu = null;
+  menu = createBatchMenu(event, openerElement, _allBatches[targetBatchNumber], batchMarker, _allBatches)
+  return menu;
+}
+
+const updateSearcherData = (searcher, newData, useKey = null) => {
+  // TODO: see why platform update without checking change date.
+  if (useKey) {
+    const data = [];
+    for (let [key, value] of Object.entries(newData)) {
+      data.push(value[useKey]);
+    }
+    searcher.setData(data);
+  } else {
+    searcher.setData(newData);
+  }
+}
+
+const batchSearcher = new BasicSearcher(
+  batchSearchForm,
+  batchSearchField,
+  batchClearButton,
+  batchResultContainer,
+  batchMarkSubmit,
+  () => clearMarking(batchMarker),
+  batchMenuOpener,
+)
+batchSearcher.setOptions(BASIC_BATCH_SEARCHER_OPTIONS);
+//  - BATCH SEARCH -
+//  + WHEELS SEARCH +
+const wheelsMarker = new AttributeMark('wheels-mark');
+
+const wheelsSearchForm = document.getElementById('wheelsSearchForm');
+const wheelsSearchField = document.getElementById('wheelsSearchField');
+const wheelsResultContainer = document.getElementById('wheelsResults');
+const wheelsClearButton = document.getElementById('clearWheelsSearch');
+
+// TODO: REDO
+const focusChosenWheel = (wheelId) => {
+  const curTargets = Array.from(document.querySelectorAll(`[data-wheels]`)).filter(element => {
+      const attrValue = element.getAttribute('data-wheels');
+      const valueList = attrValue.split(';');
+      return valueList.includes(wheelId);
+  });
+  // There should be only 1 element with wheelId.
+  curTargets.forEach( target => {
+      if (gridContainer.contains(target)) {
+          const newTranslationData = gridFocusMark.centerElementInContainer(
+              gridContainer.childNodes[0],
+              gridContainer,
+              target,
+          );
+          // ZoomAndDrag saves it's direction as Class value, we need to adjust it.
+          zoomer.translation.x = newTranslationData['newX'];
+          zoomer.translation.y = newTranslationData['newY'];
+          zoomer.translation.scale = newTranslationData['newScale'];
+      } else if (platformsContainer.contains(target)) {
+          platformFocusMark.higlightElement(target);
+      }
+      flashMessage.show({
+          'message': `Сфокисурована стопка содержащая колесо: <b>${wheelId}</b>`,
+          'color': '#013565',
+      })
+  })
+}
+
+const wheelsMarkSubmit = (targetValue) => {
+  if (targetValue && '' !== targetValue.trim()) {
+      wheelsMarker.clearMarking();
+      wheelsMarker.setRules('data-wheels', targetValue);
+      wheelsMarker.markTargets(true);
+      focusChosenWheel(targetValue)
+  }
+}
+
+const wheelsSearcher = new BasicSearcher(
+  wheelsSearchForm,
+  wheelsSearchField,
+  wheelsClearButton,
+  wheelsResultContainer,
+  wheelsMarkSubmit,
+  () => clearMarking(wheelsMarker),
+);
+wheelsSearcher.setOptions(BASIC_WHEELS_SEARCHER_OPTION);
+//  - WHEELS SEARCH -
+// - SEARCH -
+
+
+// setInterval( () => {
+  // console.log(_allBatches);
+  // console.log(_allOrders);
+  // console.log('GRIDS', availGrids);
+  // console.log('PLATFORMS', availPlatforms);
   // console.log('WHEELS_LENGTH', Object.keys(_allWheels).length);
   // console.log('WHEELS', _allWheels);
-}, 5500);
+// }, 5500);

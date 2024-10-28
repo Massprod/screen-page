@@ -326,6 +326,10 @@ html, body {
     width: fit-content;
 }
 
+.extra-bot-container.second {
+    bottom: 18%;
+}
+
 .extra-buttons-container {
     display: flex;
     flex-direction: row;
@@ -338,6 +342,11 @@ html, body {
     transition: width 0.4s ease-out 0s;
     overflow: hidden;
 }
+
+.extra-buttons-container.show-hidden {
+    overflow: visible;
+}
+
 
 .extra-button {
     cursor: pointer;
@@ -558,3 +567,24 @@ td.batch-indicator {
     -moz-user-select: none;
     -ms-user-select: none;
 }
+
+.name-span {
+    transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease;
+}
+
+.name-span:hover {
+    transform: scale(1.05);          /* Slightly enlarges the element */
+    font-size: 1.05em;               /* Subtle increase in font size */
+    color: #555;                     /* Soft color change, adjust as needed */
+}
+.name-span.platform {
+    margin-left: auto;
+    margin-right: 2%;
+}
+
+.name-span.grid {
+    top: 1%;
+    left: 1%;
+    position: absolute;
+}
+
