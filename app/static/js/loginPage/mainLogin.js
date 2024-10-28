@@ -15,6 +15,7 @@ import {
     COOKIE_MESSAGES_BG_COLOR,
     USERS_PAGE_ROLES,
     usersPage,
+    ACTIVE_USERNAME_COOKIE_NAME,
 } from "../uniConstants.js";
 import { FLASH_MESSAGES } from "../managerPage/js/constants.js";
 import { setCookie, updateAuthCookie } from "../utility/roleCookies.js";
@@ -106,6 +107,7 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
     const userRole = respData['user_role'];
     await setCookie(AUTH_COOKIE_NAME, authToken, AUTH_COOKIE_BASIC_EXPIRE);
     await setCookie(USER_ROLE_COOKIE_NAME, userRole, USER_ROLE_COOKIE_BASIC_EXPIRE)
+    await setCookie(ACTIVE_USERNAME_COOKIE_NAME, formData.get('username').toLowerCase());
     if (userRole in USERS_PAGE_ROLES) {
         window.location.href = usersPage;
     } else if (userRole in GRID_PAGE_ROLES) {
