@@ -34,7 +34,7 @@ export default class PlacementCell {
         //  Otherwise we will need extra O(n) traverse of all created elements
         //   and attach menu from `main`.
         //  Which is essentially the same and we still need to import menu...
-        this.element.addEventListener('contextmenu', async event => {
+        this.element.addEventListener('click', async event => {
             event.preventDefault();
             if (this.wheelstackMenu) {
                 this.wheelstackMenu.remove();

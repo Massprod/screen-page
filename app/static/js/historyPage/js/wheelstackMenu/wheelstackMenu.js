@@ -101,30 +101,21 @@ export const createWheelstackMenu = async (event, openerElement, wheelstackData)
     }
     var menus = {};
     openerElement.classList.add('menu-active');
-    // + WHEELS +
     const menu = document.createElement('div');
     menu.id = wheelstackData['_id'];
     menu.classList.add('wheelstack-menu');
-    const wheelsList = document.createElement('ul');
-    let blockedWheelObjectId = null;
+    // + ORDER BLOCK +
     if (wheelstackData['blocked']) {
-        const orderData = wheelstackData['lastOrder'];
-        if (ORDER_MOVE_TO_LABORATORY === orderData['orderType']) {
-            blockedWheelObjectId = wheelstackData['lastOrder']['affectedWheels']['source'][0];
-        }  
+        const orderObjectId = wheelstackData['lastOrder']['_id'];
+        const orderText = `<b>Ожидает</b><br>${orderObjectId}`;
+        const orderTitle = 'Ожидает выполнения заказа';
+        const orderRecord = await createInfoRecord(orderObjectId, orderText, orderTitle, true);
+        menu.appendChild(orderRecord);
+        orderRecord.addEventListener('click', event => {
+            focusTableOrder(orderObjectId);
+        })
     }
-    for (let wheelIndex = 5; wheelIndex > -1; wheelIndex -= 1) {
-        const wheelData = wheelstackData['wheels'][wheelIndex];
-        let wheelRecord = null;
-        if (wheelData && wheelData['_id'] === blockedWheelObjectId) {
-            wheelRecord = await createWheelRecord(wheelData, true);
-        } else {
-            wheelRecord = await createWheelRecord(wheelData);
-        }   
-        wheelsList.appendChild(wheelRecord);
-    }
-    menu.appendChild(wheelsList);
-    // - WHEELS -
+    // - ORDER BLOCK -
     // + BATCH +
     const batchData = wheelstackData['batchNumber'];
     const batchNumber = batchData['batchNumber'];
@@ -150,24 +141,33 @@ export const createWheelstackMenu = async (event, openerElement, wheelstackData)
         batchMarker.setRules('data-batch-number', batchNumber);
         batchMarker.markTargets(true);
     })
-    batchRecord.addEventListener('contextmenu', async event => {
+    batchRecord.addEventListener('click', async event => {
         event.preventDefault();
         menus['batchMenu'] = await createBatchMenu(event, batchRecord, batchData);
     })
     menu.appendChild(batchRecord);
     // - BATCH -
-    // + ORDER BLOCK +
+    // + WHEELS +
+    const wheelsList = document.createElement('ul');
+    let blockedWheelObjectId = null;
     if (wheelstackData['blocked']) {
-        const orderObjectId = wheelstackData['lastOrder']['_id'];
-        const orderText = `<b>Ожидает</b><br>${orderObjectId}`;
-        const orderTitle = 'Ожидает выполнения заказа';
-        const orderRecord = await createInfoRecord(orderObjectId, orderText, orderTitle, true);
-        menu.appendChild(orderRecord);
-        orderRecord.addEventListener('click', event => {
-            focusTableOrder(orderObjectId);
-        })
+        const orderData = wheelstackData['lastOrder'];
+        if (ORDER_MOVE_TO_LABORATORY === orderData['orderType']) {
+            blockedWheelObjectId = wheelstackData['lastOrder']['affectedWheels']['source'][0];
+        }  
     }
-    // - ORDER BLOCK -
+    for (let wheelIndex = 5; wheelIndex > -1; wheelIndex -= 1) {
+        const wheelData = wheelstackData['wheels'][wheelIndex];
+        let wheelRecord = null;
+        if (wheelData && wheelData['_id'] === blockedWheelObjectId) {
+            wheelRecord = await createWheelRecord(wheelData, true);
+        } else {
+            wheelRecord = await createWheelRecord(wheelData);
+        }   
+        wheelsList.appendChild(wheelRecord);
+    }
+    menu.appendChild(wheelsList);
+    // - WHEELS -
     // END
     assignCloser(openerElement, menu, menus)
     document.body.appendChild(menu);

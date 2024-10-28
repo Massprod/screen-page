@@ -10,6 +10,8 @@ import {
     HISTORY_PAGE_ROLES,
     NAV_BUTTONS,
     USER_ROLE_COOKIE_UPDATE_INTERVAL,
+    BASIC_WHEELS_SEARCHER_OPTION,
+    BASIC_BATCH_SEARCHER_OPTIONS,
 } from "../../uniConstants.js";
 import { BASE_PLATFORM_NAME, GRID_NAME, ORDER_TYPES_TRANSLATE_TABLE } from "../../managerPage/js/constants.js";
 import { keepAuthCookieFresh, clearRedirect, validateRoleCookie, getCookie } from "../../utility/roleCookies.js";
@@ -127,7 +129,6 @@ const assignPlatformFocus = (element, target, focusClass, message, callTimeout =
 const assignGridSequenceFocus = (element, targets, focusContainer, focusers, message, callTimeout = 1500, sequenceCooldown = 2500) => {
     // TODO: REBUILD THIS MONSTROSITY LATER.
     element.addEventListener('click', event => {
-        console.log('123');
         if (focusSequence) {
             flashMessage.show({
                 'message': `Подождите отображения эпизода прошлого заказа`,
@@ -1170,7 +1171,7 @@ const batchSearcher = new BasicSearcher(
     () => clearMarking(batchMarker),
     batchMenuOpener,
 );
-batchSearcher.setOptions(batchOptions);
+batchSearcher.setOptions(BASIC_BATCH_SEARCHER_OPTIONS ?? batchOptions);
 //  - BATCH FIELD -
 // + WHEELS FIELD +
 export const wheelsMarker = new AttributeMark('wheels-mark');
@@ -1202,7 +1203,7 @@ const wheelsSearcher = new BasicSearcher(
     wheelsMarkSubmit,
     () => clearMarking(wheelsMarker),
 );
-wheelsSearcher.setOptions(wheelsOptions);
+wheelsSearcher.setOptions(BASIC_WHEELS_SEARCHER_OPTION ?? wheelsOptions);
 // - WHEELS FIELD -
 // - INPUT FIELDS -
 
