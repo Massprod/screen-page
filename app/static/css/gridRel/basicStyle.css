@@ -324,10 +324,13 @@ html, body {
     top: auto;
     align-items: center;
     width: fit-content;
+    background-color: rgba(200, 200, 200, 0.65);
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
 }
 
 .extra-bot-container.second {
-    bottom: 18%;
+    bottom: 20%;
 }
 
 .extra-buttons-container {
@@ -383,14 +386,14 @@ html, body {
 }
 
 .extra-button img, .slider-button img {
-    height: 30px;
-    width: 30px;
+    height: 35px;
+    width: 35px;
 }
 
 @media (max-width: 1000px) {
     .extra-button img, .slider-button img {
-        height: 20px;
-        width: 20px;
+        height: 22px;
+        width: 22px;
     }
 
     .switch-view img {
