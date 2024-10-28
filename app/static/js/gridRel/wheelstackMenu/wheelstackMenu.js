@@ -670,6 +670,10 @@ const updateMenu = async (
     showMes.message = '<b>Отсутствуют</b> данные стопы для открытого меню.<br>Исключительное закрытие меню';
     showMes.duration = 3000;
     flashMessage.show(showMes);
+    if (wheelstackMenuUpdatingInterval) {
+      clearInterval(wheelstackMenuUpdatingInterval);
+      wheelstackMenuUpdatingInterval = null;
+    };
     return;
   };
   // If it's blocked, only option we're going to have is to show what's blocking it. And which wheel is blocked.
