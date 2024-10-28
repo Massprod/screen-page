@@ -606,6 +606,7 @@ const zoomer = new ZoomAndDrag({
   'viewport': gridContainer,
   'grid': gridPlacement.element,
   'maxScale': 0.7,
+  'zoomStep': 0.03,
 });
 var gridView = false;
 gridContainer.appendChild(gridPlacement.element);
