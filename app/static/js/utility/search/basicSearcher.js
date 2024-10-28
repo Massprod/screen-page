@@ -85,7 +85,7 @@ export default class BasicSearcher{
         this.activeIndex = -1;
         if (this.searchData.length === 0) {
             const emptyItem = document.createElement('li');
-            emptyItem.textContent = 'Не выбрано расположение';
+            emptyItem.textContent = 'Нет данных для отображения';
             emptyItem.classList.add('text-muted', 'p-2');
             this.resultsElement.appendChild(emptyItem);
         } else {
@@ -115,11 +115,15 @@ export default class BasicSearcher{
     }
 
     handleSearchFocus() {
-        // const curValue = this.searchField.value.trim();
-        this.showAllOptions();
+        const curValue = this.searchField.value.trim();
+        if (!curValue) {
+            this.showAllOptions();
+        } else {
+            this.handleSearchInput();
+        }
     }
 
-    handleSearchInput() {
+    handleSearchInput(currentValue = null) {
         if (!this.fuse) {
             console.warn('Fuse instance is not initialized. Set data and options first.');
             return;
