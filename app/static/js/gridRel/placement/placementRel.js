@@ -81,8 +81,6 @@ export const preparePlacement = async (presetId, placement, useIdentifiers) => {
 }
 
 export const switchView = async (activeElements, inActiveElements) => {
-  console.log(activeElements);
-  console.log(inActiveElements);
   activeElements.forEach( element => {
       element.classList.add('hidden');
   })
