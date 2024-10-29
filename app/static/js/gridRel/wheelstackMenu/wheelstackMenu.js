@@ -625,6 +625,10 @@ export const createWheelstackMenu = async (
   document.body.appendChild(menu);
   updateMenuPosition(event, menu);
   menu.classList.add('show');
+  if (wheelstackMenuUpdatingInterval) {
+    clearInterval(wheelstackMenuUpdatingInterval);
+    wheelstackMenuUpdatingInterval = null;
+  }
   wheelstackMenuUpdatingInterval = setInterval( () => {
     updateMenu(
       openerElement,
