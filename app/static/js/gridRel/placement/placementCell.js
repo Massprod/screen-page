@@ -83,6 +83,7 @@ export default class PlacementCell {
         this.clearElementData();
         this.element.innerHTML = '';
         this.element.classList.remove('placement-cell-whitespace');
+        this.element.classList.remove('active-move-select');
         this.element.classList.add('placement-cell-empty');
     }
 
@@ -93,6 +94,7 @@ export default class PlacementCell {
         };
         this.element.classList.remove('placement-cell-empty');
         this.element.classList.remove('placement-cell-whitespace');
+        this.element.classList.remove('move-possible');
     }
 
     blockState(blockedBy = null) {

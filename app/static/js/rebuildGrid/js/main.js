@@ -1325,8 +1325,8 @@ const assignWheelstackMenus = (cells, placement, sourcePlacement) => [
         placement,
         sourcePlacement
       );
-      cell.hasWheelstackMenuAssigned = wheelstackMenu;
-    })
+    });
+    cell.hasWheelstackMenuAssigned = true;
   })
 ]
 // - CONTEXT MENUS -

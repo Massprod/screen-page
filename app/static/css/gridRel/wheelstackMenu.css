@@ -77,6 +77,14 @@
   border-top-right-radius: 6px; */
 }
 
+
+.wheelstack-menu li:nth-last-child(2) {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-bottom: none;
+}
+
+
 .wheelstack-menu li:last-child {
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;

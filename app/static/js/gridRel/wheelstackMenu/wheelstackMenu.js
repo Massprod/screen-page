@@ -36,11 +36,11 @@ const menuCloser = async (event, openerElement, menuElement, subMenus, boundClos
   }
   subMenus = {};
   menuElement.classList.add('hide');
+  document.body.removeEventListener('mousedown', boundCloser);
+  document.body.removeEventListener('touchstart', boundCloser);
+  menuElement.remove();
   setTimeout(() => {
-      menuElement.remove();
       openerElement.classList.remove('menu-active');
-      document.body.removeEventListener('mousedown', boundCloser);
-      document.body.removeEventListener('touchstart', boundCloser);
   }, 75);
 }
 
@@ -247,6 +247,7 @@ var wheelstackId = null;
 var selectRelated = [];
 var blockedRelated = [];
 var activeUserRole = null;
+var openedPlacementId = null;
 // --
 export const createWheelstackMenu = async (
   event, openerElement, dataBanks = {}, markers = {}, ordersTable = null, placement, sourcePlacement) => {
@@ -267,6 +268,9 @@ export const createWheelstackMenu = async (
       flashMessage.show(warnMessage);
     }
     return;
+  }
+  if (wheelstackMenuUpdatingInterval) {
+    forceMenuClose(null, true);
   }
   // + USER ROLE +
   activeUserRole = await getCookie(USER_ROLE_COOKIE_NAME);
@@ -295,6 +299,7 @@ export const createWheelstackMenu = async (
     };
     return;
   }
+  openedPlacementId = placement.placementId;
   const wheelsData = dataBanks['wheels'];
   var menus = {};
   // + WHEELSTACK MENU +
@@ -406,6 +411,11 @@ export const createWheelstackMenu = async (
 
       moveMarkUpdateInterval = setInterval( () => {
         markMovePossible(placement);
+        // Not canceling move actions until we return to our source placement (if wheelstack is not anymore present).
+        // We will allow to use move action, but it will return an error == canceled by default.
+        if (openedPlacementId !== placement.placementId) {
+          return;
+        }
         const openerWheelstackId = openerElement.getAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID);
         // SAME for closing menu
         const openerBlockingOrder = openerElement.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER);
@@ -663,7 +673,7 @@ const updateMenu = async (
   openerElement, wheelstackMenu, dataBanks, placement, sourcePlacement
 ) => {
   const openerWheelstackId = openerElement.getAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID);
-  if (!openerElement || !openerElement.isConnected || openerWheelstackId !== wheelstackMenu.id) {
+  if (!openerElement || !openerElement.isConnected || openerWheelstackId !== wheelstackMenu.id  || !wheelstackMenu.isConnected) {
     forceMenuClose(null, true);
     return;
   }
