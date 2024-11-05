@@ -52,7 +52,13 @@ import AttributeMark from "../../utility/mark/mark.js";
 import FocusMark from "../../utility/focusElement/focusElement.js";
 import { createProRejOrderBulk } from "../../utility/ordersCreation.js";
 import { createOrderMenu } from "../../gridRel/orderMenu/orderMenu.js";
-import { createWheelstackMenu } from "../../gridRel/wheelstackMenu/wheelstackMenu.js";
+import {
+  createWheelstackMenu,
+  moveSelectActive,
+  openedPlacementId,
+  openedPlacementType,
+  openedPlacementName,
+ } from "../../gridRel/wheelstackMenu/wheelstackMenu.js";
 import BasicSearcher from "../../utility/search/basicSearcher.js";
 
 
@@ -238,7 +244,7 @@ const updateBanksFromPlacement = async (placementData, placementType) => {
   setTimeout( () => {
     updateSearcherData(wheelsSearcher, Object.values(_allWheels), 'wheelId');
     updateSearcherData(batchSearcher, Object.keys(_allBatches));
-  }, 750);
+  }, 1000);
 }
 // - DATA BANKS -
 
@@ -466,11 +472,11 @@ const placementChanged = async (placement) => {
 }
 
 
-const updatePlacement = async (placement, newId) => {
+const updatePlacement = async (placement, newId, forceUpdate = false) => {
   let dataURL = '';
   let placementType = placement.placementType;
   // + PING FOR CHANGES +
-  if (placement.placementId === newId) {
+  if (!forceUpdate && placement.placementId === newId) {
     if (!(await placementChanged(placement))) {
       return;
     };
@@ -543,7 +549,29 @@ const updateAvailGrids = async (container, selectRelated, selector) => {
     container.appendChild(errorEl);
     return;
   }
-  const newGridsData = await gridsReq.json();
+  let newGridsData = await gridsReq.json();
+  // add moveLimit
+  if (moveSelectActive && PLACEMENT_TYPES.BASE_PLATFORM === openedPlacementType) {
+    let filteredGridsData = [];
+    for (let index = 0; index < newGridsData.length; index += 1) {
+      const gridData = newGridsData[index];
+      if ('assignedPlatforms' in gridData) {
+        const assignedPlatforms = gridData['assignedPlatforms'];
+        for (let platformData of assignedPlatforms) {
+          if (openedPlacementId === platformData['platformId']) {
+            filteredGridsData.push(gridData);
+          };
+        }
+      }
+    }
+    newGridsData = filteredGridsData;
+    const filteredMessage = BASIC_INFO_MESSAGE_WARNING;
+    filteredMessage.message = `Выбор ограничен из-за активного переноса с челнока: <b>${openedPlacementName}</b><br>Отмените перенос или закончите его в доступных приямках.`;
+    filteredMessage.duration = 4500;
+    filteredMessage.fontSize = '18px';
+    flashMessage.show(filteredMessage);
+  };
+  // ---
   availGrids = {};
   for (let gridData of newGridsData) {
     availGrids[gridData['_id']] = gridData;
@@ -625,6 +653,21 @@ const invokeGridSelectAction = async () => {
   //       If preset isn't changed == we don't need to override them.
   const gridCells = gridContainer.querySelectorAll('.placement-cell, .grid-cell');
   assignWheelstackMenus(gridCells, gridPlacement, gridPlacement);
+  // ---
+  // NEW GRID || OLD GRID == 100% NEW PLATFORM - because we're forcing to choose it
+  platformWheels = {};
+  platformBatches = {};
+  platformOrders = {};
+  platformWheelstacks = {};
+  // ---
+  // OLD GRID == not clearing GRID
+  if (gridPlacement.placementId !== placementId) {
+    gridWheels = {};
+    gridBatches = {};
+    gridOrders = {};
+    gridWheelstacks = {};
+    await updatePlacement(gridPlacement, placementId, true);
+  }
   // ---
   gridSelectActive = false;
   setPlatformToSelect();
@@ -783,6 +826,15 @@ const invokePlatformSelectAction = async () => {
   )
   const platformCells = platformsContainer.querySelectorAll('.placement-cell, .baseplatform-cell');
   assignWheelstackMenus(platformCells, gridPlacement, platformPlacement);
+  if (platformPlacement.placementId !== placementId) {
+    // clear of platform data == when we choose new placement
+    platformWheels = {};
+    platformBatches = {};
+    platformOrders = {};
+    platformWheelstacks = {};
+    // ---
+  }
+  await updatePlacement(platformPlacement, placementId, true);
   platformSelectActive = false;
   if (platformPlacementUpdateInterval) {
     clearInterval(platformPlacementUpdateInterval);
@@ -1309,7 +1361,7 @@ const assignWheelstackMenus = (cells, placement, sourcePlacement) => [
     }
     cell.addEventListener('click', (event) => {
       event.preventDefault();
-      const wheelstackMenu = createWheelstackMenu(
+      createWheelstackMenu(
         event,
         cell, 
         {
@@ -1357,7 +1409,10 @@ const batchMenuOpener = async (event, openerElement, targetBatchNumber) => {
     return;
   }
   let menu = null;
-  menu = createBatchMenu(event, openerElement, _allBatches[targetBatchNumber], batchMarker, _allBatches)
+  menu = await createBatchMenu(event, openerElement, _allBatches[targetBatchNumber], batchMarker, _allBatches)
+  if (OPERATOR_ROLE !== activeUserRole) {
+    assignBatchExpandableButtons(menu);
+  };
   return menu;
 }
 

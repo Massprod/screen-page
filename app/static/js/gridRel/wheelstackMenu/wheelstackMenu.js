@@ -234,7 +234,7 @@ const showHideElements = (showElements, container, hideClass = 'd-none') => {
 }
 
 
-var moveSelectActive = false;
+
 var markEventHandlers = new Map();
 
 var moveMarkUpdateInterval = null;
@@ -247,7 +247,12 @@ var wheelstackId = null;
 var selectRelated = [];
 var blockedRelated = [];
 var activeUserRole = null;
-var openedPlacementId = null;
+var clearMarks = null
+// Using to filter avail GRID's
+export var openedPlacementId = null;
+export var openedPlacementType = null;
+export var openedPlacementName = null;
+export var moveSelectActive = false;
 // --
 export const createWheelstackMenu = async (
   event, openerElement, dataBanks = {}, markers = {}, ordersTable = null, placement, sourcePlacement) => {
@@ -299,7 +304,11 @@ export const createWheelstackMenu = async (
     };
     return;
   }
-  openedPlacementId = placement.placementId;
+  // used to filter availGrids
+  openedPlacementId = sourcePlacement.placementId;
+  openedPlacementType = sourcePlacement.placementType;
+  openedPlacementName  = sourcePlacement.placementData['name'];
+  // used to filter availGrids
   const wheelsData = dataBanks['wheels'];
   var menus = {};
   // + WHEELSTACK MENU +
@@ -309,7 +318,6 @@ export const createWheelstackMenu = async (
   menu.classList.add('wheelstack-menu');
   // TODO: complete rebuild :)
   // + MOVE FIELD +
-  let clearMarks = null
   //  + FIRST MOVE CONTAINER +
   //  + MOVE INSIDE BUTTON +
   if (OPERATOR_ROLE !== activeUserRole) {
@@ -382,7 +390,7 @@ export const createWheelstackMenu = async (
         const createMoveOrder = (element) => {
           return (event) => {
             if (element.classList.contains('move-possible') && moveSelectActive) {
-              let [destinationRow, destinationCol ] = element.id.split('|');;
+              let [destinationRow, destinationCol ] = element.id.split('|');
               const destinationData = {
                 'destinationId': placement.placementId,
                 'destinationType': placement.placementType,
@@ -527,7 +535,7 @@ export const createWheelstackMenu = async (
     moveOutsideButton.addEventListener('click', event => {
       if (PLACEMENT_TYPES.GRID !== sourcePlacement.placementType) {
         const showMes = BASIC_INFO_MESSAGE_WARNING;
-        showMes.message = '<b>Выгрузка с платформ запрещена</b><br>Сначало перенесите стопу в <b>Приямок</b>';
+        showMes.message = '<b>Выгрузка с челноков запрещена</b><br>Сначало перенесите стопу в <b>Приямок</b>';
         showMes.duration = 3000;
         flashMessage.show(showMes);
         return;
@@ -675,6 +683,9 @@ const updateMenu = async (
   const openerWheelstackId = openerElement.getAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID);
   if (!openerElement || !openerElement.isConnected || openerWheelstackId !== wheelstackMenu.id  || !wheelstackMenu.isConnected) {
     forceMenuClose(null, true);
+    if (clearMarks) {
+      clearMarks();
+    }
     return;
   }
   wheelstackData = dataBanks['wheelstacks'][wheelstackId];
@@ -688,6 +699,9 @@ const updateMenu = async (
       clearInterval(wheelstackMenuUpdatingInterval);
       wheelstackMenuUpdatingInterval = null;
     };
+    if (clearMarks) {
+      clearMarks();
+    }
     return;
   };
   // If it's blocked, only option we're going to have is to show what's blocking it. And which wheel is blocked.
@@ -702,6 +716,9 @@ const updateMenu = async (
     blockingOrderData = dataBanks['orders'][blockingOrderId];
     if (!blockingOrderData) {
       return;
+    }
+    if (clearMarks) {
+      clearMarks();
     }
     // removeExpandables + removeEventListeners on wheels
     const orderType = blockingOrderData['orderType'];
@@ -728,8 +745,11 @@ const updateMenu = async (
     const newBlockTitle = 'Ожидает выполнения заказа';
     updateInfoRecord(blockOrderField, null, newBlockText, newBlockTitle, blockingOrderId);
     switchMoveBlocked(true);
-  // `wheelstack` not blocked, but we still have previoud `id` set == reset everything
+  // `wheelstack` not blocked, but we still have previous `id` set == reset everything
   } else if (blockingOrderId) {
+    if (clearMarks) {
+      clearMarks();
+    }
     blockingOrderId = null;
     blockingOrderData = null;
     const blockOrderField = wheelstackMenu.querySelector('#blockOrderField');
