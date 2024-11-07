@@ -7,6 +7,7 @@ import {
   ORDER_MOVE_TO_LABORATORY,
   USER_ROLE_COOKIE_NAME,
   OPERATOR_ROLE,
+  WHEELSTACK_WHEELS_LIMIT,
 } from "../../uniConstants.js";
 import updateMenuPosition from "../../utility/adjustContainerPosition.js";
 import { createBatchMenu } from "../batchMenu/batchMenu.js";
@@ -215,10 +216,12 @@ const clearMarkEventHandlers = (eventHandlers, openerElement, extraCalls = []) =
   eventHandlers.forEach((handlerData, element) => {
     Object.keys(handlerData).forEach(eventType => {
       element.removeEventListener(eventType, handlerData[eventType]);
-    })
+    });
     if (document !== element) {
       element.classList.remove('move-possible');
-    }
+      element.classList.remove('merge-possible');
+    };
+    eventHandlers.delete(element);
   });
 }
 
@@ -374,9 +377,17 @@ export const createWheelstackMenu = async (
       
       const markMovePossible = (placement) => {
         moveSelectActive = true;
-        const emptyCells = placement.element.querySelectorAll('.placement-cell-empty:not(.blocked):not(.move-possible)');
-        if (0 === emptyCells.length && moveSelectActive) {
-          const markedCells = placement.element.querySelectorAll('.placement-cell.move-possible');
+        const emptyCellFilterClass = 'placement-cell-empty';
+        const emptyCellMarkClass = 'move-possible';
+        const emptyCells = placement.element.querySelectorAll(`.${emptyCellFilterClass}:not(.blocked):not(.${emptyCellMarkClass}):not(.identifier-cell)`);
+        // + ADD MERGE + 
+        const cellFilterClass = 'placement-cell';
+        const cellMarkClass = 'merge-possible';
+        const batchAttributeFilter = `[${BASIC_ATTRIBUTES.BATCH_NUMBER}="${wheelstackData['batchNumber']}"]`;
+        const mergeCells = placement.element.querySelectorAll(`.${cellFilterClass}:not(.blocked):not(.${cellMarkClass}):not(.identifier-cell)${batchAttributeFilter}`)
+        // - ADD MERGE -
+        if (0 === emptyCells.length && 0 === mergeCells.length && moveSelectActive) {
+          const markedCells = placement.element.querySelectorAll(`.${cellFilterClass}.${emptyCellMarkClass}`);
           // NO new empty to mark, but we're still having some we can use.
           if (0 !== markedCells.length) {
             return;
@@ -389,32 +400,73 @@ export const createWheelstackMenu = async (
         }
         const createMoveOrder = (element) => {
           return (event) => {
-            if (element.classList.contains('move-possible') && moveSelectActive) {
-              let [destinationRow, destinationCol ] = element.id.split('|');
-              const destinationData = {
-                'destinationId': placement.placementId,
-                'destinationType': placement.placementType,
-                'destinationRow': destinationRow,
-                'destinationCol': destinationCol,
-              }
-              createOrderMoveWholestackFromBaseGrid(wheelstackData, destinationData);
-              clearMarks();
+            if (!(element.classList.contains(`${emptyCellMarkClass}`))
+               && !(element.classList.contains(`${cellMarkClass}`))
+               && moveSelectActive) {
+              return;
             }
+            const mergeType = element.classList.contains(`${cellMarkClass}`);
+            let [destinationRow, destinationCol ] = element.id.split('|');
+            const destinationData = {
+              'destinationId': placement.placementId,
+              'destinationType': placement.placementType,
+              'destinationRow': destinationRow,
+              'destinationCol': destinationCol,
+            }
+            createOrderMoveWholestackFromBaseGrid(wheelstackData, destinationData, mergeType);
+            clearMarks();
           }
         }
-
         emptyCells.forEach(element => {
-          if (element.classList.contains('move-possible')) {
+          if (element.classList.contains(`${emptyCellMarkClass}`)) {
+            return;
+          }
+          element.classList.add(`${emptyCellMarkClass}`);
+          if (markEventHandlers.has(element)) {
             return;
           }
           const moveOrderHandler = createMoveOrder(element);
-          element.classList.add('move-possible');
           markEventHandlers.set(
             element, {
               'click': moveOrderHandler
-            });
+            }
+          );
           element.addEventListener('click', moveOrderHandler);
         })
+        // + ADD MERGE +
+        mergeCells.forEach(element => {
+          if (element === openerElement) {
+            if (wheelstackData['_id'] === element.getAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID)) {
+              element.classList.add('active-move-select');
+            }
+            return;
+          } 
+          if (element.classList.contains(`${cellMarkClass}`)) {
+            return;
+          }
+          const targetWheelsAttr = element.getAttribute(BASIC_ATTRIBUTES.WHEELS);
+          if (!targetWheelsAttr) {
+            return;
+          }
+          const targetWheels = targetWheelsAttr.split(';');
+          const sourceWheels = wheelstackData['wheels'];
+          // Wheels can be changed == we need to recheck == simply ignoring
+          if ((targetWheels.length + sourceWheels.length) > WHEELSTACK_WHEELS_LIMIT) {
+            return;
+          }
+          element.classList.add(`${cellMarkClass}`);
+          if (markEventHandlers.has(element)) {
+            return;
+          }
+          const mergeOrderHandler = createMoveOrder(element);
+          markEventHandlers.set(
+            element, {
+              'click': mergeOrderHandler
+            }
+          );
+          element.addEventListener('click', mergeOrderHandler);
+        });
+        // - ADD MERGE -
       };
 
       moveMarkUpdateInterval = setInterval( () => {

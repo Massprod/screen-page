@@ -84,6 +84,7 @@ export default class PlacementCell {
         this.element.innerHTML = '';
         this.element.classList.remove('placement-cell-whitespace');
         this.element.classList.remove('active-move-select');
+        this.element.classList.remove('merge-possible');
         this.element.classList.add('placement-cell-empty');
     }
 
@@ -95,10 +96,14 @@ export default class PlacementCell {
         this.element.classList.remove('placement-cell-empty');
         this.element.classList.remove('placement-cell-whitespace');
         this.element.classList.remove('move-possible');
+        this.element.classList.remove('merge-possible');
+        this.element.classList.remove('active-move-select');
     }
 
     blockState(blockedBy = null) {
-        this.element.classList.remove('move-possible');  // cringe
+        this.element.classList.remove('move-possible');  // cringe 1
+        this.element.classList.remove('merge-possible');  // cringe 2
+        this.element.classList.remove('active-move-select'); // cringe 3 :)
         this.element.classList.add('blocked');
         if (blockedBy) {
             if (this.element.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER) !== blockedBy) {

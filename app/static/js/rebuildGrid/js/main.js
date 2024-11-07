@@ -651,7 +651,7 @@ const invokeGridSelectAction = async () => {
   );
   // TODO: Maybe change it. Because we're always overriding previous action.
   //       If preset isn't changed == we don't need to override them.
-  const gridCells = gridContainer.querySelectorAll('.placement-cell, .grid-cell');
+  const gridCells = gridContainer.querySelectorAll('.placement-cell:not(.identifier-cell), .grid-cell:not(.identifier-cell)');
   assignWheelstackMenus(gridCells, gridPlacement, gridPlacement);
   // ---
   // NEW GRID || OLD GRID == 100% NEW PLATFORM - because we're forcing to choose it

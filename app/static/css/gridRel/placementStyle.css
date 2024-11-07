@@ -175,10 +175,30 @@
 }
 /* - BATCH INDICATOR - */
 
-.placement-cell.move-possible {
-  background-color: #0d7bf091 !important;
+@keyframes flash {
+  0%, 100% {
+      /* background-color: #04729791; */
+      opacity: 0.8;
+  }
+  25%, 75% {
+    opacity: 0.9;
+  }
+  50% {
+      /* background-color: #047297; */
+      opacity: 1.0;
+  }
 }
 
+
+.placement-cell.move-possible {
+  background-color: #0d7bf091 !important;
+  animation: flash 2.2s infinite;
+}
+
+.placement-cell.merge-possible {
+  background-color: #002ffe91 !important;
+  animation: flash 1.6s infinite;
+}
 
 .placement-cell.active-move-select {
   background-color: #5205c691 !important;

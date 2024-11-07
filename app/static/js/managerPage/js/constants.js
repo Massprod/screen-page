@@ -68,6 +68,7 @@ export const ORDER_MOVE_TO_REJECTED = "moveToRejected";
 export const ORDER_MOVE_TO_LABORATORY = 'moveToLaboratory';
 export const ORDER_MOVE_WHOLE_STACK = 'moveWholeStack';
 export const ORDER_MOVE_TO_STORAGE = 'moveToStorage';
+export const ORDER_MERGE_WHEELSTACKS = 'mergeWheelStacks';
 
 export const PLACEMENT_TYPES = {
     "grid": "Приямок",
