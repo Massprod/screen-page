@@ -8,6 +8,9 @@ import {
   USER_ROLE_COOKIE_NAME,
   OPERATOR_ROLE,
   WHEELSTACK_WHEELS_LIMIT,
+  BACK_URL,
+  BASIC_INFO_MESSAGE_ERROR,
+  BASIC_INFO_MESSAGE_PRESET,
 } from "../../uniConstants.js";
 import updateMenuPosition from "../../utility/adjustContainerPosition.js";
 import { createBatchMenu } from "../batchMenu/batchMenu.js";
@@ -19,6 +22,7 @@ import { createLaboratoryOrderGrid, createOrderMoveWholestackFromBaseGrid, creat
 import { createOption } from "../../utility/utils.js";
 import { getCookie } from "../../utility/roleCookies.js";
 import { createRebuildMenu } from "./rebuildMenu.js";
+import { patchRequest } from "../../utility/basicRequests.js";
 
 
 const menuCloser = async (event, openerElement, menuElement, subMenus, boundCloser, force = false) => {
@@ -343,47 +347,64 @@ export const createWheelstackMenu = async (
       })
     }
   });
-
-  menu.appendChild(alterButtonsContainer);
-  //  + REBUILD MENU OPENER + 
-  const rebButton = document.createElement('button');
-  rebButton.classList.add('btn', 'hidden');
-  rebButton.id = 'rebuildButton';
-  rebButton.title = 'Изменить стопу';
-
-  let rebuildMenu = null;
-  rebButton.addEventListener('click', async event => {
-    rebuildMenu = await createRebuildMenu(menu, wheelstackData, dataBanks, rebuildRelatedElements, forceMenuClose);
-    menus['rebuildMenu'] = rebuildMenu;
-  })
-
-  const rebImage = document.createElement('img');
-  rebImage.alt = "Картинка переключения меню на пересоздание стопы";
-  rebImage.src = 'static/images/swap.png';
-  rebButton.appendChild(rebImage);
-  alterButtonsContainer.appendChild(rebButton);
-  //  - REBUILD MENU OPENER -
-  //  + DECONSTRUCT BUT +
-  const deconstructButton = document.createElement('button');
-  deconstructButton.classList.add('btn', 'btn-warning', 'hidden');
-  deconstructButton.id = 'deconstructButton';
-  deconstructButton.title = 'Разобрать стопу';
-  deconstructButton.addEventListener('click', event => {
-    console.log('kkk');
-
-  })
-  const decImage = document.createElement('img');
-  decImage.alt = "Картинка разбора стопы на свободные колёса";
-  decImage.src = 'static/images/deconstruct.png';
-  deconstructButton.appendChild(decImage);
-  alterButtonsContainer.appendChild(deconstructButton);
-  //  - DECONSTRUCT BUT -
-  // - ALTERNATE MENU -
   // TODO: complete rebuild :)
   // + MOVE FIELD +
   //  + FIRST MOVE CONTAINER +
   //  + MOVE INSIDE BUTTON +
   if (OPERATOR_ROLE !== activeUserRole) {
+    menu.appendChild(alterButtonsContainer);
+    //  + REBUILD MENU OPENER + 
+    const rebButton = document.createElement('button');
+    rebButton.classList.add('btn', 'hidden');
+    rebButton.id = 'rebuildButton';
+    rebButton.title = 'Изменить стопу';
+
+    let rebuildMenu = null;
+    rebButton.addEventListener('click', async event => {
+      rebuildMenu = await createRebuildMenu(menu, wheelstackData, dataBanks, rebuildRelatedElements, forceMenuClose);
+      menus['rebuildMenu'] = rebuildMenu;
+    })
+
+    const rebImage = document.createElement('img');
+    rebImage.alt = "Картинка переключения меню на пересоздание стопы";
+    rebImage.src = 'static/images/swap.png';
+    rebButton.appendChild(rebImage);
+    alterButtonsContainer.appendChild(rebButton);
+    //  - REBUILD MENU OPENER -
+    // TODO: ADD send to storage button
+    // ---
+    //  + DECONSTRUCT BUT +
+    const deconstructButton = document.createElement('button');
+    deconstructButton.classList.add('btn', 'btn-warning', 'hidden');
+    deconstructButton.id = 'deconstructButton';
+    deconstructButton.title = 'Разобрать стопу';
+    deconstructButton.addEventListener('click', async (event) => {
+      const deconstructURL = `${BACK_URL.PATCH_DECONSTRUCT_WHEELSTACK}/${wheelstackData['_id']}`;
+      try {
+        const corResp = await patchRequest(
+          deconstructURL, true, true
+        );
+        forceMenuClose(event, true);
+        if (corResp.ok) {
+          const showMsg = BASIC_INFO_MESSAGE_PRESET;
+          showMsg.message = `Колёса содержащие в выбранной стопе перенесены в свободные колеса<br><b>Номер партии колёс:</b> ${wheelstackData['batchNumber']}`;
+          showMsg.duration = 2000;
+          flashMessage.show(showMsg);
+        }
+      } catch (error) {
+        const showMsg = BASIC_INFO_MESSAGE_ERROR;
+        showMsg.message = `<b>Ошибка</b> при разборе стопы:<br> ${error}`;
+        showMsg.duration = 5000;
+        flashMessage.show(showMsg);
+      };
+    })
+    const decImage = document.createElement('img');
+    decImage.alt = "Картинка разбора стопы на свободные колёса";
+    decImage.src = 'static/images/deconstruct.png';
+    deconstructButton.appendChild(decImage);
+    alterButtonsContainer.appendChild(deconstructButton);
+    //  - DECONSTRUCT BUT -
+    // - ALTERNATE MENU -
     const moveButtonsField = document.createElement('div');
     if (wheelstackData['blocked']) {
       moveButtonsField.classList.add('d-none');
