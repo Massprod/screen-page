@@ -306,12 +306,12 @@ export const createRebuildMenu = async (originalMenu, openerData, dataBanks, rem
     try {
       const corResp = await patchRequest(
         reconstructURL, true, true, reqArgs
-      )
+      );
       originalMenuCloser(event, true);
       mainCloser(event, true);
     } catch (error) {
-      const showMsg = BASIC_INFO_MESSAGE_ERROR
-      showMsg.message = `<b>Ошибка</b> обновления:<br> ${error}`
+      const showMsg = BASIC_INFO_MESSAGE_ERROR;
+      showMsg.message = `<b>Ошибка</b> обновления:<br> ${error}`;
       showMsg.duration = 5000;
       flashMessage.show(showMsg);
     };
