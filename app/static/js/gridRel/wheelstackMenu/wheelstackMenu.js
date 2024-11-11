@@ -18,6 +18,7 @@ import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import { createLaboratoryOrderGrid, createOrderMoveWholestackFromBaseGrid, createProRejOrderBulk, createProRejOrderGrid } from "../../utility/ordersCreation.js";
 import { createOption } from "../../utility/utils.js";
 import { getCookie } from "../../utility/roleCookies.js";
+import { createRebuildMenu } from "./rebuildMenu.js";
 
 
 const menuCloser = async (event, openerElement, menuElement, subMenus, boundCloser, force = false) => {
@@ -111,7 +112,7 @@ const getBatchStatusClass = (batchData) => {
 }
 
 
-const createWheelRecord = async (wheelData, blocked = false) => {
+export const createWheelRecord = async (wheelData, blocked = false) => {
   const wheelRecord = document.createElement('li');
   let recordText = '-----------';
   let recordId = 'emptyWheel';
@@ -250,7 +251,8 @@ var wheelstackId = null;
 var selectRelated = [];
 var blockedRelated = [];
 var activeUserRole = null;
-var clearMarks = null
+var clearMarks = null;
+var rebuildRelatedElements = [];
 // Using to filter avail GRID's
 export var openedPlacementId = null;
 export var openedPlacementType = null;
@@ -319,6 +321,64 @@ export const createWheelstackMenu = async (
   const menu = document.createElement('div');
   menu.id = wheelstackData['_id'];
   menu.classList.add('wheelstack-menu');
+  rebuildRelatedElements = []; 
+  // + ALTERNATE MENU +
+  const alterButtonsContainer = document.createElement('li');
+  rebuildRelatedElements.push(alterButtonsContainer);
+  alterButtonsContainer.id = 'alterButtons';
+  alterButtonsContainer.classList.add('buttons-container');
+  alterButtonsContainer.addEventListener('click', event => {
+    if (alterButtonsContainer.classList.contains('open')) {
+      if (alterButtonsContainer !== event.target) {
+        return;
+      }
+      alterButtonsContainer.classList.remove('open');
+      alterButtonsContainer.childNodes.forEach(element => {
+          element.classList.add('hidden');
+      })
+    } else {
+      alterButtonsContainer.classList.add('open');
+      alterButtonsContainer.childNodes.forEach(element => {
+        element.classList.remove('hidden');
+      })
+    }
+  });
+
+  menu.appendChild(alterButtonsContainer);
+  //  + REBUILD MENU OPENER + 
+  const rebButton = document.createElement('button');
+  rebButton.classList.add('btn', 'hidden');
+  rebButton.id = 'rebuildButton';
+  rebButton.title = 'Изменить стопу';
+
+  let rebuildMenu = null;
+  rebButton.addEventListener('click', async event => {
+    rebuildMenu = await createRebuildMenu(menu, wheelstackData, dataBanks, rebuildRelatedElements, forceMenuClose);
+    menus['rebuildMenu'] = rebuildMenu;
+  })
+
+  const rebImage = document.createElement('img');
+  rebImage.alt = "Картинка переключения меню на пересоздание стопы";
+  rebImage.src = 'static/images/swap.png';
+  rebButton.appendChild(rebImage);
+  alterButtonsContainer.appendChild(rebButton);
+  //  - REBUILD MENU OPENER -
+  //  + DECONSTRUCT BUT +
+  const deconstructButton = document.createElement('button');
+  deconstructButton.classList.add('btn', 'btn-warning', 'hidden');
+  deconstructButton.id = 'deconstructButton';
+  deconstructButton.title = 'Разобрать стопу';
+  deconstructButton.addEventListener('click', event => {
+    console.log('kkk');
+
+  })
+  const decImage = document.createElement('img');
+  decImage.alt = "Картинка разбора стопы на свободные колёса";
+  decImage.src = 'static/images/deconstruct.png';
+  deconstructButton.appendChild(decImage);
+  alterButtonsContainer.appendChild(deconstructButton);
+  //  - DECONSTRUCT BUT -
+  // - ALTERNATE MENU -
   // TODO: complete rebuild :)
   // + MOVE FIELD +
   //  + FIRST MOVE CONTAINER +
@@ -667,7 +727,7 @@ export const createWheelstackMenu = async (
   if (wheelstackData['blocked'] && (ORDER_MOVE_TO_LABORATORY === blockingOrderData['orderType'])) {
     blockedWheelObjectId = blockingOrderData['affectedWheels']['source'][0];
   }
-  for (let wheelIndex = 5; wheelIndex > -1; wheelIndex -= 1) {
+  for (let wheelIndex = WHEELSTACK_WHEELS_LIMIT - 1; wheelIndex > -1; wheelIndex -= 1) {
     const wheelObjectId = wheelstackData['wheels'][wheelIndex];
     const wheelData = wheelsData[wheelObjectId];
     let wheelRecord = null;
@@ -760,6 +820,9 @@ const updateMenu = async (
   // When block will be lifted, we're going to reset wheels and show new data.
   // So, all we care is to delete expandable and show what's blocked.
   if (wheelstackData['blocked']) {
+    rebuildRelatedElements.forEach(element => {
+      element.classList.add('hidden');
+    })
     const newBlocked = wheelstackData['lastOrder'];
     if (blockingOrderId && newBlocked === blockingOrderId && blockingOrderData) {
       return;
@@ -799,6 +862,9 @@ const updateMenu = async (
     switchMoveBlocked(true);
   // `wheelstack` not blocked, but we still have previous `id` set == reset everything
   } else if (blockingOrderId) {
+    rebuildRelatedElements.forEach(element => {
+      element.classList.remove('hidden');
+    })
     if (clearMarks) {
       clearMarks();
     }

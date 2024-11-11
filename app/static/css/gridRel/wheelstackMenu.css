@@ -42,6 +42,7 @@
   background-color: white;
   font-size: 1.2rem;
   transition: background-color 0.2s ease;
+  z-index: 111;
 }
 
 .wheelstack-menu li.blocked {
@@ -71,7 +72,7 @@
 }
 
 /* First item gets no top border */
-.wheelstack-menu li:first-child {
+.wheelstack-menu li:nth-child(1) {
   border-top: none;
   /* border-top-left-radius: 6px;
   border-top-right-radius: 6px; */
@@ -134,6 +135,12 @@
   padding: 12px;
   min-height: 120px;
   place-items: center;
+}
+
+.wheelstack-buttons.horizontal {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: none;
+  min-height: 0px;
 }
 
 .wheelstack-buttons button {
@@ -202,8 +209,69 @@
   transform: translateY(-1px);
 }
 
-
 .wheelstack-menu li.expandable.open:hover {
   background-color: rgb(215, 215, 220); /* Slightly darker background */
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+}
+
+
+/* WTF this? :) */
+.wheelstack-menu li.buttons-container {
+  display: flex;
+  flex-direction: row;
+  height: 0px;
+  opacity: 1;
+  gap: 15px;
+  margin-top: 0px;
+  transition: height 0.5s ease-in-out, opacity 0.6s ease-in-out;
+  position: relative;
+  padding: 15px 0% 0% 0%;
+}
+
+.wheelstack-menu li.buttons-container.open {
+  height: 50px;
+  margin-bottom: 40px;
+  transition: height 0.5s ease-in-out, opacity 0.6s ease-in-out;
+  opacity: 1;
+  padding: 5% 20% 0% 20%;
+}
+
+.wheelstack-menu li.buttons-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0px);
+  opacity: 1;
+  border-width: 14px 30px;
+  border-style: solid;
+  border-color: transparent transparent #000000 transparent;
+  transition: height 0.5s ease-in-out, border-color 0.5s ease, opacity 0.6s ease-in-out;
+}
+
+.wheelstack-menu li.buttons-container.open::after {
+  bottom: -5px;
+  transform: translateX(-50%) translateY(40px);
+  transition: height 0.5s ease-in-out, border-color 0.5s ease, opacity 0.6s ease-in-out;
+  border-color: #000000 transparent transparent transparent;
+}
+
+.wheelstack-menu li.buttons-container:hover {
+  font-size: inherit;
+  background-color: inherit; 
+}
+
+.wheelstack-menu li.buttons-container button {
+  padding: 0% 2% 0% 2%;
+  height: 45px;
+  width: 48px;
+  /* background-color: rgb(240, 239, 239); */
+  opacity: 1;
+  transition: border-color 0.5s ease, opacity 0.6s ease-in-out;
+}
+
+.wheelstack-menu li.buttons-container button img {
+  width: 100%;
+  height: 100%;
+  opacity: 1;
 }

@@ -412,6 +412,8 @@ html, body {
 /* + SEARCH INPUTS + */
 .dropdown-item {
     cursor: pointer;
+    border: none !important;
+    font-size: 1.1rem !important;
 }
 .dropdown-item.active {
     background-color: #0468d3;
@@ -435,6 +437,7 @@ html, body {
     outline: none;              /* Remove any default outline */
 }
 
+
 .clear-btn {
     position: absolute;
     right: 10px;
@@ -447,6 +450,7 @@ html, body {
     line-height: 1;
     cursor: pointer;
     display: none; /* Hidden by default */
+    z-index: 100;
 }
 
 /* TODO: Bad decision, but simple :) Rebuild later */
@@ -514,7 +518,8 @@ td.batch-indicator {
 
 /* Hide elements by default */
 .hidden {
-    display: none;
+    display: none !important;
+    opacity: 0 !important;
 }
 
 .cant-be-hidden {

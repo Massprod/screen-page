@@ -116,14 +116,13 @@
   transform: translateX(-50%); /* Ensuring it's centered */
   border-width: 6px 14px; /* Adjust size */
   border-style: solid;
-  border-color: #333 transparent transparent transparent; /* Top color defines the triangle color */
+  border-color: #333 transparent transparent transparent;
   transition: border-color 0.3s ease;
 }
 
 .expand-ind.open::after {
   border-color: transparent transparent #333 transparent;
 }
-
 
 .batch-menu li.expandable {
   padding: 0;

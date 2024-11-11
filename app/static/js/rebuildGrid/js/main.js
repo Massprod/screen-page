@@ -1416,7 +1416,7 @@ const batchMenuOpener = async (event, openerElement, targetBatchNumber) => {
   return menu;
 }
 
-const updateSearcherData = (searcher, newData, useKey = null) => {
+export const updateSearcherData = (searcher, newData, useKey = null) => {
   // TODO: see why platform update without checking change date.
   if (useKey) {
     const data = [];

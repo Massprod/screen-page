@@ -1,4 +1,6 @@
 import Fuse from "../../fuse/fuse.js";
+import { BASIC_ATTRIBUTES, BASIC_INFO_MESSAGE_WARNING } from "../../uniConstants.js";
+import flashMessage from "../flashMessage/flashMessage.js";
 
 
 export default class BasicSearcher{
@@ -10,6 +12,9 @@ export default class BasicSearcher{
         resultCallback,
         clearCallback = null,
         menuCallback = null,
+        usedKey = null,
+        ignoredRecords = null,
+        // storeActualData = false,
     ) {
         this.searchForm = searchForm;
         this.searchField = searchField;
@@ -21,6 +26,9 @@ export default class BasicSearcher{
         this.openedMenu = null;
         this.fuse = null;
         this.fuseOptions = null;
+        this.ignoredRecords = ignoredRecords;
+        // this.storeActualData = storeActualData;
+        this.usedKey = usedKey;
         this.searchData = [];
         this.activeIndex = -1;
         this.#init();
@@ -35,26 +43,33 @@ export default class BasicSearcher{
                 this.resultsElement.classList.add('show');
             }
         })
+
         this.searchForm.addEventListener('submit', (event) => {
             event.preventDefault();
             this.triggerSubmitAction(this.searchField.value);
         });
-        document.addEventListener('click', (event) => {
+        this.menuClickCheck = (event) => {
             if (this.openedMenu && this.openedMenu.contains(event.target)) {
                 return;
             }
             if (!(this.resultsElement.contains(event.target)) && event.target !== this.searchField) {
+                this.resultsElement.contains(event.target)
                 this.resultsElement.innerHTML = '';
                 this.clearDependencies();
             }
-        })
+        }
+        document.addEventListener('click', this.menuClickCheck)
         if (this.searchFieldClearButton && this.clearCallback) {
             this.searchFieldClearButton.addEventListener('click', event => {
                 event.preventDefault();
-                this.searchField.value = '';
                 this.clearCallback();
+                this.searchField.value = '';
             })
         }
+    }
+
+    clearListeners() {
+        document.removeEventListener('click', this.menuClickCheck);
     }
 
     clearDependencies() {
@@ -62,12 +77,18 @@ export default class BasicSearcher{
         this.openedMenu = null;
     }
 
-    triggerSubmitAction(selectedValue) {
+    triggerSubmitAction(
+        selectedValue,
+        // assignAttributes = {},
+    ) {
         this.resultsElement.innerHTML = '';
-        this.clearDependencies();
-        this.openedMenu = null;
         this.searchField.value = selectedValue;
+        // for (let attribute of Object.keys(assignAttributes)) {
+        //     this.searchField.setAttribute(attribute, JSON.stringify(assignAttributes[attribute]));
+        // }
         this.resultCallback(selectedValue);
+        this.openedMenu = null;
+        this.clearDependencies();
     }
 
     updateActiveItem(items) {
@@ -90,25 +111,41 @@ export default class BasicSearcher{
             this.resultsElement.appendChild(emptyItem);
         } else {
             this.searchData.forEach(item => {
+                const itemData = this.usedKey ? item[this.usedKey] : item;
+                if (this.ignoredRecords && this.searchField.value !== itemData && itemData in this.ignoredRecords) {
+                    return;
+                };
                 const li = document.createElement('li');
-                li.classList.add('dropdown-item');
-                li.textContent = item;
+                li.classList.add('dropdown-item')
+                li.textContent = itemData;
+                // let newAttributes = {}
+                // if (this.storeActualData) {
+                //     newAttributes[BASIC_ATTRIBUTES.WHEELSTACK_DATA] = item;
+                // }
                 li.addEventListener('click', () => {
-                    this.searchField.value = item;
-                    this.resultsElement.innerHTML = '';
+                    this.triggerSubmitAction(
+                        itemData,
+                        // newAttributes,
+                    );
                     this.clearDependencies();
-                    this.triggerSubmitAction(item);
                 })
                 // + BATCH MENU +
                 if (this.menuCallback) {
                     li.addEventListener('contextmenu', async (event) => {
                         event.preventDefault();
-                        this.openedMenu = await this.menuCallback(event, li, item);
+                        this.openedMenu = await this.menuCallback(event, li, itemData);
                     })
                 }
                 // - BATCH MENU -
                 this.resultsElement.appendChild(li);
             })    
+        }
+
+        if (0 === this.resultsElement.childNodes.length) {
+            const emptyItem = document.createElement('li');
+            emptyItem.textContent = 'Нет совпадений';
+            emptyItem.classList.add('dropdown-item', 'text-muted', 'p-2');
+            this.resultsElement.appendChild(emptyItem);
         }
 
         this.resultsElement.classList.add('show');
@@ -138,21 +175,33 @@ export default class BasicSearcher{
             if (0 === curResults.length) {
                 const emptyItem = document.createElement('li');
                 emptyItem.textContent = 'Нет совпадений';
-                emptyItem.classList.add('text-muted', 'p-2');
+                emptyItem.classList.add('dropdown-item', 'text-muted', 'p-2');
                 this.resultsElement.appendChild(emptyItem);
             } else {
                 curResults.forEach((result, index) => {
+                    const searchRes = result.item;
+                    const resultData = this.usedKey ? searchRes[this.usedKey] : searchRes;
+                    if (this.ignoredRecords && this.searchField.value !== resultData && resultData in this.ignoredRecords) {
+                        return;
+                    }
                     const resultItem = document.createElement('li');
                     resultItem.classList.add('dropdown-item');
-                    resultItem.textContent = result.item;
+                    // let newAttributes = {};
+                    // if (this.storeActualData) {
+                    //     newAttributes[BASIC_ATTRIBUTES.WHEELSTACK_DATA] = searchRes;
+                    // }
+                    resultItem.textContent = resultData;
                     resultItem.addEventListener('click', () => {
-                        this.triggerSubmitAction(result.item);
+                        this.triggerSubmitAction(
+                            resultData,
+                            //  newAttributes,
+                        );
                     });
                     // + BATCH MENU +
                     if (this.menuCallback) {
                         resultItem.addEventListener('contextmenu', async (event) => {
                             event.preventDefault();
-                            this.openedMenu = await this.menuCallback(event, resultItem, result.item);
+                            this.openedMenu = await this.menuCallback(event, resultItem, resultData);
                         })
                     }
                     // - BATCH MENU -
@@ -160,6 +209,14 @@ export default class BasicSearcher{
                 });
             }
         }
+
+        if (0 === this.resultsElement.childNodes.length) {
+            const emptyItem = document.createElement('li');
+            emptyItem.textContent = 'Нет совпадений';
+            emptyItem.classList.add('dropdown-item', 'text-muted', 'p-2');
+            this.resultsElement.appendChild(emptyItem);
+        }
+
         if (curQuery) {
             this.resultsElement.classList.add('show');
         } else {

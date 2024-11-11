@@ -1,6 +1,11 @@
-export const mainAddress = "/api/grid";
-const authMainAddress = "/api/auth";
-const serviceDom = "";
+// export const mainAddress = "/api/grid";
+// const authMainAddress = "/api/auth";
+// const serviceDom = "";
+
+const serviceDom = 'http://192.168.54.238:5000';
+const authMainAddress = 'http://localhost:8080/api/auth';
+export const mainAddress = 'http://localhost:8000/api/grid';
+
 
 
 export const loginPage = `${serviceDom}/`;
@@ -21,6 +26,17 @@ export const USED_PLATFORN_NAME = 'pmkBase1';
 
 // + NAMES +
 export const EXTRA_ELEMENT_NAME = 'extra';
+
+export const WHEEL_STATUSES = {
+    WH_LABORATORY: 'laboratory',
+    SHIPPED: 'shipped',
+    GRID: 'grid',
+    PLATFORM: 'basePlatform',
+    REJECTED: 'rejected',
+    STORAGE: 'storage',
+    UNPLACED: 'unplaced',
+} 
+
 
 export const PLACEMENT_TYPES = {
     BASE_PLATFORM: 'basePlatform',
@@ -77,6 +93,7 @@ export const BASIC_ATTRIBUTES = {
     BLOCKING_ORDER: 'data-blocking-order',
     ORDER_TYPE: 'data-order-type',
     WHEELSTACK_ID: 'data-wheelstack-id',
+    WHEELSTACK_DATA: 'data-wheelstack-data',
 }
 // - BASIC ATTRIBUTES -
 
@@ -113,6 +130,8 @@ export const BACK_URL  = {
     POST_CANCEL_ORDER: `${mainAddress}/orders/cancel`,
     GET_GRID_LAST_CHANGE: `${mainAddress}/grid/change_time`,
     GET_PLATFORM_LAST_CHANGE: `${mainAddress}/platform/change_time`,
+    GET_ALL_WHEELS: `${mainAddress}/wheels/all`,
+    PATCH_RECONSTRUCT_WHEELSTACK: `${mainAddress}/wheelstacks/reconstruct`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';
@@ -316,4 +335,11 @@ export const BASIC_INFO_MESSAGE_WARNING = {
     duration: 1500              // Duration in milliseconds
 }
 
-
+export const BASIC_INFO_MESSAGE_ERROR = {
+    message: '',
+    color: '#ffffff',           // White text color
+    backgroundColor: '#dc3545', // Red background for error
+    fontSize: '12px',           // Default font size
+    fontFamily: 'Arial, sans-serif', // Default font family
+    duration: 1250              // Duration in milliseconds
+};
