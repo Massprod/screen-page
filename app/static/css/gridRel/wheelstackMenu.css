@@ -149,8 +149,8 @@
 }
 
 .wheelstack-buttons button.return-view {
-  top: 1%;
-  left: 1%;
+  top: 3%;
+  left: 3%;
   position: absolute;
   max-width: 30px;
   max-height: 30px;
@@ -167,7 +167,7 @@
 
 .batch-checkbox {
   position: absolute;
-  top: 1%;
+  top: 3%;
   right: 5px;
   width: 22px;
   height: 22px;
@@ -175,7 +175,7 @@
 
 .batch-checkbox-label {
   position: absolute;
-  top: 1%;
+  top: 3%;
   right: 35px;
 }
 
