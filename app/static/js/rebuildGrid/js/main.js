@@ -60,6 +60,7 @@ import {
   openedPlacementName,
  } from "../../gridRel/wheelstackMenu/wheelstackMenu.js";
 import BasicSearcher from "../../utility/search/basicSearcher.js";
+import { openWheelCreationMenu } from "../../gridRel/wheelCreation/mainMenu.js";
 
 
 // + BAD PRESET +
@@ -351,6 +352,22 @@ searchInputsViewSlider.addEventListener('click', event => {
     leftArrow, rightArrow, true, 500
   );
 })
+//  + CREATION SLIDER +
+const creationContainer = document.getElementById('creationContainer');
+const creationButtonsContainer = document.getElementById('creationButtons');
+const creationContainerSlider = document.getElementById('creationViewSlider');
+creationContainerSlider.addEventListener('click', event => {
+  viewSliderChange(
+    'expanded', creationContainerSlider, creationButtonsContainer, leftArrow, rightArrow, true
+  )
+})
+//   + CREATION BUTTONS +
+const wheelCreationBut = document.getElementById('createWheel');
+wheelCreationBut.addEventListener('click', async (event) => {
+  await openWheelCreationMenu();
+})
+//   - CREATION BUTTONS -
+//  - CREATION SLIDER -
 //  - SEARCH INPUTS -
 // - VIEW BUTTONS CONTAINER -
 
@@ -639,7 +656,7 @@ const zoomer = new ZoomAndDrag({
 var gridView = false;
 gridContainer.appendChild(gridPlacement.element);
 const gridActiveElements = new Set([
-  topContainer, gridContainer, viewContainer, searchInputsViewContainer, gridSpanName
+  topContainer, gridContainer, viewContainer, searchInputsViewContainer, gridSpanName, creationContainer
 ])
 const gridInactiveElements = new Set([gridsContainer]);
 

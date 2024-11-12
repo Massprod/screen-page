@@ -134,6 +134,7 @@ export const BACK_URL  = {
     GET_ALL_WHEELS: `${mainAddress}/wheels/all`,
     PATCH_RECONSTRUCT_WHEELSTACK: `${mainAddress}/wheelstacks/reconstruct`,
     PATCH_DECONSTRUCT_WHEELSTACK: `${mainAddress}/wheelstacks/deconstruct`,
+    POST_CREATE_WHEEL: `${mainAddress}/wheels`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';

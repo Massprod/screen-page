@@ -6,6 +6,7 @@
     <title>Приямок</title>
     {% include "favicon.html" %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/gridRel/basicStyle.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/usersPage/css/basicStyle.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/gridRel/placementStyle.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='js/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sharedStyle.css') }}">
@@ -56,6 +57,14 @@
                 <!-- GRID SELECTOR -->
             </div>
             <div id="gridContainer" class="grid-container hidden"></div>
+            <!-- CREATION SLIDER -->
+             <div id="creationContainer" class="extra-bot-container third hidden">
+                <div id="creationButtons" class="extra-buttons-container">
+                    <button id="createWheel" title="Создать колесо" class="extra-button" alt="Кнопка создания нового колеса"><img src="{{ url_for('static', filename='images/addWheel.png')}}" alt="Картинка создания нового колеса"></button>
+                </div>
+                <button id="creationViewSlider" title="Опции создания" class="extra-button slider-button" alt="Кнопка отображения кнопок создания"><img src="{{ url_for('static', filename='images/right-arrow.png')}}" alt="Картинка переключения видимости кнопок управления видом"></button>
+             </div>
+            <!-- CREATION SLIDER -->
             <!-- PAGE SEARCHERS -->
              <div id="searchInputsContainer" class="extra-bot-container second hidden">
                 <div id="searchInputs" class="extra-buttons-container">

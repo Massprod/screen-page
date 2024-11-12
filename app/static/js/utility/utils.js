@@ -72,3 +72,55 @@ export const createOption = async (optionValue, optionName, selected = false) =>
 	}
 	return newOption;
 }
+
+
+export const preventOverLengthInput = (element, event) => {
+    if (element.maxLength < element.value.length) {
+        event.preventDefault();
+        return false;
+    }
+    return true;
+}
+
+
+export const preventNonDigitInput = (event) => {
+    if (
+        event.key === 'Backspace' ||
+        event.key === 'Delete' ||
+        event.key === 'ArrowLeft' ||
+        event.key === 'ArrowRight' ||
+        event.key === 'Tab' ||
+        (event.ctrlKey && (event.key === 'a' || event.key === 'c' || event.key === 'v' || event.key === 'x' || event.key === 'z')) // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    ) {
+        return true; // Allow these keys
+    }
+
+    // Prevent the default action if the key is not a digit (0-9)
+    if (!/^[0-9]$/.test(event.key)) {
+        event.preventDefault();
+        return false;
+    }
+}
+
+
+export const preventCopyInput = (element) => {
+    // Remove any non-digit characters after a paste or input
+    element.value = element.value.replace(/\D/g, '');
+    
+        // Enforce the max length by truncating the value if it exceeds 50 characters
+    if (element.maxLength && element.value.length > element.maxLength) {
+        inputBatchNumber.value = inputBatchNumber.value.slice(0, element.maxLength);
+    }
+}
+
+
+export const assignValidators = (element, validators = {}) => {
+    element.addEventListener('keydown', (event) => {
+      if (preventOverLengthInput(element)) {
+        preventNonDigitInput(event);
+      };
+    });
+    element.addEventListener('input', (event) => {
+      preventCopyInput(element);
+    });
+  }
