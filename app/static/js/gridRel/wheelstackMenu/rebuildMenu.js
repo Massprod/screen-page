@@ -19,6 +19,7 @@ var availableWheels = [];
 var usedRecords = {};
 var wheelsUpdateInterval = null;
 var mainCloser = null;
+var openerExistInterval = null;
 
 
 // + WHEELS VALIDATION +
@@ -104,6 +105,10 @@ const menuCloser = async (event, openerElement, menuElement, subMenus, boundClos
   if (wheelsUpdateInterval) {
     clearInterval(wheelsUpdateInterval);
     wheelsUpdateInterval = null;
+  }
+  if (openerExistInterval) {
+    clearInterval(openerExistInterval);
+    openerExistInterval = null;
   }
   wheelSearchers.forEach(searcher => {
     searcher.clearListeners();
@@ -335,10 +340,13 @@ export const createRebuildMenu = async (originalMenu, openerData, dataBanks, rem
   maintainAvailableWheels();
   menu.appendChild(wheelsList);
 
-  const openerExistInterval = setInterval(() => {
+  openerExistInterval = setInterval(() => {
     const openerExists = dataBanks['wheelstacks'][openerData['_id']];
+    if (originalMenu && openerExists) {
+      return;
+    }
     const openerBlocked = openerExists['blocked'];
-    if (originalMenu && openerExists && !(openerBlocked)) {
+    if (!(openerBlocked)) {
       return;
     }
     removeDependedElements.forEach( element => {
