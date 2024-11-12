@@ -11,6 +11,7 @@ import {
   BACK_URL,
   BASIC_INFO_MESSAGE_ERROR,
   BASIC_INFO_MESSAGE_PRESET,
+  BASIC_TEMPO_STORAGE,
 } from "../../uniConstants.js";
 import updateMenuPosition from "../../utility/adjustContainerPosition.js";
 import { createBatchMenu } from "../batchMenu/batchMenu.js";
@@ -18,7 +19,13 @@ import { assignBatchExpandableButtons } from "../../rebuildGrid/js/main.js";
 import { createOrderMenu } from "../orderMenu/orderMenu.js";
 import { focusTableOrder } from "../ordersTable/orderRecords.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
-import { createLaboratoryOrderGrid, createOrderMoveWholestackFromBaseGrid, createProRejOrderBulk, createProRejOrderGrid } from "../../utility/ordersCreation.js";
+import {
+  createLaboratoryOrderGrid,
+  createOrderMoveWholestackFromBaseGrid,
+  createProRejOrderBulk,
+  createProRejOrderGrid,
+  createOrderMoveWholestackToStorage,
+} from "../../utility/ordersCreation.js";
 import { createOption } from "../../utility/utils.js";
 import { getCookie } from "../../utility/roleCookies.js";
 import { createRebuildMenu } from "./rebuildMenu.js";
@@ -372,7 +379,23 @@ export const createWheelstackMenu = async (
     alterButtonsContainer.appendChild(rebButton);
     //  - REBUILD MENU OPENER -
     // TODO: ADD send to storage button
-    // ---
+    // + TEMPO STORAGE BUT +
+    const tempoStorageBut = document.createElement('button');
+    tempoStorageBut.classList.add('btn', 'btn-secondary', 'hidden');
+    tempoStorageBut.id = 'tempoStorageButton';
+    tempoStorageBut.title = 'Перенос во временное хранилище';
+    // Simply throw everything into our dedicated storage to use later.
+    tempoStorageBut.addEventListener('click', async (event) => {
+      const orderResp = await createOrderMoveWholestackToStorage(
+        wheelstackData, null, BASIC_TEMPO_STORAGE 
+      );
+    });
+    const tempoStorageImg = document.createElement('img');
+    tempoStorageImg.alt = "Картинка выгрузки стопы во временное хранилище";
+    tempoStorageImg.src = 'static/images/arrowUp.png';
+    tempoStorageBut.appendChild(tempoStorageImg);
+    alterButtonsContainer.appendChild(tempoStorageBut);
+    // - TEMPO STORAGE BUT -
     //  + DECONSTRUCT BUT +
     const deconstructButton = document.createElement('button');
     deconstructButton.classList.add('btn', 'btn-warning', 'hidden');
@@ -666,7 +689,7 @@ export const createWheelstackMenu = async (
       moveOutsideButtonsContainer, batchCheckbox, batchCheckboxLabel
     ]);
     moveOutsideButton.addEventListener('click', event => {
-      if (PLACEMENT_TYPES.GRID !== sourcePlacement.placementType) {
+      if (PLACEMENT_TYPES.BASE_PLATFORM === sourcePlacement.placementType) {
         const showMes = BASIC_INFO_MESSAGE_WARNING;
         showMes.message = '<b>Выгрузка с челноков запрещена</b><br>Сначало перенесите стопу в <b>Приямок</b>';
         showMes.duration = 3000;

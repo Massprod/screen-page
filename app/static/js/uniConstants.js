@@ -18,6 +18,7 @@ export const historyPage = `${serviceDom}/history`;
 // PRESET NAMES
 export const BASIC_PMK_PLATFORM_PRESET = `pmkBasePlatform`;
 export const BASIC_PMK_GRID_PRESET = `pmkGrid`;
+export const BASIC_TEMPO_STORAGE = 'tempoStorage';
 
 // + REMOVE SELECTORS +
 export const USED_PMK_GRID_NAME = 'pmkGrid1';
