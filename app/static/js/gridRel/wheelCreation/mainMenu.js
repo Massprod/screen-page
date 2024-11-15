@@ -5,7 +5,7 @@ import { assignValidators } from "../../utility/utils.js";
 import { createConfirmationMenu } from "../../utility/confirmForm.js";
 
 
-const showMenu = (menuElement) => {
+export const showMenu = (menuElement) => {
   let overlay = document.getElementById('blurOverlay');
 
   if (!overlay) {
@@ -20,7 +20,7 @@ const showMenu = (menuElement) => {
   overlay.style.display = 'flex';
 }
 
-const closeMenu = () => {
+export const closeMenu = () => {
   const formOverlay = document.getElementById('blurOverlay');
   formOverlay.remove();
 }
@@ -115,12 +115,10 @@ const createMenuElement = (minInputLength = 4, maxInputLength = 20) => {
   const menuContainer = document.createElement('div');
   menuContainer.classList.add('form-container');
 
-  const mainForm = document.createElement('form');
-  menuContainer.appendChild(mainForm);
   // + TITLE + 
   const menuTitle = document.createElement('h4');
   menuTitle.classList.add('text-center');
-  menuTitle.textContent = 'Новое колесо';
+  menuTitle.textContent = 'Добавление колеса';
   menuContainer.appendChild(menuTitle);
   // - TITLE -
   // + BATCH CONTAINER +
@@ -204,7 +202,6 @@ const createMenuElement = (minInputLength = 4, maxInputLength = 20) => {
     }
     const wheelData = gatherValidateWheelData(menuContainer);
     if (!wheelData) {
-
       const showMsg = BASIC_INFO_MESSAGE_WARNING;
       showMsg.message = 'Заполните обязательные поля:<br><b>Номер партии</b> и <b>Номер маркировки</b>';
       showMsg.duration = 3000;

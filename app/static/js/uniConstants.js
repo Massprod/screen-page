@@ -1,10 +1,7 @@
-// export const mainAddress = "/api/grid";
-// const authMainAddress = "/api/auth";
-// const serviceDom = "";
-
-const serviceDom = 'http://192.168.54.238:5000';
-const authMainAddress = 'http://localhost:8080/api/auth';
-export const mainAddress = 'http://localhost:8000/api/grid';
+export const mainAddress = "/api/grid";
+const authMainAddress = "/api/auth";
+const serviceDom = "";
+export const gridRelSocketAddress = `wss//${window.location.host}/api/grid/ws/grid_page`;
 
 
 
@@ -150,7 +147,7 @@ export const BASIC_PASSWORD_MAX_LENGTH = 50;
 // auth-token cookie
 export const AUTH_COOKIE_NAME = 'auth-token';
 export const AUTH_COOKIE_BASIC_EXPIRE = 3 * 60;
-export const COOKIE_UPDATE_INTERVAL = 1 * 30 * 1000;
+export const COOKIE_UPDATE_INTERVAL = 1 * 60 * 1000;
 // cookie Messages
 export const AUTH_COOKIE_NOT_FOUND = 'auth-cookie-not-found';
 export const AUTH_COOKIE_SESSION_EXPIRED = 'auth-cookie-session-expired';
@@ -159,12 +156,18 @@ export const AUTH_COOKIE_INVALID ='auth-cookie-invalid';
 // user-role cookie.
 export const USER_ROLE_COOKIE_NAME = 'user-role';
 export const USER_ROLE_COOKIE_BASIC_EXPIRE = 3 * 60;
-export const USER_ROLE_COOKIE_UPDATE_INTERVAL = 1 * 5 * 1000;
+export const USER_ROLE_COOKIE_UPDATE_INTERVAL = 1 * 60 * 1000;
 // chosen-grid-platform cookie
 // stored as `{active-user}-saved-{type} = placementId;presetId`
 export const SAVED_GRID_COOKIE_NAME = 'saved-grid';
 export const SAVED_PLATFORM_COOKIE_NAME = 'saved-platform';
 export const ACTIVE_USERNAME_COOKIE_NAME = 'active-user';
+// + EXTRA INTERVALS +
+export const EXTRA_INTERVALS = {
+    WHEELSTACK_CREATION_MENU_BATCHES: 500,
+    WHEELSTACK_CREATION_MENU_WHEELS: 500,
+}
+// - EXTRA INTERVALS -
 
 export const BASIC_COOKIES = [
     AUTH_COOKIE_NAME, USER_ROLE_COOKIE_NAME, ACTIVE_USERNAME_COOKIE_NAME
@@ -346,3 +349,39 @@ export const BASIC_INFO_MESSAGE_ERROR = {
     fontFamily: 'Arial, sans-serif', // Default font family
     duration: 1250              // Duration in milliseconds
 };
+
+
+export const TOM_SETTINGS = {
+    WHEELSTACK_CREATION_BATCHES: {
+        searchField: 'batchNumber',
+        valueField: 'batchNumber',
+        labelField: 'batchNumber',
+        maxOptions: 250,
+        highlight: true,
+        placeholder: 'Выберите партию стопы',
+        render: {
+            option: function(data, escape) {
+                return '<div class="check-batch-option">' + escape(data.batchNumber) + '</div>';
+            },
+            item: function(data, escape) {
+                return '<div class="check-item">' + escape(data.batchNumber) + '</div>'
+            }
+        },
+    },
+    WHEELSTACK_CREATION_WHEELS: {
+        searchField: 'wheelId',
+        valueField: '_id',
+        labelField: 'wheelId',
+        maxOptions: 250,
+        highlight: true,
+        placeholder: 'Выбор колеса',
+        render: {
+            option: function(data, escape) {
+                return '<div class="check-option">' + escape(data.wheelId) + '</div>';
+            },
+            item: function(data, escape) {
+                return '<div class="check-item">' + escape(data.wheelId) + '</div>'
+            }
+        },
+    },
+}

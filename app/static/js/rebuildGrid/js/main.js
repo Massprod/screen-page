@@ -61,7 +61,13 @@ import {
  } from "../../gridRel/wheelstackMenu/wheelstackMenu.js";
 import BasicSearcher from "../../utility/search/basicSearcher.js";
 import { openWheelCreationMenu } from "../../gridRel/wheelCreation/mainMenu.js";
+import { initGridRelWebsocket } from "./websocketRel.js";
+import { openWheelstackCreationMenu } from "../../gridRel/wheelstackCreation/mainMenu.js";
 
+
+// + WEBSOCKET EXP +
+export const gridSocket = await initGridRelWebsocket();
+// - WEBSOCKET EXP -
 
 // + BAD PRESET +
 // ROLE COOKIE
@@ -154,6 +160,7 @@ setInterval( () => {
 // - MAINTAIN ORDERS DATA -
 
 // + MAINTAIN BATCHES DATA +
+// TODO: same change to WS
 const maintainBatchesData = async (initial = false) => {
   Object.keys(_allBatches).forEach(async batchId => {
     const dataURL = `${BACK_URL.GET_BATCH_DATA}/${batchId}`;    
@@ -342,6 +349,7 @@ viewButtonsSlider.addEventListener('click', event => {
   );
 })
 //  - PAGE VIEW -
+// - VIEW BUTTONS CONTAINER -
 //  + SEARCH INPUTS +
 const searchInputsViewContainer = document.getElementById('searchInputsContainer');
 const searchInputsViewButtonsContainer = document.getElementById('searchInputs');
@@ -352,6 +360,7 @@ searchInputsViewSlider.addEventListener('click', event => {
     leftArrow, rightArrow, true, 500
   );
 })
+//  - SEARCH INPUTS -
 //  + CREATION SLIDER +
 const creationContainer = document.getElementById('creationContainer');
 const creationButtonsContainer = document.getElementById('creationButtons');
@@ -366,10 +375,14 @@ const wheelCreationBut = document.getElementById('createWheel');
 wheelCreationBut.addEventListener('click', async (event) => {
   await openWheelCreationMenu();
 })
+const wheelstackCreationBut = document.getElementById('createWheelstack');
+wheelstackCreationBut.addEventListener('click', async (event) => {
+  await openWheelstackCreationMenu();
+})
 //   - CREATION BUTTONS -
 //  - CREATION SLIDER -
-//  - SEARCH INPUTS -
-// - VIEW BUTTONS CONTAINER -
+
+
 
 const setGridFullscreen = (elements) => {
   let fullScreen = true;
@@ -683,6 +696,7 @@ const invokeGridSelectAction = async () => {
     gridBatches = {};
     gridOrders = {};
     gridWheelstacks = {};
+    // TODO: initial WS message to get data
     await updatePlacement(gridPlacement, placementId, true);
   }
   // ---
@@ -696,6 +710,8 @@ const invokeGridSelectAction = async () => {
     if (gridSelectActive) {
       return;
     }
+    // TODO: WS message to get data with interval
+    //  using wrapper to update placement with new data, we can call it from websocketRel.
     await updatePlacement(gridPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL)
 }

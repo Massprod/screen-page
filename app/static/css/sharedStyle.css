@@ -48,14 +48,81 @@
 }
 
 @keyframes blink {
-  0% { background-color: transparent; }
+  0% { background-color: rgba(255, 0, 0, 0.1); }
   25% { background-color: rgba(255, 0, 0, 0.2); } /* Adjust color and opacity as needed */
   50% { background-color: rgba(255, 0, 0, 0.4); }
   75% { background-color: rgba(255, 0, 0, 0.2); }
-  100% { background-color: transparent; }
+  100% { background-color: rgba(255, 0, 0, 0.1); }
 }
 
 /* Apply blink animation for delete effect */
 .delete-blink {
-  animation: blink 1s ease-in-out infinite;
+  animation: blink 1.3s ease-in-out infinite;
+}
+
+.delete-blink-slow {
+  animation: blink 3s ease-in-out infinite;
+}
+
+
+
+.check {
+  border: none !important;
+  justify-content: center !important;
+  padding: 8px 0% 8px 0% !important;
+  border-bottom: 2.5px black dashed !important;
+  /* width: 50% !important; */
+  font-size: 1.3rem !important;
+}
+
+.check-batch {
+  font-size: 1.3rem !important;
+}
+
+.check-batch-option {
+  font-size: 1.2rem !important;
+  margin: 8px 0px 8px 0px;
+  border-bottom: 1.1px whitesmoke solid;
+}
+
+.check-input {
+  font-size: 1.2rem !important;
+}
+
+
+.check-item {
+  background-color: rgb(249, 238, 218); /* Light beige color */
+  color: #333; /* Dark text color for contrast */
+  padding: 4px 8px; /* Add padding for spacing */
+  border-radius: 6px; /* Rounded corners */
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  font-weight: 500; /* Medium font weight for readability */
+  font-size: 1.2rem; /* Adjust font size as needed */
+  display: inline-block; /* Make it inline, like a label */
+}
+
+
+.check-option {
+  font-size: 1.2rem !important;
+  text-align: center;
+  margin: 8px 0px 8px 0px;
+  border-bottom: 1.6px whitesmoke solid;
+}
+
+.wheels-text {
+  padding: 8px 8px 8px 0px;
+}
+
+.wheels-cont {
+  padding: 0% 20% 0% 10%;
+}
+
+.wheels-wrapper {
+  font-size: 1.3rem !important;
+  display: flex;
+  flex-direction: row;
+}
+
+.wheels-wrapper .ts-wrapper {
+  width: 100% !important;
 }

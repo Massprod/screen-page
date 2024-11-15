@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/gridRel/placementStyle.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='js/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sharedStyle.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
 </head>
 <body>
     <div class="main-page-container">
@@ -61,6 +62,7 @@
              <div id="creationContainer" class="extra-bot-container third hidden">
                 <div id="creationButtons" class="extra-buttons-container">
                     <button id="createWheel" title="Создать колесо" class="extra-button" alt="Кнопка создания нового колеса"><img src="{{ url_for('static', filename='images/addWheel.png')}}" alt="Картинка создания нового колеса"></button>
+                    <button id="createWheelstack" title="Создать стопу" class="extra-button" alt="Кнопка создания новой стопы"><img src="{{ url_for('static', filename='images/addWheelstack.png')}}" alt="Картинка создания новой стопы"></button>
                 </div>
                 <button id="creationViewSlider" title="Опции создания" class="extra-button slider-button" alt="Кнопка отображения кнопок создания"><img src="{{ url_for('static', filename='images/right-arrow.png')}}" alt="Картинка переключения видимости кнопок управления видом"></button>
              </div>
@@ -101,5 +103,6 @@
         </div>
     </div>
     <script type="module" src="{{  url_for('static', filename='js/rebuildGrid/js/main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 </body>
 </html>
