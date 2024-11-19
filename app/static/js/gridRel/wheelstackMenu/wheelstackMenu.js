@@ -269,18 +269,22 @@ export var openedPlacementId = null;
 export var openedPlacementType = null;
 export var openedPlacementName = null;
 export var moveSelectActive = false;
+export const triggerMoveSelectActive = (state) => {
+  moveSelectActive = state;
+}
+
 // --
 export const createWheelstackMenu = async (
   event, openerElement, dataBanks = {}, markers = {}, ordersTable = null, placement, sourcePlacement) => {
   if (!('wheelstacks' in dataBanks)) {
     throw new Error('`wheelstacks` data bank is not provided');
-  }
+  };
   if (!('orders' in dataBanks)) {
     throw new Error('`orders` data bank is not provided');
-  }
+  };
   if (!('wheels' in dataBanks)) {
     throw new Error('`wheels` data bank is not provided');
-  }
+  };
   if (moveSelectActive && !openerElement.classList.contains('active-move-select')) {
     if (!openerElement.classList.contains('move-possible')) {
       const warnMessage = BASIC_INFO_MESSAGE_WARNING;
@@ -289,10 +293,10 @@ export const createWheelstackMenu = async (
       flashMessage.show(warnMessage);
     }
     return;
-  }
+  };
   if (wheelstackMenuUpdatingInterval) {
     forceMenuClose(null, true);
-  }
+  };
   // + USER ROLE +
   activeUserRole = await getCookie(USER_ROLE_COOKIE_NAME);
   // - USER ROLE -
@@ -319,7 +323,7 @@ export const createWheelstackMenu = async (
       }
     };
     return;
-  }
+  };
   // used to filter availGrids
   openedPlacementId = sourcePlacement.placementId;
   openedPlacementType = sourcePlacement.placementType;
@@ -410,7 +414,7 @@ export const createWheelstackMenu = async (
         forceMenuClose(event, true);
         if (corResp.ok) {
           const showMsg = BASIC_INFO_MESSAGE_PRESET;
-          showMsg.message = `Колёса содержащие в выбранной стопе перенесены в свободные колеса<br><b>Номер партии колёс:</b> ${wheelstackData['batchNumber']}`;
+          showMsg.message = `Колёса выбранной стопы перенесены в свободные колеса<br><b>Номер партии колёс:</b> ${wheelstackData['batchNumber']}`;
           showMsg.duration = 2000;
           flashMessage.show(showMsg);
         }
@@ -501,7 +505,7 @@ export const createWheelstackMenu = async (
           flashMessage.show(emptyMessage);
           clearMarks();
           return;
-        }
+        };
         const createMoveOrder = (element) => {
           return (event) => {
             if (!(element.classList.contains(`${emptyCellMarkClass}`))
@@ -520,7 +524,7 @@ export const createWheelstackMenu = async (
             createOrderMoveWholestackFromBaseGrid(wheelstackData, destinationData, mergeType);
             clearMarks();
           }
-        }
+        };
         emptyCells.forEach(element => {
           if (element.classList.contains(`${emptyCellMarkClass}`)) {
             return;

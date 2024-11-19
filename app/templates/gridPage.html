@@ -46,7 +46,6 @@
         <div id="botContainer" class="main-page-bottom-container">
             <button id="switchViewGrid" title="Сменить активный вид приямка" class="btn switch-view grid hidden" alt="Сменить активный вид приямка"><img src="{{ url_for('static', filename='images/show.png') }}" alt="Картинка переключения видимости приямка"></button>
             <div id="gridsContainer" class="grids-container select-active">
-                <!-- <img class="logo logo-grid cant-be-hidden" src="{{ url_for('static', filename='images/pmk_emblem.png') }}"> -->
                 <!-- GRID SELECTOR -->
                 <div id="gridSelectInputGroup" title="Выбор приямка для отображения" class="input-group input-group-lg mb-3 justify-content-center hidden">
                     <select id="gridsSelector" class="form-select border-secondary fw-bold select-grid" title="Выбор приямка для отображения" alt="Выбор приямка для отображения">
@@ -63,9 +62,11 @@
                 <div id="creationButtons" class="extra-buttons-container">
                     <button id="createWheel" title="Создать колесо" class="extra-button" alt="Кнопка создания нового колеса"><img src="{{ url_for('static', filename='images/addWheel.png')}}" alt="Картинка создания нового колеса"></button>
                     <button id="createWheelstack" title="Создать стопу" class="extra-button" alt="Кнопка создания новой стопы"><img src="{{ url_for('static', filename='images/addWheelstack.png')}}" alt="Картинка создания новой стопы"></button>
+                    <select id="tomTargetTempoStorage"></select>
+                    <button id="wheelstackStorageMenu" title="Меню выбранной стопы" class="extra-button" alt="Кнопка открытия меню стопы хранилища"><img src="{{ url_for('static', filename='images/topRight.png')}}" alt="Картинка открытия меню стопы"></button>
                 </div>
                 <button id="creationViewSlider" title="Опции создания" class="extra-button slider-button" alt="Кнопка отображения кнопок создания"><img src="{{ url_for('static', filename='images/right-arrow.png')}}" alt="Картинка переключения видимости кнопок управления видом"></button>
-             </div>
+            </div>
             <!-- CREATION SLIDER -->
             <!-- PAGE SEARCHERS -->
              <div id="searchInputsContainer" class="extra-bot-container second hidden">

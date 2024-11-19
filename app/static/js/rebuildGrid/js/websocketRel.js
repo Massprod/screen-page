@@ -10,6 +10,7 @@ import {
   wheelTomSelectors,
 } from "../../gridRel/wheelstackCreation/mainMenu.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
+import { handleTempoStorageUpdate } from "../../gridRel/tempoStorageSelector/tempoStorageSelector.js";
 // - MAYBE CHANGE -
 
 
@@ -102,6 +103,25 @@ const handleAvailableWheelsUnplaced = (newData) => {
 };
 // - WHEELSTACK CREATION -
 
+// + TEMPO STORAGE +
+export const reqStorageExpandedData = (socket, storageName, lastChange) => {
+  const reqData = {
+    'type': 'gather',
+    'filter': {
+      'task': 'expandedStorage',
+      'dataFilter': {
+        'name': storageName,
+        'lastChange': lastChange
+      },
+    },
+  };
+  // console.log('preRequestData', reqData);
+  socket.send(JSON.stringify(reqData));
+};
+// - TEMPO STORAGE -
+
+
+
 
 const assignWebSocketListeners = async (socket) => {
   socket.onmessage = (event) => {
@@ -113,18 +133,21 @@ const assignWebSocketListeners = async (socket) => {
       showMsg.duration = 5000;
       flashMessage.show(showMsg);
     } else if ('dataUpdate' === messageData['type']) {
-      if ('batchNumbersWUnplaced' === messageData['filter']['task']) {
+      const taskName = messageData['filter']['task'];
+      if ('batchNumbersWUnplaced' === taskName) {
         handleAvailableBatchNumbersWUnplaced(messageData['data']);
-      } else if ('wheelsUnplaced' === messageData['filter']['task']) {
+      } else if ('wheelsUnplaced' === taskName) {
         handleAvailableWheelsUnplaced(messageData['data']);
+      } else if ('expandedStorage' === taskName) {
+        handleTempoStorageUpdate(messageData['data']);
       }
     } else if ('create' === messageData['type']) {
       if ('wheelstackCreation' === messageData['filter']['task']) {
         const showMsg = {...BASIC_INFO_MESSAGE_PRESET};
-        showMsg.message = `<b>Стопа</b> с выбраннами данными.<br><b>Успешно</b> добавлена во временное хранилище <b>${BASIC_TEMPO_STORAGE}.`;
+        showMsg.message = `<b>Стопа</b> с выбраннами данными.<br>Успешно добавлена во временное хранилище <b>${BASIC_TEMPO_STORAGE}.`;
         showMsg.duration = 2500;
         flashMessage.show(showMsg);
-      };
+      }
     }
   };
   socket.onerror = (event) => {

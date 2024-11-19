@@ -59,7 +59,6 @@ const actionCreateWheelstack = (wheelsData) => {
     'wheels': corWheels,
     'status': PLACEMENT_TYPES.STORAGE,
   };
-  console.log('preData', wheelstackData)
   reqWheelstackCreation(gridSocket, wheelstackData);
 };
 // - ACTIONS -
@@ -247,8 +246,8 @@ const assignTomSelect = (elementId, settings) => {
   return tomWrapper;
 }
 
-const updateOptions = (tomSelector, options) => {  
-  if (0 === options.length) {
+const updateOptions = (tomSelector, options, disableEmpty = true) => {
+  if (0 === options.length && disableEmpty) {
     tomSelector.disable();
   } else {
     tomSelector.enable();
@@ -292,12 +291,10 @@ export const createWheelstackCreationMenu = (event) => {
     const wheelSelectorWrapper = document.createElement('div');
     wheelSelectorWrapper.id = `wheelSelectorWrapper${wheelIndex}`;
     wheelSelectorWrapper.classList.add('mb-3', 'wheels-wrapper');
-    // T
     const textT = document.createElement('div');
     textT.classList.add('wheels-text');
     textT.textContent = `${wheelIndex + 1}. `;
     wheelSelectorWrapper.appendChild(textT);
-    // T
     const wheelSelector = document.createElement('select');
     wheelSelector.id = `selectWheels|${wheelIndex}`;
     wheelSelectorWrapper.appendChild(wheelSelector);

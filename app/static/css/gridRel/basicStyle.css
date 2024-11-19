@@ -7,6 +7,7 @@
 @import url(./batchMenu.css);
 @import url(./ordersTable.css);
 @import url(./orderMenu.css);
+@import url(./tomStorage.css);
 
 
 * {
@@ -600,4 +601,3 @@ td.batch-indicator {
     left: 1%;
     position: absolute;
 }
-

@@ -118,7 +118,7 @@ var platformOrders = {};
 var _allWheels = {};
 var _allWheelstacks = {};
 var _allBatches = {};
-var _allOrders = {};
+export var _allOrders = {};
 // ---
 // NOT YET PRESENT
 var _notYetPresent = {
@@ -260,7 +260,7 @@ const hideClass = 'hidden';
 
 const platformsContainer = document.getElementById('platformsContainer');
 const ordersContainer = document.getElementById('ordersTableContainer');
-const ordersTableBody = ordersContainer.querySelector('#ordersTableBody');
+export const ordersTableBody = ordersContainer.querySelector('#ordersTableBody');
 
 const topContainer = document.getElementById('topContainer');
 const botContainer = document.getElementById('botContainer');
@@ -659,7 +659,7 @@ await updateAvailGrids(
 
 const gridContainer = botContainer.querySelector('#gridContainer');
 var gridPlacementUpdateInterval = null;
-const gridPlacement = new Placement(PLACEMENT_TYPES.GRID);
+export const gridPlacement = new Placement(PLACEMENT_TYPES.GRID);
 const zoomer = new ZoomAndDrag({
   'viewport': gridContainer,
   'grid': gridPlacement.element,
@@ -1057,7 +1057,7 @@ let orderRecordsUpdateInterval = setInterval( () => {
 
 // + FOCUS RELATED +
 // + BATCH MARKER +
-const batchMarker = new AttributeMark('batch-mark');
+export const batchMarker = new AttributeMark('batch-mark');
 const batchMarkTrigger = (targetValue, markTimeout = 90) => {
   if (targetValue && '' !== targetValue.trim()) {
     batchMarker.clearMarking();
@@ -1530,7 +1530,6 @@ const wheelsSearcher = new BasicSearcher(
 wheelsSearcher.setOptions(BASIC_WHEELS_SEARCHER_OPTION);
 //  - WHEELS SEARCH -
 // - SEARCH -
-
 
 // setInterval( () => {
   // console.log(_allBatches);

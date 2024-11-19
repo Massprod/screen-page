@@ -16,6 +16,7 @@ import { getCookie } from "../../utility/roleCookies.js";
 const curOrdersTable = document.getElementById('ordersTableBody');
 let currentlyFocusedRow = null;
 let currentlyFocusedRowTimeout= null;
+let mainCloser = null;
 
 
 const updateOrderStatus = async (orderId, complete = true) => {
@@ -83,9 +84,11 @@ const focusTableOrder = async (orderId) => {
 
 
 const assignCloser = async (openerElement, menuElement) => {
-  const mainCloser = (event) => {
-    if (event && (event.target === menuElement || menuElement.contains(event.target))) {
-      return;
+  mainCloser = (event, forceClose = false) => {
+    if (!forceClose) {
+      if (event && (event.target === menuElement || menuElement.contains(event.target))) {
+        return;
+      }
     }
     clearInterval(checkInterval);
     checkInterval = null;
@@ -143,7 +146,7 @@ const removeOpener = (openerElement) => {
 
 
 export const createOrderMenu = async (
-  event, openerElement, orderData, removableOpener = true
+  event, openerElement, orderData, removableOpener = true, forceClose = false,
 ) => {
   if (!orderData) {
     return;
@@ -199,6 +202,9 @@ export const createOrderMenu = async (
       if (result && removableOpener) {
         removeOpener(openerElement);
       };
+      if (result && forceClose) {
+        mainCloser(null, forceClose);
+      };
     });
     buttonsContainer.appendChild(completeButton);
 
@@ -210,6 +216,9 @@ export const createOrderMenu = async (
       const result = updateOrderStatus(orderId, false);
       if (result && removableOpener) {
         removeOpener(openerElement);
+      };
+      if (result && forceClose) {
+        mainCloser(null, forceClose);
       };
     });
     buttonsContainer.appendChild(cancelButton);

@@ -4,7 +4,6 @@ const serviceDom = "";
 export const gridRelSocketAddress = `wss//${window.location.host}/api/grid/ws/grid_page`;
 
 
-
 export const loginPage = `${serviceDom}/`;
 export const usersPage = `${serviceDom}/users`;
 export const gridPage = `${serviceDom}/grid`;
@@ -166,6 +165,8 @@ export const ACTIVE_USERNAME_COOKIE_NAME = 'active-user';
 export const EXTRA_INTERVALS = {
     WHEELSTACK_CREATION_MENU_BATCHES: 500,
     WHEELSTACK_CREATION_MENU_WHEELS: 500,
+    TEMPO_WHEELSTACKS_UPDATE: 500,
+    MOVE_SELECT_INTERVAL: 100,
 }
 // - EXTRA INTERVALS -
 
@@ -384,4 +385,77 @@ export const TOM_SETTINGS = {
             }
         },
     },
-}
+    WHEELSTACK_TEMPO_STORAGE: {
+        searchField: 'wheels',
+        valueField: '_id',
+        labelField: '_id',
+        maxOptions: 250,
+        dropdownPosition: 'auto',
+        placeholder: 'Выберите стопу',
+        score: function (search) {
+            return function (item) {
+                const term = search.toLowerCase();
+                for (let wheelRecord of item['wheels']) {
+                    const wheelId = wheelRecord['wheelId'];
+                    if (wheelId.includes(term)) {
+                        return 1;
+                    }
+                };
+                return 0;
+            }
+        },
+        onDropdownOpen: function(dropdown){
+            let bounding = dropdown.getBoundingClientRect();
+            if (bounding.bottom + 300 > (window.innerHeight || document.documentElement.clientHeight)) {
+                dropdown.classList.add('dropup');
+            };
+        },
+        onDropdownClose: function(dropdown){
+            dropdown.classList.remove('dropup');
+        },
+        render: {
+            // Custom rendering for each dropdown option
+            option: function(data, escape) {
+                const items = [];
+                for (let index = 0; index < WHEELSTACK_WHEELS_LIMIT; index += 1) {
+                    const wheelData = data['wheels'][index];
+                    let wheelRecord = null;
+                    if (wheelData) {
+                        wheelRecord = `<div class="column-item"><b>${index + 1}.</b> ${escape(wheelData['wheelId'])}</div>`;
+                    } else {
+                        wheelRecord = `<div class="column-item"><b>${index + 1}.</b> _None_</div>`;
+                    };
+                    items.push(wheelRecord);
+                };
+                const middle = WHEELSTACK_WHEELS_LIMIT / 2;
+                // const column1Items = data.wheels.slice(0, 3).map(wheel => `<div class="column-item"><b>p1.</b> ${escape(wheel['wheelId'])}</div>`).join('');
+                // const column2Items = data.wheels.slice(3).map(wheel => `<div class="column-item">${escape(wheel['wheelId'])}</div>`).join('');
+                let blockingOrder = '';
+                let blockingClass = '';
+                if (data['blocked']) {
+                    blockingOrder = data['lastOrder'];
+                    blockingClass = 'tom-item-blocked';
+                };
+                return `
+                    <div class="custom-option ${blockingClass} border rounded-3 p-3 bg-light"
+                     ${BASIC_ATTRIBUTES.BLOCKING_ORDER}="${blockingOrder}"
+                     ${BASIC_ATTRIBUTES.BATCH_NUMBER}="${data['batchNumber']}">
+                        <div class="option-label">Партия: <b>${escape(data['batchNumber'])}</b></div>
+                        <div class="two-column-container">
+                            <div class="column border rounded-2 p-2">${items.slice(0, middle).join('')}</div>
+                            <div class="column border rounded-2 p-2">${items.slice(middle).join('')}</div>
+                        </div>
+                    </div>
+                `;
+            },
+            item: function(data, escape) {
+                const elementId = data['_id'].slice(-6,);
+                let blockedClass = 'bg-light';
+                if (data['blocked']) {
+                    blockedClass = 'tom-item-blocked';
+                };
+                return `<div id="chosenOption" class="border rounded-2 text-dark fs-6 ${blockedClass}" ${BASIC_ATTRIBUTES.BATCH_NUMBER}=${data['batchNumber']}>ID: ${escape(elementId)}</div>`;
+            }
+        },
+    }
+};
