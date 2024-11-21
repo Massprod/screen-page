@@ -71,7 +71,7 @@ const createWheelAction = async (menuElement, wheelData) => {
     'method': 'POST',
     'body': JSON.stringify(wheelBodyData),
   }
-  const createWheelURL = `${BACK_URL.POST_CREATE_WHEEL}`;
+  const createWheelURL = `${BACK_URL.POST_CREATE_WHEEL}/`;
   const wheelResp = await postRequest(
     createWheelURL, false, true, reqArgs,
   );
