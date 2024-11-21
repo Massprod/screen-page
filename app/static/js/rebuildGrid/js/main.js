@@ -1,3 +1,4 @@
+// #region imports
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import {
   keepAuthCookieFresh,
@@ -32,6 +33,9 @@ import {
   ACTIVE_USERNAME_COOKIE_NAME,
   ORDERS_TABLE_PRUNE_INTERVAL,
   ORDERS_TABLE_ELEMENT_REMOVE_INDICATOR,
+  GRID_ACTION_ROLES,
+  gridRelSocketAddress,
+  BASIC_INFO_MESSAGE_ERROR,
 } from "../../uniConstants.js";
 import NavigationButton from "../../utility/navButton/navButton.js";
 import { getRequest } from "../../utility/basicRequests.js";
@@ -40,8 +44,6 @@ import Placement from "../../gridRel/placement/placement.js";
 import ZoomAndDrag from "../../utility/zoomDrag.js";
 import {
   combineObjectsData,
-  combineSetsData,
-  updateSetBank,
   updateObjBank,
 } from "../../utility/dataManip.js";
 import { createErrorElement, createLoadSpinner } from "../../utility/errorMessages.js";
@@ -61,14 +63,53 @@ import {
  } from "../../gridRel/wheelstackMenu/wheelstackMenu.js";
 import BasicSearcher from "../../utility/search/basicSearcher.js";
 import { openWheelCreationMenu } from "../../gridRel/wheelCreation/mainMenu.js";
-import { initGridRelWebsocket } from "./websocketRel.js";
+import {
+  initGridRelWebsocket,
+  reqPlacementData,
+  reqBatchesData,
+  reqOrdersData,
+  assignGridWebSocketListeners,
+} from "./websocketRel.js";
 import { openWheelstackCreationMenu } from "../../gridRel/wheelstackCreation/mainMenu.js";
+// #endregion imports
 
+// #region wsRelated
+let recAttempts = 0;
+let recLimit = 0;
+let recInterval = 3000;
+export let gridSocket = null;
+const authToken = await getCookie(AUTH_COOKIE_NAME);
 
-// + WEBSOCKET EXP +
-export const gridSocket = await initGridRelWebsocket();
-// - WEBSOCKET EXP -
+// TODO: We need more Errors coverage and better placement for all of these :)
+const initGridSocket = async () => {
+  gridSocket = await initGridRelWebsocket(
+    gridRelSocketAddress, authToken
+  );
+  assignGridWebSocketListeners(gridSocket);
+  gridSocket.onclose = (event) => {
+    if (0 === recLimit || recAttempts < recLimit) {
+      recAttempts += 1;
+      console.log(`Service unavailable. Trying to reconnect - attempt = ${recAttempts}`)
+      
+      const showMsg = {...BASIC_INFO_MESSAGE_ERROR};
+      showMsg.message = `Потеряно соединение с сервисом обновления данных.<br>Попытка подключения: <b>${recAttempts}</b>`;
+      showMsg.duration = 1500;
+      flashMessage.show(showMsg);
 
+      setTimeout(async () => {
+        initGridSocket();
+        console.log('recTest');
+      }, recInterval);
+    } else {
+      throw new Error(`Service unavailable. Reconnect attempts reached limit.`);
+    };
+  };
+};
+
+await initGridSocket();
+// #endregion wsRelated
+
+// #region pageSetup
 // + BAD PRESET +
 // ROLE COOKIE
 keepAuthCookieFresh(AUTH_COOKIE_NAME);
@@ -99,8 +140,9 @@ const activeUser = await getCookie(ACTIVE_USERNAME_COOKIE_NAME);
 const hoverCoord = new CellHoverCoordinate('placement-cell');
 //  - HOVER COORD -
 // - BAD PRESET -
+// #endregion pageSetup
 
-
+// #region allData
 // + DATA BANKS +
 // GRID
 var gridWheels = {};
@@ -120,68 +162,107 @@ var _allWheelstacks = {};
 var _allBatches = {};
 export var _allOrders = {};
 // ---
-// NOT YET PRESENT
+// NOT YET PRESENT == present on platform, but not on grid and vice-versa
 var _notYetPresent = {
   'wheelstacks': {},
   'batches': {},
-}
+};
+// #endregion allData
 
 const pruneObject = (objectToPrune = {}, objectsToCheck = []) => {
   Object.keys(objectToPrune).forEach( element => {
     for (let toCheck of objectsToCheck) {
       if (element in toCheck) {
         delete objectToPrune[element];
-      }
-    }
-  })
-}
-// TODO: Rebuild without interval?
+      };
+    };
+  });
+};
 setInterval( () => {
   pruneObject(_notYetPresent['batches'], [platformBatches, gridBatches]);
   pruneObject(_notYetPresent['wheelstacks'], [platformWheelstacks, gridWheelstacks]);
 }, 1000);
-// ---
 
-
-// + MAINTAIN ORDERS DATA +
-const maintainOrdersData = () => {
-  Object.keys(_allOrders).forEach( async (orderId) => {
-    if (_allOrders[orderId] === false) {
-      const dataURL = `${BACK_URL.GET_ORDER_BY_ID}/${orderId}?active_orders=true&completed_orders=false&canceled_orders=false`;
-      const dataResp = await getRequest(dataURL, true, true);
-      const orderData = await dataResp.json();
-      _allOrders[orderId] = orderData;
-    };
+// #region ORDERS_UPDATE
+export const handleOrdersUpdate = (newData) => {
+  newData.forEach(orderData => {
+    const orderId = orderData['_id'];
+    _allOrders[orderId] = orderData;
   });
-}
+};
+
+const maintainOrdersData = () => {
+  const newOrders = [];
+  // #region misery
+  // Currently updating them with newData and if there's no new records we could just ignore interval.
+  // But, because failed to create it normally. It's better to just leave it like that for now.
+  // It's not critical loop with at max 1k orders at time.
+  // In theory we could have grid with 1_000_0000 elements and then it's 1_000_000 orders.
+  // Then it's going to be a problem to loop 1_000_000 every 350ms :)
+  // No time for rebuilding it, too much incorrect dependencies (still good exp).
+  // #endregion misery
+  for (let [orderId, orderData] of Object.entries(_allOrders)) {
+    if (!orderData) {
+      newOrders.push(orderId);
+    };
+  };
+  reqOrdersData(gridSocket, newOrders);
+  // #region httpOutdated
+  // Object.keys(_allOrders).forEach( async (orderId) => {
+  //   if (_allOrders[orderId] === false) {
+  //     const dataURL = `${BACK_URL.GET_ORDER_BY_ID}/${orderId}?active_orders=true&completed_orders=false&canceled_orders=false`;
+  //     const dataResp = await getRequest(dataURL, true, true);
+  //     const orderData = await dataResp.json();
+  //     _allOrders[orderId] = orderData;
+  //   };
+  // });
+  // #endregion httpOutdated
+};
+
 setInterval( () => {
   maintainOrdersData();
 }, UPDATE_ORDERS_DATA_INTERVAL);
 // - MAINTAIN ORDERS DATA -
+// #endregion ORDERS_UPDATE
 
+// #region BATCHES_UPDATE
 // + MAINTAIN BATCHES DATA +
-// TODO: same change to WS
-const maintainBatchesData = async (initial = false) => {
-  Object.keys(_allBatches).forEach(async batchId => {
-    const dataURL = `${BACK_URL.GET_BATCH_DATA}/${batchId}`;    
-    const dataResp = await getRequest(dataURL, true, true);
-    const batchData = await dataResp.json();
+export const handleBatchesUpdate = (newBatchData) => {
+  newBatchData.forEach(batchData => {
+    const batchNumber = batchData['batchNumber'];
     updateBatchElements(batchData);
-    _allBatches[batchId] = batchData;
-  })
-}
+    _allBatches[batchNumber] = batchData;
+  });
+};
+
+
+const maintainBatchesData = async (initial = false) => {
+  const activeBatches = Object.keys(_allBatches);
+  reqBatchesData(gridSocket, activeBatches);
+  // #region httpOutdated
+  // Object.keys(_allBatches).forEach(async batchId => {
+  //   const dataURL = `${BACK_URL.GET_BATCH_DATA}/${batchId}`;    
+  //   const dataResp = await getRequest(dataURL, true, true);
+  //   const batchData = await dataResp.json();
+  //   updateBatchElements(batchData);
+  //   _allBatches[batchId] = batchData;
+  // });
+  // #endregion httpOutdated
+};
+
 
 setInterval( () => {
   maintainBatchesData();
 }, UPDATE_BATCHES_DATA_INTERVAL);
 
-// + MAINTAIN BATCH ELEMENTS +
+
+//  + MAINTAIN BATCH ELEMENTS +
 const updateBatchElements = (batchData) => {
   const allElements = document.querySelectorAll(`[data-batch-number="${batchData['batchNumber']}"]`);
   allElements.forEach( element => {
     if ('TR' === element.tagName) {
       element = element.querySelector('#batchNumber');
-    }
+    };
     let newClass = BATCH_STATUS_CLASSES.NOT_TESTED;
     if (batchData['laboratoryPassed']) {
       newClass = BATCH_STATUS_CLASSES.PASSED;
@@ -189,32 +270,27 @@ const updateBatchElements = (batchData) => {
       newClass = BATCH_STATUS_CLASSES.NOT_PASSED;
     } else {
       newClass = BATCH_STATUS_CLASSES.NOT_TESTED;
-    }
+    };
     for (let [key, value] of Object.entries(BATCH_STATUS_CLASSES)) {
       if (value !== newClass) {
         element.classList.remove(value);
       } else {
         element.classList.add(value);
-      }
-    }
-  })
-}
-// - MAINTAIN BATCH ELEMENTS -
-
+      };
+    };
+  });
+};
+//  - MAINTAIN BATCH ELEMENTS -
 // - MAINTAIN BATCHES DATA -
+// #endregion BATCHES_UPDATE
 
-// CRINGE UPDATE
+// #region DATABANKS_UPDATE
 setInterval(() => {
   combineObjectsData(_allWheels, [platformWheels, gridWheels]);
   combineObjectsData(_allWheelstacks, [platformWheelstacks, gridWheelstacks], [_notYetPresent, 'wheelstacks'], true);
-  // TODO: BATCHES can change state == always loopin and updating their state 24/7 every 200ms or smth.
-  //   Doubt there's going to be more than 20 batches, so 20 requests within 200ms is 100% fine.
   combineObjectsData(_allBatches, [platformBatches, gridBatches], [_notYetPresent, 'batches']);
-  // TODO: add indicator of getting a new data records.
-  //  Or better store all new record references and create a new Order records for each of them (in case of orders)
   combineObjectsData(_allOrders, [platformOrders, gridOrders]);
 }, UPDATE_DATA_BANKS_INTERVAL);
-// ---
 
 
 const updateBanksFromPlacement = async (placementData, placementType) => {
@@ -255,6 +331,7 @@ const updateBanksFromPlacement = async (placementData, placementType) => {
   }, 1000);
 }
 // - DATA BANKS -
+// #endregion DATABANKS_UPDATE
 
 const hideClass = 'hidden';
 
@@ -368,8 +445,8 @@ const creationContainerSlider = document.getElementById('creationViewSlider');
 creationContainerSlider.addEventListener('click', event => {
   viewSliderChange(
     'expanded', creationContainerSlider, creationButtonsContainer, leftArrow, rightArrow, true
-  )
-})
+  );
+});
 //   + CREATION BUTTONS +
 const wheelCreationBut = document.getElementById('createWheel');
 wheelCreationBut.addEventListener('click', async (event) => {
@@ -377,7 +454,7 @@ wheelCreationBut.addEventListener('click', async (event) => {
 })
 const wheelstackCreationBut = document.getElementById('createWheelstack');
 wheelstackCreationBut.addEventListener('click', async (event) => {
-  await openWheelstackCreationMenu();
+  openWheelstackCreationMenu();
 })
 //   - CREATION BUTTONS -
 //  - CREATION SLIDER -
@@ -485,65 +562,162 @@ gridFullBut.addEventListener('click', event => {
 // - VIEW CHANGE -
 
 // + PLACEMENT UPDATE +
-const placementChanged = async (placement) => {
-  let placementType = placement.placementType;
-  let checkURL = '';
-  if (PLACEMENT_TYPES.GRID === placementType) {
-    checkURL = `${BACK_URL.GET_GRID_LAST_CHANGE}/${placement.placementId}`;
-  } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
-    checkURL = `${BACK_URL.GET_PLATFORM_LAST_CHANGE}/${placement.placementId}`;
-  }
-  const checkResp = await getRequest(checkURL, true, true);
-  const checkData = await checkResp.json();
-  if (placement.placementData['lastChange'] < checkData['lastChange']) {
-    return true;
-  }
-  return false;
-}
+// const placementChanged = async (placement) => {
+//   let placementType = placement.placementType;
+//   let checkURL = '';
+//   if (PLACEMENT_TYPES.GRID === placementType) {
+//     checkURL = `${BACK_URL.GET_GRID_LAST_CHANGE}/${placement.placementId}`;
+//   } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
+//     checkURL = `${BACK_URL.GET_PLATFORM_LAST_CHANGE}/${placement.placementId}`;
+//   };
+//   const checkResp = await getRequest(checkURL, true, true);
+//   const checkData = await checkResp.json();
+//   if (placement.placementData['lastChange'] < checkData['lastChange']) {
+//     return true;
+//   };
+//   return false;
+// };
 
+// T
+const resetPlatformState = () => {
+  // NEW GRID || OLD GRID == 100% NEW PLATFOx RM - because we're forcing to choose it
+  // We could save previous state, because same platform can be used by different grids.
+  // But, we will get orders which is not used in this grid. So, it's better to clear it completely.
+  platformWheels = {};
+  platformBatches = {};
+  platformOrders = {};
+  platformWheelstacks = {};
+  platformPlacement.placementId = null;
+  platformPlacement.placementData = null;
+  setPlatformToSelect();
+  // ---
+};
 
-const updatePlacement = async (placement, newId, forceUpdate = false) => {
-  let dataURL = '';
-  let placementType = placement.placementType;
-  // + PING FOR CHANGES +
-  if (!forceUpdate && placement.placementId === newId) {
-    if (!(await placementChanged(placement))) {
-      return;
-    };
+export const handlePlacementUpdate = (newData) => {
+  // console.log('newData', newData);
+  if (0 === Object.keys(newData).length) {
+    return;
   };
-  // console.log('PLACEMENT CHANGES', placement.placementType);
-  // - PING FOR CHANGES - 
-  if (PLACEMENT_TYPES.GRID === placementType) {
-    dataURL = `${BACK_URL.GET_GRID_STATE}/${newId}?includeWheelstacks=true&includeWheels=true`;
-  } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
-    dataURL = `${BACK_URL.GET_PLATFORM_STATE}/${newId}?includeWheelstacks=true&includeWheels=true`;
-  }
-  const dataResp = await getRequest(dataURL, false, true);
-  const newData = await dataResp.json()
+  const placementType = newData['placementType']
+  let placement = null;
   updateBanksFromPlacement(newData, placementType);
+  if (PLACEMENT_TYPES.GRID === placementType) {
+    placement = gridPlacement;
+    // T
+    let clearPlatform = true;
+    newData['assignedPlatforms'].map((assignedPlatformData) => {
+      if (platformPlacement.placementId === assignedPlatformData['platformId']) {
+        clearPlatform = false;
+      };
+    });
+    if (clearPlatform) {
+      resetPlatformState();
+    };
+    // T
+  } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
+    placement = platformPlacement;
+  }
+  if (!placement) {
+    throw new Error(`Attempt to update non existing placement = ${newData['_id']}`);
+  }
   placement.updatePlacement(newData);
-  if (platformSelectActive && PLACEMENT_TYPES.GRID === placement.placementType) {
+  // We either removing all options and repopulating it == `updateAvailPlatforms`.
+  // Or we're going to have some option which can still be there,
+  //  but nothing new to add.
+  // So, we still need to recheck current options, or rebuild completely - which im trying to escape.
+  // T - cringe update, leaving for now.
+  if (PLACEMENT_TYPES.GRID === placement.placementType) {
     const newPlatformsData = newData['assignedPlatforms'] ?? [];
     if (0 === newPlatformsData.length) {
       clearAvailPlatforms(
         platformsContainer, platformSelectRelated,
         platformSelector, true, true
-      )
-    } else {
-      for (let record of newPlatformsData) {
-        const platformName = record['platformName'];
-        const platformId = record['platformId'];
-        if (!(platformId in availPlatforms)) {      
-          updateAvailPlatforms(
-            newPlatformsData, platformsContainer,
-            platformSelectRelated, platformSelector 
-          );
-          break;
-        }
-      }
-    }
-  }
-}
+      );
+      return;
+    };
+    const platformOptionExists = platformSelector.querySelectorAll(`option`);
+    const fastPlatforms = {};
+    newPlatformsData.map((platformData) => {
+      fastPlatforms[platformData['platformId']] = platformData;
+    });
+    platformOptionExists.forEach(option => {
+      const recordId = option.id;
+      if (!(recordId in fastPlatforms)) {
+        option.remove();
+        delete availPlatforms[recordId];
+      };
+    });
+    for (let record of newPlatformsData) {
+      const platformId = record['platformId'];
+      if (!(platformId in availPlatforms)) {      
+        updateAvailPlatforms(
+          newPlatformsData, platformsContainer,
+          platformSelectRelated, platformSelector 
+        );
+        break;
+      };
+    };
+  };
+  // T - cringe update, leaving for now.
+};
+// T
+
+const updatePlacement = async (placement, newId, forceUpdate = false) => {
+
+  // T
+  const placementData = {
+    'placementId': newId,
+    'placementName': '',
+    'placementType': placement.placementType,
+    'lastChange': placement.placementData && placement.placementId === newId ? placement.placementData['lastChange'] : '',
+    'includeWheelstacks': true,
+    'includeWheels': true,
+  };
+  reqPlacementData(gridSocket, placementData)
+  // T
+  return;
+  // let dataURL = '';
+  // let placementType = placement.placementType;
+  // // + PING FOR CHANGES +
+  // if (!forceUpdate && placement.placementId === newId) {
+  //   if (!(await placementChanged(placement))) {
+  //     return;
+  //   };
+  // };
+  // // console.log('PLACEMENT CHANGES', placement.placementType);
+  // // - PING FOR CHANGES - 
+  // if (PLACEMENT_TYPES.GRID === placementType) {
+  //   dataURL = `${BACK_URL.GET_GRID_STATE}/${newId}?includeWheelstacks=true&includeWheels=true`;
+  // } else if (PLACEMENT_TYPES.BASE_PLATFORM === placementType) {
+  //   dataURL = `${BACK_URL.GET_PLATFORM_STATE}/${newId}?includeWheelstacks=true&includeWheels=true`;
+  // }
+  // const dataResp = await getRequest(dataURL, false, true);
+  // const newData = await dataResp.json()
+  // console.log('newData', newData);
+  // updateBanksFromPlacement(newData, placementType);
+  // placement.updatePlacement(newData);
+  // if (platformSelectActive && PLACEMENT_TYPES.GRID === placement.placementType) {
+  //   const newPlatformsData = newData['assignedPlatforms'] ?? [];
+  //   if (0 === newPlatformsData.length) {
+  //     clearAvailPlatforms(
+  //       platformsContainer, platformSelectRelated,
+  //       platformSelector, true, true
+  //     );
+  //   } else {
+  //     for (let record of newPlatformsData) {
+  //       const platformName = record['platformName'];
+  //       const platformId = record['platformId'];
+  //       if (!(platformId in availPlatforms)) {      
+  //         updateAvailPlatforms(
+  //           newPlatformsData, platformsContainer,
+  //           platformSelectRelated, platformSelector 
+  //         );
+  //         break;
+  //       };
+  //     };
+  //   };
+  // };
+};
 // - PLACEMENT UPDATE -
 
 // + GRID SELECTION +
@@ -551,12 +725,12 @@ const createOption = async (optionValue, optionName, selected = false, optionId 
   const newOption = document.createElement('option');
   if (optionId) {
     newOption.id = optionId;
-  }
-  newOption.value = optionValue
+  };
+  newOption.value = optionValue;
   newOption.textContent = optionName.charAt(0).toUpperCase() + optionName.slice(1);
   if (selected) {
       newOption.selected = true;
-  }
+  };
   return newOption;
 }
 
@@ -578,7 +752,7 @@ const updateAvailGrids = async (container, selectRelated, selector) => {
     );
     container.appendChild(errorEl);
     return;
-  }
+  };
   let newGridsData = await gridsReq.json();
   // add moveLimit
   if (moveSelectActive && PLACEMENT_TYPES.BASE_PLATFORM === openedPlacementType) {
@@ -591,9 +765,9 @@ const updateAvailGrids = async (container, selectRelated, selector) => {
           if (openedPlacementId === platformData['platformId']) {
             filteredGridsData.push(gridData);
           };
-        }
-      }
-    }
+        };
+      };
+    };
     newGridsData = filteredGridsData;
     const filteredMessage = BASIC_INFO_MESSAGE_WARNING;
     filteredMessage.message = `Выбор ограничен из-за активного переноса с челнока: <b>${openedPlacementName}</b><br>Отмените перенос или закончите его в доступных приямках.`;
@@ -684,12 +858,6 @@ const invokeGridSelectAction = async () => {
   const gridCells = gridContainer.querySelectorAll('.placement-cell:not(.identifier-cell), .grid-cell:not(.identifier-cell)');
   assignWheelstackMenus(gridCells, gridPlacement, gridPlacement);
   // ---
-  // NEW GRID || OLD GRID == 100% NEW PLATFORM - because we're forcing to choose it
-  platformWheels = {};
-  platformBatches = {};
-  platformOrders = {};
-  platformWheelstacks = {};
-  // ---
   // OLD GRID == not clearing GRID
   if (gridPlacement.placementId !== placementId) {
     gridWheels = {};
@@ -701,7 +869,6 @@ const invokeGridSelectAction = async () => {
   }
   // ---
   gridSelectActive = false;
-  setPlatformToSelect();
   if (gridPlacementUpdateInterval) {
     clearInterval(gridPlacementUpdateInterval);
     gridPlacementUpdateInterval = null;
@@ -783,7 +950,7 @@ const clearAvailPlatforms = async (container, showElements, selector, closeView 
   //  This is temporary :)
   showElements.forEach( element => {
     element.classList.remove('hidden');
-  })
+  });
   selectPlatformButtonContainer.classList.add('hidden');
 }
 
@@ -802,7 +969,7 @@ const updateAvailPlatforms = async (
   availPlatforms = {};
   for (let platformData of newPlatformsData) {
     availPlatforms[platformData['platformId']] = platformData;
-  }
+  };
   
   container.childNodes.forEach( child => {
     if (1 === child.nodeType) {
@@ -812,9 +979,13 @@ const updateAvailPlatforms = async (
   const loadSpinner = createLoadSpinner('platformsSpinner');
   container.appendChild(loadSpinner);
   selector.innerHTML = '';
+  // return;
   const availPlatformIds = Object.keys(availPlatforms);
   if (0 === availPlatformIds.length) {
-    clearAvailPlatforms(selector, false, true)
+    clearAvailPlatforms(
+      platformsContainer, platformSelectRelated,
+      platformSelector, true, true
+    );
     forcePlatformClosedView();
   } else {
     availPlatformIds.forEach( async (platformId) => {
@@ -834,7 +1005,7 @@ const updateAvailPlatforms = async (
         restorePlatformMessage.message = `Восстановлен выбор <b>ПЛАТФОРМЫ</b> прошлой сессии <b>${platformName}</b>.<br>Для пользователя <b>${activeUser}</b>`;
         restorePlatformMessage.duration = 2000;
         flashMessage.show(restorePlatformMessage);
-      }
+      };
     });
   }
   selectRelated.forEach( element => {
@@ -866,13 +1037,13 @@ const invokePlatformSelectAction = async () => {
     platformOrders = {};
     platformWheelstacks = {};
     // ---
-  }
+  };
   await updatePlacement(platformPlacement, placementId, true);
   platformSelectActive = false;
   if (platformPlacementUpdateInterval) {
     clearInterval(platformPlacementUpdateInterval);
     platformPlacementUpdateInterval = null;
-  }
+  };
   platformPlacementUpdateInterval = setInterval( async () => {
     if (platformSelectActive) {
       return;
@@ -883,7 +1054,7 @@ const invokePlatformSelectAction = async () => {
 
 selectPlatformButton.addEventListener('click', async (event) => {
   invokePlatformSelectAction();
-})
+});
 
 
 const setPlatformToSelect = () => {
@@ -1331,9 +1502,9 @@ export const assignBatchExpandableButtons = async (batchMenu) => {
     }
     const newOption = await createOption(elementName, elementName);
     moveSelector.appendChild(newOption);
-  }
+  };
   // - populateSelector -
-  
+
   // + assignButtons +
   const processingButton = batchMenu.querySelector('#moveToProcess');
   processingButton.addEventListener('click', async event => {
@@ -1342,9 +1513,9 @@ export const assignBatchExpandableButtons = async (batchMenu) => {
   const rejectButton = batchMenu.querySelector('#moveToReject');
   rejectButton.addEventListener('click', async event => {
     assignMoveProRejButton(batchMenu, moveSelector, false);
-  })
+  });
   // - assignButtons -
-}
+};
 
 
 const assignBatchMenu = (orderElement) => {
@@ -1363,7 +1534,8 @@ const assignBatchMenu = (orderElement) => {
   if (!batchData) {
     orderElement.remove();
     return;
-  }
+  };
+  
   batchTd.addEventListener('contextmenu', async event => {
     event.preventDefault();
     const batchMenu = await createBatchMenu(
@@ -1442,6 +1614,7 @@ const batchMenuOpener = async (event, openerElement, targetBatchNumber) => {
     return;
   }
   let menu = null;
+  console.log('targetNumber', targetBatchNumber);
   menu = await createBatchMenu(event, openerElement, _allBatches[targetBatchNumber], batchMarker, _allBatches)
   if (OPERATOR_ROLE !== activeUserRole) {
     assignBatchExpandableButtons(menu);
@@ -1531,11 +1704,8 @@ wheelsSearcher.setOptions(BASIC_WHEELS_SEARCHER_OPTION);
 //  - WHEELS SEARCH -
 // - SEARCH -
 
-// setInterval( () => {
-  // console.log(_allBatches);
-  // console.log(_allOrders);
-  // console.log('GRIDS', availGrids);
-  // console.log('PLATFORMS', availPlatforms);
-  // console.log('WHEELS_LENGTH', Object.keys(_allWheels).length);
-  // console.log('WHEELS', _allWheels);
-// }, 5500);
+
+// TODO: add role clearance
+if (!(activeUserRole in GRID_ACTION_ROLES)) {
+  creationContainer.remove();
+};

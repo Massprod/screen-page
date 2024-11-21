@@ -2,6 +2,7 @@ import {
   BASIC_INFO_MESSAGE_ERROR,
   BASIC_INFO_MESSAGE_WARNING,
   BASIC_WHEELS_SEARCHER_OPTION,
+  EXTRA_INTERVALS,
   WHEEL_STATUSES,
   WHEELSTACK_WHEELS_LIMIT,
 } from "../../uniConstants.js";
@@ -9,6 +10,8 @@ import BasicSearcher from "../../utility/search/basicSearcher.js";
 import { getRequest, patchRequest } from "../../utility/basicRequests.js";
 import { BACK_URL } from "../../uniConstants.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
+import { reqBatchNumberUnplacedWheels } from "../../rebuildGrid/js/websocketRel.js";
+import { gridSocket } from "../../rebuildGrid/js/main.js";
 
 
 // global*
@@ -134,32 +137,26 @@ const assignCloser = async (openerElement, menuElement, subMenus = {}) => {
 // - Closer -
 
 
-const getUnplacedWheels = async (batchNumber = '') => {
-  const wheelsUrl = `${BACK_URL.GET_ALL_WHEELS}?batch_number=${batchNumber}&wheel_status=${WHEEL_STATUSES.UNPLACED}`;
-  const wheelsData = await getRequest(wheelsUrl, true, true);
-  return wheelsData.json();
-}
-
-
-const updateAvailableWheels = async () => {
-  const unplacedWheels = await getUnplacedWheels(openerElData['batchNumber']);
-  availableWheels = [...openerWheels, ...unplacedWheels]
+export const wheelstackRebuildHandler = (newData) => {
+  const newWheels = newData['wheels'];
+  availableWheels = [...openerWheels, ...newWheels]
   wheelSearchers.forEach( searcher => {
     searcher.setData(availableWheels);
   });
-}
+};
 
 
 const maintainAvailableWheels = () => {
   if (wheelsUpdateInterval) {
     clearInterval(wheelsUpdateInterval);
     wheelsUpdateInterval = null;
-  }
-  updateAvailableWheels()
-  wheelsUpdateInterval = setInterval( async () => {
-    updateAvailableWheels()
-  }, 500);
-}
+  };
+
+  reqBatchNumberUnplacedWheels(gridSocket, openerElData['batchNumber'], 'wheelstackRebuildHandler');
+  wheelsUpdateInterval = setInterval(() => {
+    reqBatchNumberUnplacedWheels(gridSocket, openerElData['batchNumber'], 'wheelstackRebuildHandler');
+  }, EXTRA_INTERVALS.WHEELSTACK_REBUILD_WHEELS_UPDATE);
+};
 
 
 export const createWheelSelector = async (wheelPosition) => {
@@ -337,7 +334,7 @@ export const createRebuildMenu = async (originalMenu, openerData, dataBanks, rem
   menu.appendChild(actionButtonsContainer);
   // - ACTION BUTTONS -
   assignCloser(originalMenu, menu, menus);
-  maintainAvailableWheels();
+  maintainAvailableWheels(batchNumber);
   menu.appendChild(wheelsList);
 
   openerExistInterval = setInterval(() => {

@@ -1,5 +1,11 @@
-import { AUTH_COOKIE_NAME, BASIC_INFO_MESSAGE_ERROR, BASIC_INFO_MESSAGE_PRESET, BASIC_INFO_MESSAGE_WARNING, BASIC_TEMPO_STORAGE, griRelSocketAddress, WHEEL_STATUSES } from "../../uniConstants.js";
-import { getCookie } from "../../utility/roleCookies.js";
+// #region imports
+import {
+  BASIC_INFO_MESSAGE_ERROR,
+  BASIC_INFO_MESSAGE_PRESET,
+  BASIC_INFO_MESSAGE_WARNING,
+  BASIC_TEMPO_STORAGE,
+  WHEEL_STATUSES,
+} from "../../uniConstants.js";
 // + MAYBE CHANGE +
 import {
   availableBatchNumbersWUnplaced,
@@ -11,24 +17,26 @@ import {
 } from "../../gridRel/wheelstackCreation/mainMenu.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
 import { handleTempoStorageUpdate } from "../../gridRel/tempoStorageSelector/tempoStorageSelector.js";
-// - MAYBE CHANGE -
+import {
+  handlePlacementUpdate,
+  handleBatchesUpdate,
+  handleOrdersUpdate,
+} from "./main.js";
+import { wheelstackRebuildHandler } from "../../gridRel/wheelstackMenu/rebuildMenu.js";
+// #endregion imports
 
 
-export const initGridRelWebsocket = async (useAuthToken = true) => {
-  let authToken = '';
-  if (useAuthToken) {
-    authToken = await getCookie(AUTH_COOKIE_NAME);
-  }
-  const socket = new WebSocket(`${griRelSocketAddress}?auth_token=${authToken}`);
-  // TODO: Error handle?
-  // socket.onerror = event => {
-  //
-  // }
-  await assignWebSocketListeners(socket);
+export const initGridRelWebsocket = async (
+  wsAddress,
+  authToken,
+) => {
+  const socket = new WebSocket(`${wsAddress}?auth_token=${authToken}`);
   return socket;
 };
 
 
+// #region wsRequests
+// #region wheelstackCreation
 // + WHEELSTACK CREATION +
 export const reqBatchNumbersWUnplaced = async (socket) => {
   const req_data = {
@@ -42,7 +50,7 @@ export const reqBatchNumbersWUnplaced = async (socket) => {
 };
 
 
-export const reqBatchNumberUnplacedWheels = async (socket, batchNumber) => {
+export const reqBatchNumberUnplacedWheels = async (socket, batchNumber, handler = '') => {
   const req_data = {
     'type': 'gather',
     'filter': {
@@ -52,8 +60,9 @@ export const reqBatchNumberUnplacedWheels = async (socket, batchNumber) => {
         'status': WHEEL_STATUSES.UNPLACED,
       },
     },
+    'handler': handler,
   };
-  socket.send(JSON.stringify(req_data))
+  socket.send(JSON.stringify(req_data));
 };
 
 
@@ -72,6 +81,9 @@ export const reqWheelstackCreation = async (socket, wheelstackData) => {
 
 
 const handleAvailableBatchNumbersWUnplaced = (newData) => {
+  if (!batchTomSelect) {
+    return;
+  }
   if (0 === newData.length && !batchTomSelect.isDisabled) {
     const showMsg = {...BASIC_INFO_MESSAGE_WARNING};
     showMsg.message = 'Нет доступных к использованию <b>свободных</b> колёс';
@@ -90,18 +102,20 @@ const handleAvailableBatchNumbersWUnplaced = (newData) => {
     batchTomSelect.settings.placeholder = 'Выберите партию стопы';
     batchTomSelect.inputState();
     batchTomSelect.enable();
-  }
+  };
   updateSelectorsData([batchTomSelect], availableBatchNumbersWUnplaced, newData, 'batchNumber');
 };
 
 
-const handleAvailableWheelsUnplaced = (newData) => {
-  if (0 === newData.length){
+const wheelstackCreationWheelsUnplaced = (newData) => {
+  const wheelsData = newData['wheels']
+  if (0 === wheelsData) {
     clearSelectorChosen(batchTomSelect);
   };
-  updateSelectorsData(wheelTomSelectors, availableWheelsUnplaced, newData, '_id');
+  updateSelectorsData(wheelTomSelectors, availableWheelsUnplaced, wheelsData, '_id');
 };
 // - WHEELSTACK CREATION -
+// #endregion wheelstackCreation
 
 // + TEMPO STORAGE +
 export const reqStorageExpandedData = (socket, storageName, lastChange) => {
@@ -120,10 +134,60 @@ export const reqStorageExpandedData = (socket, storageName, lastChange) => {
 };
 // - TEMPO STORAGE -
 
+// + PLACEMENT +
+export const reqPlacementData = (socket, placementData) => {
+  const reqData = {
+    'type': 'gather',
+    'filter': {
+      'task': 'placementUpdate',
+      'dataFilter': placementData,
+    },
+  };
+  socket.send(JSON.stringify(reqData));
+};
+// - PLACEMENT -
+// + BATCHES +
+export const reqBatchesData = (socket, batchNumbers = []) => {
+  const reqData = {
+    'type': 'gather',
+    'filter': {
+      'task': 'batchesData',
+      'dataFilter': {
+        'batchNumbers': batchNumbers,
+      },
+    },
+  };
+  socket.send(JSON.stringify(reqData));
+};
+// - BATCHES -
+// + ORDERS +
+export const reqOrdersData = (socket, orders = []) => {
+  const reqData = {
+    'type': 'gather',
+    'filter': {
+      'task': 'ordersData',
+      'dataFilter': {
+        'orders': orders,
+        'activeOrders': true,
+        'completedOrders': false,
+        'canceledOrders': false,
+      },
+    },
+  };
+  socket.send(JSON.stringify(reqData));
+};
+// - ORDERS -
+// #region rebuildMenu
+
+// #endregion rebuildMenu
+
+// #endregion wsRequests
 
 
-
-const assignWebSocketListeners = async (socket) => {
+export const assignGridWebSocketListeners = async (socket) => {
+  if (!socket) {
+    throw new Error(`Empty arg = socket => ${socket}`)
+  };
   socket.onmessage = (event) => {
     const messageData = JSON.parse(event.data);
     // console.log('websocketResponse: ', messageData);
@@ -134,26 +198,40 @@ const assignWebSocketListeners = async (socket) => {
       flashMessage.show(showMsg);
     } else if ('dataUpdate' === messageData['type']) {
       const taskName = messageData['filter']['task'];
+      const handler = messageData['handler'];
       if ('batchNumbersWUnplaced' === taskName) {
         handleAvailableBatchNumbersWUnplaced(messageData['data']);
       } else if ('wheelsUnplaced' === taskName) {
-        handleAvailableWheelsUnplaced(messageData['data']);
+        // TODO: change to normal dict filter, but its one use for now. W.e
+        if (handler) {
+          if ('wheelstackCreationHandler' === handler) {
+            wheelstackCreationWheelsUnplaced(messageData['data']);
+          } else if ('wheelstackRebuildHandler' === handler) {
+            wheelstackRebuildHandler(messageData['data']);
+          };
+        };
       } else if ('expandedStorage' === taskName) {
         handleTempoStorageUpdate(messageData['data']);
-      }
+      } else if ('placementUpdate' === taskName) {
+        handlePlacementUpdate(messageData['data']);
+      } else if ('batchesUpdate' === taskName) {
+        handleBatchesUpdate(messageData['data']);
+      } else if ('ordersUpdate' === taskName) {
+        handleOrdersUpdate(messageData['data']);
+      };
+    // Not the best idea to create within WS. But this one is test-task and it's fine.
+    // Because we're just closing menu w.o anything else.
+    // Better will stick to POST, because it's better for error handle1.
     } else if ('create' === messageData['type']) {
       if ('wheelstackCreation' === messageData['filter']['task']) {
         const showMsg = {...BASIC_INFO_MESSAGE_PRESET};
         showMsg.message = `<b>Стопа</b> с выбраннами данными.<br>Успешно добавлена во временное хранилище <b>${BASIC_TEMPO_STORAGE}.`;
         showMsg.duration = 2500;
         flashMessage.show(showMsg);
-      }
-    }
+      };
+    };
   };
   socket.onerror = (event) => {
     console.log('WS error', event);
-  };
-  socket.onclose = (event) => {
-    console.log('WS closed', event);
   };
 };

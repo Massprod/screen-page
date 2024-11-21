@@ -39,6 +39,7 @@ const clearDependencies = () => {
   chosenWheels = [];
   duplicateWheels = {};
   wheelTomSelectors = [];
+  batchTomSelect = null;
 };
 
 
@@ -230,7 +231,7 @@ const startMaintainAvailableWheels = (batchNumber, extraCalls = []) => {
     stopMaintainAvailableWheels();
   };
   intervalMaintainAvailableWheels = setInterval( () => {
-    reqBatchNumberUnplacedWheels(gridSocket, batchNumber);
+    reqBatchNumberUnplacedWheels(gridSocket, batchNumber, 'wheelstackCreationHandler');
     extraCalls.forEach(callback => {
       callback();
     });
