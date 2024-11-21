@@ -51,7 +51,7 @@ html, body {
 /* + ELEMENT CONTAINERS + */
 .platforms-container {
     display: block;
-    min-width: 700px;
+    min-width: 575px;
     max-width: 45%;
     height: 100%;
     margin: auto;
@@ -313,13 +313,12 @@ html, body {
     animation: shake 0.3s ease;
 }
 
-
 /* + SHOW | HIDE & FULLSCREEN + */
 .extra-bot-container {
     display: flex;
     flex-direction: row;
     position: absolute;
-    bottom: 10%;
+    bottom: 40px;
     left: 0%;
     right: auto;
     top: auto;
@@ -331,13 +330,12 @@ html, body {
 }
 
 .extra-bot-container.second {
-    bottom: 20%;
+    bottom: 90px;
 }
 
 .extra-bot-container.third {
-    bottom: 30%;
+    bottom: 150px;
 }
-
 
 .extra-buttons-container {
     display: flex;
