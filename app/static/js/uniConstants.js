@@ -1,7 +1,7 @@
 export const mainAddress = "/api/grid";
 const authMainAddress = "/api/auth";
 const serviceDom = "";
-export const gridRelSocketAddress = `wss//${window.location.host}/api/grid/ws/grid_page`;
+export const gridRelSocketAddress = `/api/grid/ws/grid_page`;
 
 
 export const loginPage = `${serviceDom}/`;
