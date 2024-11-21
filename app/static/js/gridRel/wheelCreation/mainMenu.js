@@ -1,8 +1,6 @@
 import { BACK_URL, BASIC_INFO_MESSAGE_ERROR, BASIC_INFO_MESSAGE_PRESET, BASIC_INFO_MESSAGE_WARNING, WHEEL_STATUSES } from "../../uniConstants.js";
 import { postRequest } from "../../utility/basicRequests.js";
 import flashMessage from "../../utility/flashMessage/flashMessage.js";
-import { assignValidators } from "../../utility/utils.js";
-import { createConfirmationMenu } from "../../utility/confirmForm.js";
 
 
 export const showMenu = (menuElement) => {
