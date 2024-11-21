@@ -55,7 +55,7 @@ const createWheelAction = async (menuElement, wheelData) => {
     'status': WHEEL_STATUSES.UNPLACED,
     'sqlData': {
       'order_no': wheelData['batchNumber'],
-      'year': creationDate.year,
+      'year': creationDate.getFullYear(),
       'product_ID': wheelData['productId'],
       'marked_part_no': wheelData['markedPart'],
       'shuttle_number': 0,
