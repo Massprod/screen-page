@@ -32,7 +32,7 @@ export const WHEEL_STATUSES = {
     REJECTED: 'rejected',
     STORAGE: 'storage',
     UNPLACED: 'unplaced',
-} 
+} ;
 
 
 export const PLACEMENT_TYPES = {
@@ -40,13 +40,13 @@ export const PLACEMENT_TYPES = {
     GRID: 'grid',
     STORAGE: 'storage',
     LABORATORY: 'laboratory',
-}
+};
 
 export const BATCH_STATUS_CLASSES = {
     NOT_PASSED: 'not-passed',
     PASSED: 'passed',
     NOT_TESTED: 'not-tested',
-}
+};
 
 export const PLACEMENT_TYPES_TRANSLATE = {
     "grid": "Приямок",
@@ -70,7 +70,7 @@ export const ORDER_TYPES_TRANSLATE_TABLE = {
     "moveToProcessing": "Обработка",
     "moveToRejected": "Несоответствующая",
     "moveToStorage": "Хранилище",
-}
+};
 
 export const EXTRA_ORDER_TYPES_TRANSLATE_TABLE = {
     'moveWholeStack': 'Перемещение в приямке',
@@ -80,7 +80,7 @@ export const EXTRA_ORDER_TYPES_TRANSLATE_TABLE = {
     'moveToProcessing': 'Перенос в обработку',
     'moveToRejected': 'Перенос в несоответствующую',
     'moveToStorage': 'Перенос в хранилище',
-}
+};
 
 // - NAMES -
 // + BASIC ATTRIBUTES +
@@ -91,7 +91,7 @@ export const BASIC_ATTRIBUTES = {
     ORDER_TYPE: 'data-order-type',
     WHEELSTACK_ID: 'data-wheelstack-id',
     WHEELSTACK_DATA: 'data-wheelstack-data',
-}
+};
 // - BASIC ATTRIBUTES -
 
 // ------
@@ -167,7 +167,8 @@ export const EXTRA_INTERVALS = {
     WHEELSTACK_CREATION_MENU_WHEELS: 500,
     TEMPO_WHEELSTACKS_UPDATE: 500,
     MOVE_SELECT_INTERVAL: 100,
-}
+    WHEELSTACK_REBUILD_WHEELS_UPDATE: 500,
+};
 // - EXTRA INTERVALS -
 
 export const BASIC_COOKIES = [
@@ -184,12 +185,12 @@ export const ROLE_TRANSLATION = {
     'admin': 'администратор',
     'operator': 'оператор',
     'labPersonal': 'лаборант',
-}
+};
 
 export const REVERSE_ROLE_TRANSLATION = {}
 for (let [key, value] of Object.entries(ROLE_TRANSLATION)) {
     REVERSE_ROLE_TRANSLATION[value] = key;
-}
+};
 
 export const LAB_PAGE_ROLES = {
     [ADMIN_ROLE]: true,
@@ -203,21 +204,26 @@ export const GRID_PAGE_ROLES = {
     [OPERATOR_ROLE]: true,
 };
 
+export const GRID_ACTION_ROLES = {
+    [ADMIN_ROLE]: true,
+    [MANAGER_ROLE]: true,
+};
+
 export const USERS_PAGE_ROLES = {
     [ADMIN_ROLE]: true,
-}
+};
 
 export const HISTORY_PAGE_ROLES = {
     [ADMIN_ROLE]: true,
     [MANAGER_ROLE]: true,
-}
+};
 
 export const COOKIE_MESSAGES = {
     [AUTH_COOKIE_NOT_FOUND]: "Токен доступа не найден.<br> Перезайдите в систему.",
     [AUTH_COOKIE_SESSION_EXPIRED]: "Токен доступа больше не действителен.<br> Перезайдите в систему.",
     [RESTRICTED_TO_THIS_ROLE]: `Использование страниц без прав доступа запрещено<br>Произведён автоматический выход из системы<br>Перезайдите в систему`,
     [AUTH_COOKIE_INVALID]: "Не действительный токен доступа. Перезайдите в систему.",
-}
+};
 export const COOKIE_MESSAGES_TEXT_COLOR = 'white';
 export const COOKIE_MESSAGES_BG_COLOR = 'black';
 export const COOKIE_MESSAGES_POSITION = 'top-center';
@@ -226,12 +232,12 @@ export const COOKIE_MESSAGES_SHOW_TIME = 8000;
 // nav-buttons
 const NAV_LAB_BUTTON = {
     'class': '',
-    'text': 'Лаборатория',
+    'text': 'ОКК',
     'href': labPage,
     'id': 'labRedirect',
     'insideList': true,
     'title': 'Страница изменения статуса лабораторных тестов партии',
-}
+};
 const NAV_GRID_BUTTON = {
     'class': '',
     'text': 'Приямок',
@@ -239,7 +245,7 @@ const NAV_GRID_BUTTON = {
     'id': 'gridRedirect',
     'insideList': true,
     'title': 'Основная страница приямка остывания',
-}
+};
 const NAV_LOGIN_BUTTON = {
     'class': 'close-btn',
     'text': 'Выход',
@@ -247,7 +253,7 @@ const NAV_LOGIN_BUTTON = {
     'id': 'loginRedirect',
     'insideList': false,
     'title': 'Страница авторизации',
-}
+};
 
 const NAV_USERS_BUTTON = {
     'class': '',    
@@ -256,7 +262,7 @@ const NAV_USERS_BUTTON = {
     'id': 'usersRedirect',
     'insideList': true,
     'title': 'Страница управления пользователями системы',
-}
+};
 
 const NAV_HISTORY_BUTTON = {
     'class': '',
@@ -265,7 +271,7 @@ const NAV_HISTORY_BUTTON = {
     'id': 'historyRedirect',
     'insideList': true,
     'title': 'Страница истории приямка остывания',
-}
+};
 
 export const NAV_BUTTONS = {
     [LAB_PERSONAL_ROLE]: [
@@ -312,14 +318,14 @@ export const BASIC_BATCH_SEARCHER_OPTIONS = {
     distance: 0,
     ignoreLocation: true,
     minMatchCharLength: 1, 
-}
+};
 
 export const BASIC_WHEELS_SEARCHER_OPTION = {
     threshold: 0,  // lower == stricter
     distance: 0,     // distance between matches
     ignoreLocation: true,  // true <- dont care about match place | false <- prioritize left-most symbols
     minMatchCharLength: 1,
-}
+};
 // - SEARCHERS SETTINGS -
 
 
