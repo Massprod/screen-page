@@ -61,7 +61,7 @@ h2 {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
     backdrop-filter: blur(10px); /* Blur effect */
-    z-index: 1000; /* Ensure it covers all content */
+    z-index: 100000000; /* Ensure it covers all content */
     display: none; /* Hidden by default */
     justify-content: center;
     align-items: center;
