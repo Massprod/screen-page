@@ -303,12 +303,12 @@ export const createWheelstackMenu = async (
   blockingOrderId = openerElement.getAttribute(BASIC_ATTRIBUTES.BLOCKING_ORDER);
   if (blockingOrderId) {
     blockingOrderData = dataBanks['orders'][blockingOrderId];
-  }
+  };
   wheelstackData = null;
   wheelstackId = openerElement.getAttribute(BASIC_ATTRIBUTES.WHEELSTACK_ID)
   if (wheelstackId) {
     wheelstackData = dataBanks['wheelstacks'][wheelstackId];
-  }
+  };
   if (!wheelstackData && !wheelstackId) {
     if (blockingOrderId) {
       if (!blockingOrderData) {
@@ -320,7 +320,7 @@ export const createWheelstackMenu = async (
         createOrderMenu(
           event, openerElement, blockingOrderData, false
         );
-      }
+      };
     };
     return;
   };
