@@ -31,7 +31,6 @@ checkEl.style.width = '220px';
 const moveFromStorageBut = document.getElementById('wheelstackStorageMenu');
 
 
-
 openerSlider.addEventListener('click', (event) => {
   if (allButs.classList.contains('show-hidden')) {
     stopMaintainAvailableWheelstacks();
@@ -52,6 +51,9 @@ tomWheelstacksTempo.on('change', async (event) => {
     return;
   };
   image.src = 'static/images/topRight.png';
+  if (moveSelectActive) {
+    clearCall();
+  }
 });
 
 
@@ -317,8 +319,8 @@ moveFromStorageBut.addEventListener('click', async (event) => {
   const chosenElement = tomWheelstacksTempo.options[tomWheelstacksTempo.getValue()];
   if (!chosenElement) {
     const showMsg = {...BASIC_INFO_MESSAGE_WARNING};
-    showMsg.message = 'Для открытия меню, выберите <b>стопу</b>.';
-    showMsg.duration = 1500;
+    showMsg.message = 'Для начала переноса, выберите <b>стопу</b>.';
+    showMsg.duration = 2500;
     flashMessage.show(showMsg);
     return;
   };
