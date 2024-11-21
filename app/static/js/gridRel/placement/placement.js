@@ -23,17 +23,17 @@ export default class Placement{
       this.element.className = 'placement-grid-container';
     } else if ('basePlatform' === this.placementType) {
       this.element.className = 'placement-base-platform-container';
-    }
+    };
     this.element.classList.add('no-select');
     this.element.addEventListener('contextmenu', event => {
       event.preventDefault();
-    })
-  }
+    });
+  };
 
   async buildPreset(presetData, useIdentifiers = true) {
     if (this.presetData && this.presetData['_id'] === presetData['_id']) {
       return;
-    }
+    };
     this.presetId = presetData['_id'];
     this.presetData = presetData;
     this.placementExtraRows = this.presetData['extra'];
@@ -48,13 +48,13 @@ export default class Placement{
       placementRow.buildRow(rowData, useIdentifiers, rowId)
       this.placementRows[rowId] = placementRow;
       this.element.appendChild(placementRow.element);
-    }
-  }
+    };
+  };
 
   async updatePlacement(placementData) {
     if (!this.presetId || !this.placementRows) {
       throw new Error('Placement doesnt have build preset. First create a preset to populate with data.')
-    }
+    };
     const newPlacementData = placementData;
     // if (this.placementId !== newPlacementData['_id']) {
     //   return;
@@ -64,71 +64,70 @@ export default class Placement{
       throw new Error(`Incorrect placementData for used in this Placement preset.
                         Currently used presetId == ${this.presetId}.
                         Rebuild Placement according to a new presetId or use correct placement Data`);
-    }
+    };
     // console.log('NEW_UPDATE_DATA', newPlacementData);
     if (this.placementData
         && this.placementId === newPlacementData['_id']
          && this.placementData['lastChange'] >= newPlacementData['lastChange']) {
         // console.log('NOT CHANGED PLACEMENT');
         return;
-    }
+    };
     // console.log('UPDATING PLACEMENT');
     if (this.placementId !== newPlacementData['_id']) {
       this.placementId = newPlacementData['_id'];
       this.element.id = this.placementId;
-    }
+    };
     const ignoredEmptyAtt = new Set([BASIC_ATTRIBUTES.BLOCKING_ORDER]);
     this.placementData = newPlacementData;
     this.placementExtraRows = newPlacementData['extra'];
-    this.placementData['rowsOrder'].forEach( rowId => {
-      this.placementData['rows'][rowId]['columnsOrder'].forEach( colId => {
-        const placementCell = this.placementRows[rowId]['columns'][colId];
-        if (placementCell.element.classList.contains('identifier-cell')
-             || placementCell.element.classList.contains('placement-cell-whitespace')) {
+    // #region cellUpdate
+    const tasks = this.placementData['rowsOrder'].flatMap((rowId) =>
+      this.placementData['rows'][rowId]['columnsOrder'].map((colId) => {
+        return async () => {
+          const placementCell = this.placementRows[rowId]['columns'][colId];
+          if (
+            placementCell.element.classList.contains('identifier-cell') ||
+            placementCell.element.classList.contains('placement-cell-whitespace')
+          ) {
             return;
-        }
-        const cellData = this.placementData['rows'][rowId]['columns'][colId];
-        if (cellData['wheelStack']) {
-          if (cellData['blocked']) {
-            placementCell.blockState(cellData['blockedBy']);
+          };
+          const cellData = this.placementData['rows'][rowId]['columns'][colId];
+          if (cellData['wheelStack']) {
+            if (cellData['blocked']) {
+              placementCell.blockState(cellData['blockedBy']);
+            } else {
+              placementCell.unblockState();
+            }
+            placementCell.setAsElement();
+            const wheelstackData = this.placementData['wheelstacksData'][cellData['wheelStack']];
+            placementCell.setElementData(wheelstackData);
+            const numWheels = `${wheelstackData['wheels'].length}`;
+            if (placementCell.element.innerHTML !== numWheels) {
+              placementCell.element.innerHTML = `${numWheels}`;
+            }
+            placementCell.element.setAttribute(BASIC_ATTRIBUTES.BATCH_NUMBER, wheelstackData['batchNumber']);
+            placementCell.element.setAttribute(
+              BASIC_ATTRIBUTES.WHEELS,
+              wheelstackData['wheels']
+                .map((wheelObjectId) => this.placementData['wheelsData'][wheelObjectId]['wheelId'])
+                .join(';')
+            );
           } else {
-            placementCell.unblockState();
-          }
-          placementCell.setAsElement();
-          const wheelstackData = this.placementData['wheelstacksData'][cellData['wheelStack']];
-          placementCell.setElementData(wheelstackData);
-          let numWheels = `${wheelstackData['wheels'].length}`;
-          if (placementCell.element.innerHTML !== numWheels) {
-            placementCell.element.innerHTML = `${numWheels}`;
-          }
-          // + BATCH  IND +
-          const batchNumber = wheelstackData['batchNumber'];
-          placementCell.element.setAttribute(BASIC_ATTRIBUTES.BATCH_NUMBER, batchNumber);
-          // - BATCH IND -
-          // + WHEEL IND +
-          let wheelIndString = '';
-          for (let wheelObjectId of wheelstackData['wheels']) {
-            const wheelId = placementData['wheelsData'][wheelObjectId]['wheelId'];
-            wheelIndString = wheelIndString !== '' ? `${wheelIndString};${wheelId}` : `${wheelId}`;
-          }
-          placementCell.element.setAttribute(BASIC_ATTRIBUTES.WHEELS, wheelIndString);
-          // - WHEEL IND -
-          // ---
-        } else {
-          placementCell.clearBatchStatus();
-          placementCell.setAsEmptyCell();
-          if (cellData['blocked']) {
-            placementCell.clearAttributes(ignoredEmptyAtt);
-            placementCell.blockState(cellData['blockedBy']);
-            // + BLOCKED BY + 
-          } else {
-            placementCell.unblockState();
-            placementCell.clearAttributes();
-          }
-        }
+            placementCell.clearBatchStatus();
+            placementCell.setAsEmptyCell();
+            if (cellData['blocked']) {
+              placementCell.clearAttributes(ignoredEmptyAtt);
+              placementCell.blockState(cellData['blockedBy']);
+            } else {
+              placementCell.unblockState();
+              placementCell.clearAttributes();
+            }
+          };
+        };
       })
-    })
-
-  }
-
-}
+    );
+    // #endregion cellUpdate
+    // Not using results, but we can have them with this approach.
+    await Promise.all(tasks.map((task) => task()));
+  };
+};
