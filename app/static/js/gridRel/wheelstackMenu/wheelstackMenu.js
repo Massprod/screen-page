@@ -184,7 +184,7 @@ const wheelRecordAssignExpandable = (wheelRecord) => {
   wheelRecord.classList.add('expand-ind');
   const expandable = document.createElement('li');
   expandable.classList.add('expandable', 'fs-5');
-  expandable.innerHTML = 'Отправить в лабораторию';
+  expandable.innerHTML = 'Отправить в ОКК';
   return expandable;
 }
 
