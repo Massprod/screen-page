@@ -82,6 +82,10 @@ const authToken = await getCookie(AUTH_COOKIE_NAME);
 
 // TODO: We need more Errors coverage and better placement for all of these :)
 const initGridSocket = async () => {
+  if (gridSocket) {
+    gridSocket.close();
+    gridSocket = null;
+  };
   gridSocket = await initGridRelWebsocket(
     gridRelSocketAddress, authToken
   );
@@ -98,7 +102,6 @@ const initGridSocket = async () => {
 
       setTimeout(async () => {
         initGridSocket();
-        console.log('recTest');
       }, recInterval);
     } else {
       throw new Error(`Service unavailable. Reconnect attempts reached limit.`);
@@ -296,8 +299,10 @@ setInterval(() => {
 const updateBanksFromPlacement = async (placementData, placementType) => {
   const newBatches = {};
   const newOrders = {};
+  // Essentially, just deleting what's not present in new and adding new in the current.
   const allWheelstacks = placementData['wheelstacksData'];
   const allWheels = placementData['wheelsData'];
+  // Essentially, just getting new orders and batches
   for (let row in placementData['rows']) {
     for (let col in placementData['rows'][row]['columns']) {
       const cellData = placementData['rows'][row]['columns'][col];
@@ -312,6 +317,8 @@ const updateBanksFromPlacement = async (placementData, placementType) => {
       }
     }
   }
+  // So, we can just get what's been updated + deleted + added.
+  // And add values into `_all*`, update already presented and delete what we need.
   if (PLACEMENT_TYPES.GRID === placementType) {
     updateObjBank(gridBatches, newBatches);
     updateObjBank(gridOrders, newOrders);
@@ -323,7 +330,6 @@ const updateBanksFromPlacement = async (placementData, placementType) => {
     platformWheelstacks = allWheelstacks ?? {};
     platformWheels = allWheels ?? {};
   }
-  // console.log('SEARCH_UPDATE');
   // TODO: fine for now, but we need to wait of all updates on them.
   setTimeout( () => {
     updateSearcherData(wheelsSearcher, Object.values(_allWheels), 'wheelId');
