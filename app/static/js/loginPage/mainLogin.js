@@ -18,14 +18,28 @@ import {
     ACTIVE_USERNAME_COOKIE_NAME,
 } from "../uniConstants.js";
 import { FLASH_MESSAGES } from "../managerPage/js/constants.js";
-import { setCookie, updateAuthCookie } from "../utility/roleCookies.js";
+import { setCookie, updateAuthCookie, getCookie } from "../utility/roleCookies.js";
 import flashMessage from "../utility/flashMessage/flashMessage.js";
+
+
+const redirectByRole = async (userRole = '') => {
+    if (!userRole) {
+        userRole = await getCookie(USER_ROLE_COOKIE_NAME);
+    }
+    if (userRole in USERS_PAGE_ROLES) {
+        window.location.href = usersPage;
+    } else if (userRole in GRID_PAGE_ROLES) {
+        window.location.href = gridPage;
+    } else if (userRole in LAB_PAGE_ROLES) {
+        window.location.href = labPage;
+    }
+};
 
 
 window.onload = async () => {
     if (await updateAuthCookie(AUTH_COOKIE_NAME)) {
-        window.location.href = gridPage;
-    }
+        await redirectByRole();
+    };
     const urlParams = new URLSearchParams(window.location.search);
     const message = urlParams.get('message');
     if (message) {
@@ -108,11 +122,5 @@ document.getElementById('userData').addEventListener('submit', async (event) => 
     await setCookie(AUTH_COOKIE_NAME, authToken, AUTH_COOKIE_BASIC_EXPIRE);
     await setCookie(USER_ROLE_COOKIE_NAME, userRole, USER_ROLE_COOKIE_BASIC_EXPIRE)
     await setCookie(ACTIVE_USERNAME_COOKIE_NAME, formData.get('username').toLowerCase());
-    if (userRole in USERS_PAGE_ROLES) {
-        window.location.href = usersPage;
-    } else if (userRole in GRID_PAGE_ROLES) {
-        window.location.href = gridPage;
-    } else if (userRole in LAB_PAGE_ROLES) {
-        window.location.href = labPage;
-    }
+    await redirectByRole(userRole);
 })
