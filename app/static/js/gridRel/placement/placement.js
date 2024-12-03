@@ -78,6 +78,8 @@ export default class Placement{
       this.element.id = this.placementId;
     };
     const ignoredEmptyAtt = new Set([BASIC_ATTRIBUTES.BLOCKING_ORDER]);
+    // Not using it anywhere, so w.e.
+    // Just goin to override it without care.
     this.placementData = newPlacementData;
     this.placementExtraRows = newPlacementData['extra'];
     // #region cellUpdate
@@ -129,5 +131,43 @@ export default class Placement{
     // #endregion cellUpdate
     // Not using results, but we can have them with this approach.
     await Promise.all(tasks.map((task) => task()));
+  };
+
+  async updateCell(newData) {
+    const cellRow = newData['row'];
+    const cellCol = newData['column'];
+    const cellData = newData['data'];
+    const targetCell = this.placementRows[cellRow]['columns'][cellCol];
+    if (cellData['wheelStack']) {
+      if (cellData['blocked']) {
+        targetCell.blockState(cellData['blockedBy']);
+      } else {
+        targetCell.unblockState();
+      }
+      targetCell.setAsElement();
+      const wheelstackData = newData['wheelstackData'];
+      targetCell.setElementData(wheelstackData);
+      const numWheels = `${wheelstackData['wheels'].length}`;
+      if (targetCell.element.innerHTML !== numWheels) {
+        targetCell.element.innerHTML = `${numWheels}`;
+      }
+      targetCell.element.setAttribute(BASIC_ATTRIBUTES.BATCH_NUMBER, wheelstackData['batchNumber']);
+      targetCell.element.setAttribute(
+        BASIC_ATTRIBUTES.WHEELS,
+        wheelstackData['wheels']
+          .map((wheelObjectId) => this.placementData['wheelsData'][wheelObjectId]['wheelId'])
+          .join(';')
+      );
+    } else {
+      targetCell.clearBatchStatus();
+      targetCell.setAsEmptyCell();
+      if (cellData['blocked']) {
+        targetCell.clearAttributes(ignoredEmptyAtt);
+        targetCell.blockState(cellData['blockedBy']);
+      } else {
+        targetCell.unblockState();
+        targetCell.clearAttributes();
+      }
+    };  
   };
 };

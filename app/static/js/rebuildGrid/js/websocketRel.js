@@ -28,17 +28,40 @@ import { wheelstackRebuildHandler } from "../../gridRel/wheelstackMenu/rebuildMe
 
 export const initGridRelWebsocket = async (
   wsAddress,
-  authToken,
+  authToken = '',
 ) => {
-  const socket = new WebSocket(`${wsAddress}?auth_token=${authToken}`);
+  const queries = [];
+  if (authToken) {
+    let tokenQuery = `auth_token=${authToken}`
+    queries.push(tokenQuery);
+  };
+  let conString = `${wsAddress}?`
+  if (0 !== queries.length) {
+    for (let query of queries) {
+      conString += `${query}&`;
+    };
+  };
+  const socket = new WebSocket(conString);
   return socket;
 };
 
 
 // #region wsRequests
 // #region wheelstackCreation
+export const checkSocket = (webSocket) => {
+  if (webSocket
+      && webSocket.readyState !== WebSocket.CONNECTING 
+      && webSocket.readyState !== WebSocket.CLOSED
+      && webSocket.readyState !== WebSocket.CLOSING) {
+    return true;
+  };
+  return false;
+}
 // + WHEELSTACK CREATION +
 export const reqBatchNumbersWUnplaced = async (socket) => {
+  if (!checkSocket(socket)) {
+    return;
+  };
   const req_data = {
     'type': 'gather',
     'filter': {
@@ -51,6 +74,9 @@ export const reqBatchNumbersWUnplaced = async (socket) => {
 
 
 export const reqBatchNumberUnplacedWheels = async (socket, batchNumber, handler = '') => {
+  if (!checkSocket(socket)) {
+    return;
+  };
   const req_data = {
     'type': 'gather',
     'filter': {
@@ -67,6 +93,9 @@ export const reqBatchNumberUnplacedWheels = async (socket, batchNumber, handler 
 
 
 export const reqWheelstackCreation = async (socket, wheelstackData) => {
+  if (!checkSocket(socket)) {
+    return;
+  };
   const req_data = {
     'type': 'create',
     'filter': {
@@ -119,6 +148,9 @@ const wheelstackCreationWheelsUnplaced = (newData) => {
 
 // + TEMPO STORAGE +
 export const reqStorageExpandedData = (socket, storageName, lastChange) => {
+  if (!checkSocket(socket)) {
+    return;
+  };
   const reqData = {
     'type': 'gather',
     'filter': {
@@ -136,6 +168,9 @@ export const reqStorageExpandedData = (socket, storageName, lastChange) => {
 
 // + PLACEMENT +
 export const reqPlacementData = (socket, placementData) => {
+  if (!checkSocket(socket)) {
+    return;
+  };
   const reqData = {
     'type': 'gather',
     'filter': {
@@ -148,6 +183,9 @@ export const reqPlacementData = (socket, placementData) => {
 // - PLACEMENT -
 // + BATCHES +
 export const reqBatchesData = (socket, batchNumbers = []) => {
+  if (!checkSocket(socket)) {
+    return;
+  };
   const reqData = {
     'type': 'gather',
     'filter': {
@@ -162,6 +200,9 @@ export const reqBatchesData = (socket, batchNumbers = []) => {
 // - BATCHES -
 // + ORDERS +
 export const reqOrdersData = (socket, orders = []) => {
+  if (!checkSocket(socket)) {
+    return;
+  };
   const reqData = {
     'type': 'gather',
     'filter': {

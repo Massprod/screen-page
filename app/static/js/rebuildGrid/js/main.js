@@ -83,14 +83,20 @@ const authToken = await getCookie(AUTH_COOKIE_NAME);
 // TODO: We need more Errors coverage and better placement for all of these :)
 const initGridSocket = async () => {
   if (gridSocket) {
+    var forceClose = true;
     gridSocket.close();
     gridSocket = null;
   };
+  forceClose = false;
   gridSocket = await initGridRelWebsocket(
     gridRelSocketAddress, authToken
   );
   assignGridWebSocketListeners(gridSocket);
   gridSocket.onclose = (event) => {
+    if (forceClose) {
+      console.log("WebSocket closed explicitly, no reconnection will occur.");
+      return;
+    };
     if (0 === recLimit || recAttempts < recLimit) {
       recAttempts += 1;
       console.log(`Service unavailable. Trying to reconnect - attempt = ${recAttempts}`)
@@ -182,8 +188,8 @@ const pruneObject = (objectToPrune = {}, objectsToCheck = []) => {
   });
 };
 setInterval( () => {
-  pruneObject(_notYetPresent['batches'], [platformBatches, gridBatches]);
-  pruneObject(_notYetPresent['wheelstacks'], [platformWheelstacks, gridWheelstacks]);
+  pruneObject(_notYetPresent['batches'], [_allBatches]);
+  pruneObject(_notYetPresent['wheelstacks'], [_allWheelstacks]);
 }, 1000);
 
 // #region ORDERS_UPDATE
@@ -600,7 +606,6 @@ const resetPlatformState = () => {
 };
 
 export const handlePlacementUpdate = (newData) => {
-  // console.log('newData', newData);
   if (0 === Object.keys(newData).length) {
     return;
   };
@@ -682,6 +687,7 @@ const updatePlacement = async (placement, newId, forceUpdate = false) => {
   reqPlacementData(gridSocket, placementData)
   // T
   return;
+  // #region httpOutdated
   // let dataURL = '';
   // let placementType = placement.placementType;
   // // + PING FOR CHANGES +
@@ -723,6 +729,7 @@ const updatePlacement = async (placement, newId, forceUpdate = false) => {
   //     };
   //   };
   // };
+  // #endregion httpOutdated
 };
 // - PLACEMENT UPDATE -
 
@@ -878,7 +885,8 @@ const invokeGridSelectAction = async () => {
   if (gridPlacementUpdateInterval) {
     clearInterval(gridPlacementUpdateInterval);
     gridPlacementUpdateInterval = null;
-  }
+  };
+  // T - testing partial
   gridPlacementUpdateInterval = setInterval( async () => {
     if (gridSelectActive) {
       return;
@@ -887,6 +895,7 @@ const invokeGridSelectAction = async () => {
     //  using wrapper to update placement with new data, we can call it from websocketRel.
     await updatePlacement(gridPlacement, placementId);
   }, GRID_PLACEMENT_INTERVAL)
+  // T - testing partial
 }
 
 // + GRID COOKIE TEST +
@@ -1137,12 +1146,6 @@ const maintainOrderRecords = async () => {
     if (orderId in createdOrderRecords || orderData === false) {
       continue;
     }
-    // console.log('currentGridId', gridPlacement.placementId);
-    // console.log(orderData);
-    // console.log('---------------------');
-    // if ((orderData['destination']['placementId']) !== gridPlacement.placementId) {
-    //   return;
-    // }
 
     let sourceWheelstackData = null;
     const sourceWheelstackId = orderData['affectedWheelStacks']['source'];
@@ -1620,7 +1623,6 @@ const batchMenuOpener = async (event, openerElement, targetBatchNumber) => {
     return;
   }
   let menu = null;
-  console.log('targetNumber', targetBatchNumber);
   menu = await createBatchMenu(event, openerElement, _allBatches[targetBatchNumber], batchMarker, _allBatches)
   if (OPERATOR_ROLE !== activeUserRole) {
     assignBatchExpandableButtons(menu);
@@ -1715,3 +1717,121 @@ wheelsSearcher.setOptions(BASIC_WHEELS_SEARCHER_OPTION);
 if (!(activeUserRole in GRID_ACTION_ROLES)) {
   creationContainer.remove();
 };
+
+
+// region T - testing partial
+// Idea is good, but currently we're using too much dataBank updates and all of them connected.
+// And rebuilding all of the main update idea == rebuiling page from scrath.
+// Faster way of updating -> update cells and everything by 1 update message
+//  BUT still call full `handlePlacementUpdate` later with changed placementData.
+// var testSocket = null;
+// const test_address = 'http://localhost:8000/api/grid/ws1/placement_update';
+
+// const initTestSocket = async () => {
+//   if (testSocket) {
+//     var forceClose = true;
+//     testSocket.close();
+//     testSocket = null;
+//   };
+//   forceClose = false;
+//   const authToken = await getCookie(AUTH_COOKIE_NAME);
+//   testSocket = await initGridRelWebsocket(
+//     test_address, authToken
+//   );
+//   const testMessage = {
+//     'action': 'subscribe',
+//     'event': 'placementUpdate',
+//     'placementId': '673b27fd95a88572a3ee8ead',
+//   };
+//   setTimeout( () => {
+//     testSocket.send(JSON.stringify(testMessage));
+//   }, 500);
+  
+//   testSocket.onmessage = (event) => {
+//     const messageData = JSON.parse(event.data);
+//     console.log('testSocketMessage', messageData);
+//     // T
+//     const elementsDataMap = {
+//       'batches': _allBatches,
+//       'orders': _allOrders,
+//       'wheels': _allWheels,
+//       'wheelstacks': _allWheelstacks, 
+//     };
+//     // + Transfer
+//     const partialUpdateHandler = (data) => {
+//       console.log('handlerData', data);
+//       const placementId = data['placementId'];
+//       const placementType = data['placementType'];
+//       let targetPlacement = null;
+//       if (PLACEMENT_TYPES.GRID === placementType && gridPlacement.placementId === placementId) {
+//         targetPlacement = gridPlacement;
+//         // `removedElements` => just delete them.
+//         const removedElements = data['removedElements'];
+//         for (let [elementType, elementsData] of Object.entries(removedElements)) {
+//           const dataBank = elementsDataMap[elementType];
+//           if (!dataBank) {
+//             continue;
+//           };
+//           for (let elementId of elementsData) {
+//             delete dataBank[elementId];
+//           };
+//         };
+//         // `updatedElements` => just override previous data.
+//         const updatedElements = data['updatedElements'];
+//         for (let [elementType, elementsData] of Object.entries(updatedElements)) {
+//           if ('cells' === elementType) {
+//             for (let cellData of elementsData) {
+//               targetPlacement.updateCell(cellData);
+//             };
+//             updateSearcherData(wheelsSearcher, Object.values(_allWheels), 'wheelId');
+//             // TODO: we need to extra clear batches after we delete wheels.
+//             // -- check wheelstacks and wheels to get all present batches and remove not present.
+//           };
+//           const dataBank = elementsDataMap[elementType];
+//           if (!dataBank) {
+//             continue;
+//           };
+//           for (let elementData of elementsData) {
+//             const elementId = elementData['_id'];
+//             dataBank[elementId] = elementData; 
+//           };
+//         };
+//       };
+//     };
+//     partialUpdateHandler(messageData['data']);
+//     // - Transfer
+//     // console.log('allWheelstacks', _allWheelstacks);
+//     // console.log('allWheels', _allWheels);
+//     // console.log('allOrders', _allOrders);
+//     // console.log('allBatches', _allBatches);
+//     // T
+//   };
+
+//   testSocket.onclose = (event) => {
+//     if (0 === recLimit || recAttempts < recLimit) {
+//       if (forceClose) {
+//         console.log("WebSocket closed explicitly, no reconnection will occur.");
+//         return;
+//       };
+//       recAttempts += 1;
+//       console.log(`Service unavailable. Trying to reconnect - attempt = ${recAttempts}`)
+      
+//       const showMsg = {...BASIC_INFO_MESSAGE_ERROR};
+//       showMsg.message = `Потеряно соединение с сервисом обновления данных.<br>Попытка подключения: <b>${recAttempts}</b>`;
+//       showMsg.duration = 1500;
+//       flashMessage.show(showMsg);
+
+//       setTimeout(async () => {
+//         initTestSocket();
+//       }, recInterval);
+//     } else {
+//       throw new Error(`Service unavailable. Reconnect attempts reached limit.`);
+//     };
+//   };
+// };
+
+// setTimeout( () => {
+//   initTestSocket();
+// }, 2000)
+
+// endregion T - testing partial

@@ -22,10 +22,10 @@ export const combineObjectsData = (combined, toGather = [], toIgnore = [], overR
           notPresent = false;
           break;
         }
-      }
+      };
       if (ignore) {
         break;
-      }
+      };
       // ---
       if (record in bank) {
         notPresent = false;
