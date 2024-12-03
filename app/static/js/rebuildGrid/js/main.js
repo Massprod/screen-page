@@ -83,17 +83,24 @@ const authToken = await getCookie(AUTH_COOKIE_NAME);
 // TODO: We need more Errors coverage and better placement for all of these :)
 const initGridSocket = async () => {
   if (gridSocket) {
+    var forceClose = true;
+    // Calls `onclose` event, and we're getting unclosed connections.
+    // Explicitly closing it, before trying to reconnect with diff one.
     gridSocket.close();
     gridSocket = null;
   };
+  forceClose = false;
   gridSocket = await initGridRelWebsocket(
     gridRelSocketAddress, authToken
   );
   assignGridWebSocketListeners(gridSocket);
   gridSocket.onclose = (event) => {
+    if (forceClose) {
+      return;
+    };
     if (0 === recLimit || recAttempts < recLimit) {
       recAttempts += 1;
-      console.log(`Service unavailable. Trying to reconnect - attempt = ${recAttempts}`)
+      console.info(`Service unavailable. Trying to reconnect - attempt = ${recAttempts}`)
       
       const showMsg = {...BASIC_INFO_MESSAGE_ERROR};
       showMsg.message = `Потеряно соединение с сервисом обновления данных.<br>Попытка подключения: <b>${recAttempts}</b>`;
