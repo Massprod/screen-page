@@ -18,10 +18,9 @@ def grid():
     return render_template('gridPage.html')
 
 
-@main.route('/lab')
+@main.route('/okk')
 def lab():
-    return render_template('laboratoryPage.html')
-
+    return render_template('labPage.html')
 
 @main.route('/history')
 def history():

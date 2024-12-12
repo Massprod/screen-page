@@ -7,7 +7,7 @@ export const gridRelSocketAddress = `/api/grid/ws/grid_page`;
 export const loginPage = `${serviceDom}/`;
 export const usersPage = `${serviceDom}/users`;
 export const gridPage = `${serviceDom}/grid`;
-export const labPage = `${serviceDom}/lab`;
+export const labPage = `${serviceDom}/okk`;
 export const historyPage = `${serviceDom}/history`;
 
 // TODO: We need to find some analog of `.env` for js.
@@ -99,6 +99,8 @@ export const BACK_URL  = {
     POST_BATCH_STATUS_UPDATE: `${mainAddress}/batch_number/update_laboratory_status`,
     GET_BATCHES_DATA_PERIOD: `${mainAddress}/batch_number/period`,
     GET_BATCH_DATA: `${mainAddress}/batch_number/batch_number`,
+    POST_BATCH_STATUS_UPDATE_WHEEL: `${mainAddress}/batch_number/update_status`,
+    POST_BATCH_REQUEST_WHEEL: `${mainAddress}/batch_number/request_wheel`,
     POST_AUTH_CREDENTIALS: `${authMainAddress}/users/login`,
     POST_AUTH_REFRESH_TOKEN: `${authMainAddress}/users/token_refresh`,
     GET_AUTH_USERS_DATA: `${authMainAddress}/users/all`,
@@ -131,6 +133,7 @@ export const BACK_URL  = {
     PATCH_RECONSTRUCT_WHEELSTACK: `${mainAddress}/wheelstacks/reconstruct`,
     PATCH_DECONSTRUCT_WHEELSTACK: `${mainAddress}/wheelstacks/deconstruct`,
     POST_CREATE_WHEEL: `${mainAddress}/wheels`,
+    LAB_TABLES_DATA: `${mainAddress}/batch_number/tables_data`,
 };
 // REGEX
 export const BASIC_USERNAME_REGEX = '^[\\-._a-zA-Z0-9]+$';
@@ -197,6 +200,11 @@ export const LAB_PAGE_ROLES = {
     [LAB_PERSONAL_ROLE]: true,
     [MANAGER_ROLE]: true,
 };
+
+export const LAB_PAGE_ACTION_ROLES = {
+    [ADMIN_ROLE]: true,
+    [LAB_PERSONAL_ROLE]: true,
+}
 
 export const GRID_PAGE_ROLES = {
     [ADMIN_ROLE]: true,
