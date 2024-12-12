@@ -13,31 +13,33 @@ export default class NavigationButton {
         },
         buttonsData,
         clearCookies,
+        navContainerClass = 'nav-menu',
     ) {
         this.navContainer = null;
         this.position = position;
         this.buttonsData = buttonsData;
         this.clearCookies = clearCookies;
+        this.navContainerClass = navContainerClass;
         this.init();
     }
 
     init() {
         // Create hamburger button
-        const navButton = document.createElement('button');
-        navButton.title = 'Меню навигации';
-        navButton.className = 'nav-button'; // Use your custom class
-        navButton.innerHTML = '&#9776;'; // Hamburger icon
+        this.navButton = document.createElement('button');
+        this.navButton.title = 'Меню навигации';
+        this.navButton.className = 'nav-button'; // Use your custom class
+        this.navButton.innerHTML = '&#9776;'; // Hamburger icon
 
         // Apply dynamic positioning to navButton
-        navButton.style.position = 'fixed';
-        navButton.style.top = this.position.top;
-        navButton.style.right = this.position.right;
-        navButton.style.bottom = this.position.bottom;
-        navButton.style.left = this.position.left;
+        this.navButton.style.position = 'fixed';
+        this.navButton.style.top = this.position.top;
+        this.navButton.style.right = this.position.right;
+        this.navButton.style.bottom = this.position.bottom;
+        this.navButton.style.left = this.position.left;
 
         // Create navigation container
         const navContainer = document.createElement('div');
-        navContainer.className = 'nav-menu';
+        navContainer.className = this.navContainerClass;
         navContainer.style.position = 'absolute';
         this.navContainer = navContainer;
         const navigationList = document.createElement('ul');
@@ -72,17 +74,17 @@ export default class NavigationButton {
         }
 
         // Append navButton and navContainer to the body
-        document.body.appendChild(navButton);
+        document.body.appendChild(this.navButton);
         document.body.appendChild(navContainer);
 
         // Toggle visibility on button click
-        navButton.addEventListener('click', (event) => {
+        this.navButton.addEventListener('click', (event) => {
             this.toggleNavContainer(event);
         });
 
         // Hide navContainer when clicking outside
         window.addEventListener('mousedown', (event) => {
-            if (navButton.contains(event.target) || navContainer.contains(event.target)) {
+            if (this.navButton.contains(event.target) || navContainer.contains(event.target)) {
                 return;
             }
             this.hideNavContainer();
