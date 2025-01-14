@@ -137,9 +137,13 @@
 }
 
 .batch-menu li.expandable.open {
-  height: 150px;
+  height: 140px;
   opacity: 1;
   padding: 12px;
+}
+
+.batch-menu li.expandable.open.extrasize {
+  height: 190px;
 }
 
 
