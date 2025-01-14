@@ -26,7 +26,10 @@ import {
   createProRejOrderGrid,
   createOrderMoveWholestackToStorage,
 } from "../../utility/ordersCreation.js";
-import { createOption } from "../../utility/utils.js";
+import {
+  createOption,
+  populateVirtualPositions,
+} from "../../utility/utils.js";
 import { getCookie } from "../../utility/roleCookies.js";
 import { createRebuildMenu } from "./rebuildMenu.js";
 import { patchRequest } from "../../utility/basicRequests.js";
@@ -634,26 +637,56 @@ export const createWheelstackMenu = async (
     })
     moveButtonsField.appendChild(moveOutsideReturnButton);
     //  + OUTSIDE ELEMENT SELECTOR +
+    // + VIRTUAL POSITION SELECTOR + 
+    const virtualPositionSelector = document.createElement('select')
+    virtualPositionSelector.title = 'Позиция выноса из приямка';
+    virtualPositionSelector.classList.add('d-none', 'form-select', 'centered', 'w-50', 'm-2', 'fs-5', 'h-75', 'mt-1');
+    // - VIRTUAL POSITION SELECTOR -
     const moveOutsideSelector = document.createElement('select');
     moveOutsideSelector.classList.add('d-none', 'form-select', 'centered', 'w-50', 'm-2', 'fs-5', 'h-75', 'mt-4');
+    moveOutsideSelector.title = 'Элемент выноса из приямка';
+    let initialSet = false;
     for (let extraEl of Object.keys(placement.placementExtraRows)) {
       if ( PLACEMENT_TYPES.LABORATORY === extraEl) {
         continue;
       }
       const newOption = await createOption(extraEl, extraEl);
+      if (!initialSet) {
+        newOption.selected = true;
+        const virtualPositions = placement.placementExtraRows[extraEl]['virtualPositions'];
+        if (0 !== virtualPositions.length) {
+          populateVirtualPositions(virtualPositionSelector, virtualPositions);
+        };
+        initialSet = true;
+      };
+      
       moveOutsideSelector.appendChild(newOption);
     }
+    // + VIRTUAL POSITION SELECTOR + 
+    moveOutsideSelector.addEventListener('change', () => {
+      const extraElement = moveOutsideSelector.value;
+      const virtualPositions = placement.placementExtraRows[extraElement]['virtualPositions'];
+      if (0 !== virtualPositions.length) {
+        populateVirtualPositions(virtualPositionSelector, virtualPositions, true);
+      } else {
+        virtualPositionSelector.classList.add('d-none');
+      };
+    });
+    // - VIRTUAL POSITION SELECTOR -
     moveButtonsField.appendChild(moveOutsideSelector);
+    moveButtonsField.appendChild(virtualPositionSelector);
     //  - OUTSIDE ELEMENT SELECTOR -
     //  + OUTSIDE BATCH CHECKBOX +
     const batchCheckbox = document.createElement('input');
     batchCheckbox.id = 'selectWholeBatch';
     batchCheckbox.type = 'checkbox';
     batchCheckbox.classList.add('d-none', 'batch-checkbox', );
+    batchCheckbox.title = 'Сбор всех доступных для выноса элементов партии в текущем приямке';
     moveButtonsField.appendChild(batchCheckbox);
     const batchCheckboxLabel = document.createElement('label');
     batchCheckboxLabel.classList.add('d-none', 'text-muted', 'small', 'batch-checkbox-label')
     batchCheckboxLabel.innerHTML = 'Выбор всей партии';
+    batchCheckboxLabel.title = 'Сбор всех доступных для выноса элементов партии в текущем приямке';
     moveButtonsField.appendChild(batchCheckboxLabel);
     //  - OUTSIDE BATCH CHECKBOX -
     const moveOutsideButtonsContainer = document.createElement('div');
@@ -665,31 +698,35 @@ export const createWheelstackMenu = async (
     const creationHandler = async (process) => {
       const destElement = moveOutsideSelector.value;
       const destId = placement.placementId;
+      let chosenVirtualPos = 0;
+      if (!virtualPositionSelector.classList.contains('d-none')) {
+        chosenVirtualPos = virtualPositionSelector.value
+      };
       if (batchCheckbox && batchCheckbox.checked) {
         await createProRejOrderBulk(
-          wheelstackData, destElement, process, destId, false
+          wheelstackData, destElement, process, destId, false, chosenVirtualPos
         );
       } else {
         await createProRejOrderGrid(
-          wheelstackData, destElement, process, destId
+          wheelstackData, destElement, process, destId, chosenVirtualPos
         );
-      }
-    }
+      };
+    };
     moveOutsideMoveProcess.addEventListener('click', event => {
       creationHandler(true)
-    })
+    });
     moveOutsideButtonsContainer.appendChild(moveOutsideMoveProcess);
     const moveOutsideMoveReject = document.createElement('button');
     moveOutsideMoveReject.classList.add('btn', 'reject', 'fs-6', 'w-50', 'h-100', 'p-1', 'm-1');
     moveOutsideMoveReject.innerHTML = 'Отказ';
     moveOutsideMoveReject.addEventListener('click', event => {
       creationHandler(false)
-    })
+    });
     moveOutsideButtonsContainer.appendChild(moveOutsideMoveReject);
     //  - OUTSIDE PROCESS BUTTON -
     moveButtonsField.appendChild(moveOutsideButtonsContainer);
     const moveOutsideActiveShow = new Set([
-      moveOutsideReturnButton, moveOutsideSelector,
+      moveOutsideReturnButton, moveOutsideSelector, virtualPositionSelector,
       moveOutsideButtonsContainer, batchCheckbox, batchCheckboxLabel
     ]);
     moveOutsideButton.addEventListener('click', event => {

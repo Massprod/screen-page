@@ -63,10 +63,12 @@ const createMoveExpandable = async () => {
   const fullToggle = document.createElement('input');
   fullToggle.id = 'selectFromEverywhere';
   fullToggle.type = 'checkbox';
+  fullToggle.title = 'Сбор всех доступных для выноса элементов партии';
   fullToggle.classList.add('full-toggle');
   const fullToggleLable = document.createElement('label');
   fullToggleLable.classList.add('text-muted', 'small', 'position-absolute', 'full-toggle-label');
   fullToggleLable.innerHTML = 'Отовсюду';
+  fullToggleLable.title = 'Сбор всех доступных для выноса элементов партии';
   expandableRecord.appendChild(fullToggle);
   expandableRecord.appendChild(fullToggleLable);
   
@@ -75,8 +77,17 @@ const createMoveExpandable = async () => {
 
   const selector = document.createElement('select');
   selector.id = 'batchMenuMoveSelector';
-  selector.classList.add('form-select', 'w-75', 'mb-2');
+  selector.title = 'Элемент выноса из приямка';
+  selector.classList.add('form-select', 'w-50', 'mb-2', 'centered');
   selectContainer.appendChild(selector);
+
+  // T
+  const virtualPositionSelector = document.createElement('select');
+  virtualPositionSelector.id = 'virtualPosSelector';
+  virtualPositionSelector.title = 'Позиция выноса из приямка';
+  virtualPositionSelector.classList.add('form-select', 'w-50', 'mb-2', 'd-none', 'centered');
+  selectContainer.appendChild(virtualPositionSelector);
+  // T
 
   const buttonsContainer = document.createElement('div');
   buttonsContainer.id = 'batchMenuMoveButtons';

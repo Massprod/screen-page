@@ -71,6 +71,7 @@ import {
   assignGridWebSocketListeners,
 } from "./websocketRel.js";
 import { openWheelstackCreationMenu } from "../../gridRel/wheelstackCreation/mainMenu.js";
+import { populateVirtualPositions } from "../../utility/utils.js";
 // #endregion imports
 
 // #region wsRelated
@@ -1499,11 +1500,17 @@ const assignMoveProRejButton = async (batchMenu, moveSelector, processing = true
       'type': gridPlacement.placementType,
     },
   };
+  let chosenVirtPos = 0;
+  const virtualPositionSelector = batchMenu.querySelector('#virtualPosSelector');
+  if (!virtualPositionSelector.classList.contains('d-none')) {
+    chosenVirtPos = virtualPositionSelector.value
+  };
   await createProRejOrderBulk(
     elementData, moveSelector.value, processing,
-    gridPlacement.placementId, fromEverywhere
-  )
-}
+    gridPlacement.placementId, fromEverywhere, chosenVirtPos
+  );
+};
+
 
 // + BATCH MENU +
 export const assignBatchExpandableButtons = async (batchMenu) => {
@@ -1517,6 +1524,26 @@ export const assignBatchExpandableButtons = async (batchMenu) => {
     moveSelector.appendChild(newOption);
   };
   // - populateSelector -
+  // T
+  const expField = batchMenu.querySelector('#expField');
+  const virtualPosSelector = batchMenu.querySelector('#virtualPosSelector');
+  const virtualPosArray = gridPlacement.placementExtraRows[moveSelector.value]['virtualPositions'];
+  if (0 !== virtualPosArray.length) {
+    populateVirtualPositions(virtualPosSelector, virtualPosArray, true);
+    expField.classList.add('extrasize');
+  };
+  moveSelector.addEventListener('change', () => {
+    const extraElement = moveSelector.value;
+    const virtualPositions = gridPlacement.placementExtraRows[extraElement]['virtualPositions'];
+    if (0 !== virtualPositions.length) {
+      populateVirtualPositions(virtualPosSelector, virtualPositions, true);
+      expField.classList.add('extrasize');
+    } else {
+      virtualPosSelector.classList.add('d-none');
+      expField.classList.remove('extrasize');
+    };
+  });
+  // T
 
   // + assignButtons +
   const processingButton = batchMenu.querySelector('#moveToProcess');
@@ -1627,7 +1654,6 @@ const batchMenuOpener = async (event, openerElement, targetBatchNumber) => {
     return;
   }
   let menu = null;
-  console.log('targetNumber', targetBatchNumber);
   menu = await createBatchMenu(event, openerElement, _allBatches[targetBatchNumber], batchMarker, _allBatches)
   if (OPERATOR_ROLE !== activeUserRole) {
     assignBatchExpandableButtons(menu);

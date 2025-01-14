@@ -64,14 +64,32 @@ export function validateUsername(
 
 
 export const createOption = async (optionValue, optionName, selected = false) => {
-  const newOption = document.createElement('option'); 
-  newOption.value = optionValue
-  newOption.textContent = optionName.charAt(0).toUpperCase() + optionName.slice(1);
-  if (selected) {
+    const newOption = document.createElement('option'); 
+    newOption.value = optionValue
+    if ("string" === typeof optionName) {
+        newOption.textContent = optionName.charAt(0).toUpperCase() + optionName.slice(1);
+    } else {
+        newOption.textContent = String(optionName);
+    }
+    if (selected) {
 		newOption.selected = true;
 	}
-	return newOption;
+    return newOption;
 }
+
+
+export const populateVirtualPositions = async (
+    selectorEl, virtualPositions, showElement = false, prefix='Поз. '
+  ) => {
+    selectorEl.innerHTML = '';
+    for (let position of virtualPositions) {
+      const newOption = await createOption(position, `${prefix} ${position}`);
+      selectorEl.appendChild(newOption);
+    };
+    if (showElement) {
+      selectorEl.classList.remove('d-none');
+    };
+};
 
 
 export const preventOverLengthInput = (element, event) => {
